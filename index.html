@@ -161,6 +161,25 @@
   }
   .btn-copy:hover { background: var(--blue); color: white; }
 
+  /* ── AGENT CARD ── */
+  .agent-card {
+    display: inline-flex; align-items: center; gap: 0.75rem;
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 50px; padding: 0.4rem 1rem 0.4rem 0.4rem;
+    margin-bottom: 1.25rem;
+  }
+  .agent-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--blue);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; font-weight: 700; color: white; flex-shrink: 0;
+    overflow: hidden;
+  }
+  .agent-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .agent-card-info { text-align: left; }
+  .agent-card-name { font-size: 0.85rem; font-weight: 700; color: white; line-height: 1.2; }
+  .agent-card-pays { font-size: 0.72rem; color: #94a3b8; }
+
   /* ── SECTIONS ── */
   section { padding: 3rem 1.5rem; }
   .section-inner { max-width: 900px; margin: auto; }
@@ -459,6 +478,13 @@
 
 <!-- HERO -->
 <section class="hero">
+  <div id="hero-agent-card" class="agent-card" style="display:none;">
+    <div class="agent-avatar" id="hero-avatar">?</div>
+    <div class="agent-card-info">
+      <div class="agent-card-name" id="hero-agent-nom">—</div>
+      <div class="agent-card-pays" id="hero-agent-pays">—</div>
+    </div>
+  </div>
   <div class="hero-badge">✅ Agent officiel vérifié</div>
   <h1>Pariez, Gagnez &amp; <em>Retirez</em><br>avec 1xBet</h1>
   <p>Votre agent vous accompagne à chaque étape — inscription, recharge et retrait de vos gains. Simple, rapide et sécurisé.</p>
@@ -827,13 +853,32 @@ function getAdminPwd() {
 }
 
 function getAgents() {
-  try {
-    const raw = localStorage.getItem(AGENTS_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch(e) {}
-  // Default agents — tu peux modifier ici
+  // ══════════════════════════════════════════
+  //  TES AGENTS — modifie directement ici
+  //  Pour ajouter un agent : copie une ligne
+  //  et change les infos. Puis upload sur GitHub.
+  // ══════════════════════════════════════════
   return [
-    { ref: 'agent1', nom: 'Agent 1', phone: '+22600000000', promo: 'DRH26', clients: 247, actif: true },
+    {
+      ref: 'elena',
+      nom: 'Elena',
+      pays: 'Russie',
+      phone: '+79964411738',
+      promo: 'RUS76',
+      photo: '',
+      clients: 0,
+      actif: true
+    },
+    {
+      ref: 'joseph',
+      nom: 'Joseph Henry',
+      pays: 'Guinée Conakry',
+      phone: '+226620611648',
+      promo: 'JHL224',
+      photo: 'https://drive.google.com/thumbnail?id=1z_QWYLS2TxF_BeLAIkyvrHJv8NTgVkj_&sz=w200',
+      clients: 0,
+      actif: true
+    },
   ];
 }
 
@@ -885,6 +930,22 @@ function applyAgent(agent) {
   // Stats
   const sc = document.getElementById('stat-clients');
   if (sc) sc.textContent = agent.clients || '—';
+
+  // Agent card (nom, pays, photo)
+  const card = document.getElementById('hero-agent-card');
+  if (card) card.style.display = 'inline-flex';
+  const nomEl = document.getElementById('hero-agent-nom');
+  if (nomEl) nomEl.textContent = agent.nom;
+  const paysEl = document.getElementById('hero-agent-pays');
+  if (paysEl) paysEl.textContent = agent.pays || '';
+  const avatarEl = document.getElementById('hero-avatar');
+  if (avatarEl) {
+    if (agent.photo) {
+      avatarEl.innerHTML = `<img src="${agent.photo}" alt="${agent.nom}" onerror="this.parentElement.textContent='${agent.nom.charAt(0)}'">`;
+    } else {
+      avatarEl.textContent = agent.nom.charAt(0).toUpperCase();
+    }
+  }
 
   // Page title
   document.title = `Guide 1xBet — ${agent.nom}`;
