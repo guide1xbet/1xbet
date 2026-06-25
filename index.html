@@ -383,7 +383,7 @@ footer strong{color:#d32f2f;}
           <li class="step"><div class="stepn">4</div><div><h4>L'agent traite le retrait</h4><p>Fonds transférés sur Mobile Money ou en espèces.</p></div></li>
           <li class="step"><div class="stepn">5</div><div><h4>Confirmation reçue 🎉</h4><p>Vos gains sont disponibles !</p></div></li>
         </ol>
-        <div class="danger">⚠️ Compte vérifié obligatoire · Au moins un pari effectué · Contactez l'agent en cas de blocage.</div>
+
       </div>
       <div class="card">
         <div class="card-title">📤 Envoyer ma demande</div>
@@ -489,7 +489,7 @@ footer strong{color:#d32f2f;}
 function getAgents(){
   return [
     {ref:'elena',nom:'Elena',pays:'Russie',phone:'+79964411738',promo:'RUS76',photo:'',clients:0,actif:true},
-    {ref:'joseph',nom:'Joseph Henry',pays:'Guinée Conakry',phone:'+226620611648',promo:'JHL224',photo:'https://drive.google.com/thumbnail?id=1z_QWYLS2TxF_BeLAIkyvrHJv8NTgVkj_&sz=w200',clients:0,actif:true},
+    {ref:'joseph',nom:'Joseph Henry',pays:'Guinée Conakry',phone:'+226620611648',promo:'JHL224',photo:'https://lh3.googleusercontent.com/d/1z_QWYLS2TxF_BeLAIkyvrHJv8NTgVkj_=w200',clients:0,actif:true},
   ];
 }
 
@@ -499,9 +499,11 @@ function showPanel(id,btn){
   document.getElementById('panel-'+id).classList.add('active');
   document.querySelectorAll('.navtab').forEach(function(t){t.classList.remove('active');});
   if(btn) btn.classList.add('active');
-  var tabs=document.getElementById('navtabs');
-  if(tabs) tabs.scrollIntoView({behavior:'smooth',block:'nearest'});
-  window.scrollTo({top:0,behavior:'smooth'});
+  var topbar=document.querySelector('.topbar');
+  var offset=topbar ? topbar.offsetHeight : 56;
+  var navtabs=document.getElementById('navtabs');
+  var navTop=navtabs ? navtabs.getBoundingClientRect().top+window.pageYOffset : 0;
+  window.scrollTo({top:navTop-offset,behavior:'smooth'});
 }
 
 // INNER TABS
