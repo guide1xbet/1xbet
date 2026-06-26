@@ -184,7 +184,7 @@ footer strong{color:#d32f2f;}
     <span>⚡ Retrait en moins de 5 minutes via Mobile Money</span>
     <span>✅ Agent officiel 1xBet — Disponible 7j/7</span>
     <span>🏆 Plus de 50 sports — Football, Basketball, Tennis</span>
-    <span>📱 Orange Money · MTN · Moov · Wave — Instantané</span>
+    <span id="ticker-moyens">📱 Orange Money · MTN · Moov · Wave — Instantané</span>
     <span>🔒 0% de commission — Votre argent sécurisé</span>
   </div>
 </div>
@@ -241,7 +241,7 @@ footer strong{color:#d32f2f;}
   <div class="stat"><strong>0%</strong><span>Commission</span></div>
 </div>
 
-<div class="payment-bar">
+<div class="payment-bar" id="payment-bar">
   <span>🟠 Orange Money</span>
   <span>🟡 MTN MoMo</span>
   <span>🔵 Moov Money</span>
@@ -318,7 +318,7 @@ footer strong{color:#d32f2f;}
         <ol class="steps">
           <li class="step"><div class="stepn">1</div><div><h4>Accéder au site officiel</h4><p>Rendez-vous sur <a href="https://1xbet.com/fr" target="_blank">1xbet.com</a> et cliquez sur <strong>« Inscription »</strong>.</p></div></li>
           <li class="step"><div class="stepn">2</div><div><h4>Choisir « Par numéro de téléphone »</h4><p>La méthode la plus rapide.</p></div></li>
-          <li class="step"><div class="stepn">3</div><div><h4>Entrez votre numéro et votre devise</h4><p>Numéro avec indicatif (+226, +229, +225…) et votre devise locale.</p></div></li>
+          <li class="step"><div class="stepn">3</div><div><h4>Entrez votre numéro et votre devise</h4><p>Numéro avec indicatif (<span id="insc-indicatif">+224</span>, +225, +229…) et votre devise locale.</p></div></li>
           <li class="step"><div class="stepn">4</div><div><h4>Entrez le code promo</h4><p>Saisissez <strong id="step-promo-1">—</strong> dans le champ « Code promo ».</p></div></li>
           <li class="step"><div class="stepn">5</div><div><h4>Valider avec le code SMS</h4><p>Entrez le code reçu sur votre téléphone.</p></div></li>
           <li class="step"><div class="stepn">6</div><div><h4>Contactez votre agent</h4><p>Pour effectuer votre premier dépôt et activer votre bonus.</p></div></li>
@@ -364,15 +364,14 @@ footer strong{color:#d32f2f;}
       <div class="card">
         <div class="card-title">📤 Envoyer ma commande</div>
         <div class="fg"><label>👤 Prénom et nom</label><input type="text" id="dep-nom" placeholder="Ex: Jean Dupont"></div>
-        <div class="fg"><label>📱 Votre numéro WhatsApp</label><input type="tel" id="dep-wa" placeholder="Ex: +22600000000"></div>
+        <div class="fg"><label>📱 Votre numéro WhatsApp</label><input type="tel" id="dep-wa" placeholder="Ex: +224 620 000 000"></div>
         <div class="fg"><label>🔢 ID de votre compte 1xBet</label><input type="text" id="dep-id" placeholder="Ex: 123456789"></div>
         <div class="fg"><label>💰 Montant à déposer</label><input type="number" id="dep-montant" placeholder="Ex: 5000"></div>
         <div class="fg"><label>📲 Méthode de paiement</label>
           <select id="dep-methode">
             <option value="">-- Choisissez --</option>
             <option>Orange Money</option><option>MTN Mobile Money</option>
-            <option>Moov Money</option><option>Wave</option>
-            <option>MobCash</option><option>Cash (en main)</option><option>Autre</option>
+            <option>MoneyGo</option><option>MobCash</option><option>Cash (en main)</option><option>Autre</option>
           </select>
         </div>
         <button class="btn-wa" style="width:100%;justify-content:center;" onclick="sendDepot()">💬 Envoyer sur WhatsApp</button>
@@ -396,16 +395,15 @@ footer strong{color:#d32f2f;}
       <div class="card">
         <div class="card-title">📤 Envoyer ma demande</div>
         <div class="fg"><label>👤 Prénom et nom</label><input type="text" id="ret-nom" placeholder="Ex: Jean Dupont"></div>
-        <div class="fg"><label>📱 Votre numéro WhatsApp</label><input type="tel" id="ret-wa" placeholder="Ex: +22600000000"></div>
+        <div class="fg"><label>📱 Votre numéro WhatsApp</label><input type="tel" id="ret-wa" placeholder="Ex: +224 620 000 000"></div>
         <div class="fg"><label>🔢 ID de votre compte 1xBet</label><input type="text" id="ret-id" placeholder="Ex: 123456789"></div>
         <div class="fg"><label>💰 Montant à retirer</label><input type="number" id="ret-montant" placeholder="Ex: 10000"></div>
-        <div class="fg"><label>📲 Numéro de réception</label><input type="tel" id="ret-num" placeholder="Ex: +22600000000"></div>
+        <div class="fg"><label>📲 Numéro de réception</label><input type="tel" id="ret-num" placeholder="Ex: +224 620 000 000"></div>
         <div class="fg"><label>💳 Méthode de retrait</label>
           <select id="ret-methode">
             <option value="">-- Choisissez --</option>
             <option>Orange Money</option><option>MTN Mobile Money</option>
-            <option>Moov Money</option><option>Wave</option>
-            <option>Cash (en main)</option><option>Autre</option>
+            <option>MoneyGo</option><option>Cash (en main)</option><option>Autre</option>
           </select>
         </div>
         <button class="btn-wa" style="width:100%;justify-content:center;" onclick="sendRetrait()">💬 Envoyer sur WhatsApp</button>
@@ -441,24 +439,24 @@ footer strong{color:#d32f2f;}
       <div class="card-title">⭐ Ce que disent nos clients</div>
       <div class="testi-grid" id="testi-list">
         <div class="testi-card">
-          <div class="testi-top"><div class="testi-avatar">K</div><div><div class="testi-name">Kofi A.</div><div class="testi-country">🇬🇭 Ghana</div></div></div>
+          <div class="testi-top"><div class="testi-avatar">M</div><div><div class="testi-name">Mamadou B.</div><div class="testi-country">🇬🇳 Guinée Conakry</div></div></div>
           <div class="testi-stars">★★★★★</div>
-          <div class="testi-text">« Retrait reçu en 3 minutes ! L'agent est très réactif et professionnel. Je recommande vivement. »</div>
+          <div class="testi-text">« Retrait reçu en moins de 5 minutes via Orange Money. Joseph est très sérieux et disponible. Je recommande à 100%. »</div>
         </div>
         <div class="testi-card">
-          <div class="testi-top"><div class="testi-avatar" style="background:#1a56db">M</div><div><div class="testi-name">Moussa D.</div><div class="testi-country">🇸🇳 Sénégal</div></div></div>
+          <div class="testi-top"><div class="testi-avatar" style="background:#1a56db">F</div><div><div class="testi-name">Fatoumata D.</div><div class="testi-country">🇬🇳 Guinée Conakry</div></div></div>
           <div class="testi-stars">★★★★★</div>
-          <div class="testi-text">« Dépôt instantané, zéro problème. L'agent répond même tard le soir. Très satisfait du service. »</div>
+          <div class="testi-text">« Dépôt instantané via MTN MoMo. L'agent Joseph répond même le soir. Je suis très satisfaite du service. »</div>
         </div>
         <div class="testi-card">
-          <div class="testi-top"><div class="testi-avatar" style="background:#25a244">A</div><div><div class="testi-name">Aminata S.</div><div class="testi-country">🇨🇮 Côte d'Ivoire</div></div></div>
+          <div class="testi-top"><div class="testi-avatar" style="background:#25a244">A</div><div><div class="testi-name">Alpha S.</div><div class="testi-country">🇬🇳 Guinée Conakry</div></div></div>
           <div class="testi-stars">★★★★★</div>
-          <div class="testi-text">« Première fois que j'utilise 1xBet. L'agent m'a guidée étape par étape. Très bon service ! »</div>
+          <div class="testi-text">« Première fois sur 1xBet. Joseph m'a guidé étape par étape, du compte jusqu'au bonus. Excellent service ! »</div>
         </div>
         <div class="testi-card">
-          <div class="testi-top"><div class="testi-avatar" style="background:#b45309">I</div><div><div class="testi-name">Ibrahim T.</div><div class="testi-country">🇧🇫 Burkina Faso</div></div></div>
-          <div class="testi-stars">★★★★☆</div>
-          <div class="testi-text">« Service rapide et fiable. Le code promo a bien fonctionné, j'ai eu mon bonus dès l'inscription. »</div>
+          <div class="testi-top"><div class="testi-avatar" style="background:#b45309">I</div><div><div class="testi-name">Ibrahima K.</div><div class="testi-country">🇬🇳 Guinée Conakry</div></div></div>
+          <div class="testi-stars">★★★★★</div>
+          <div class="testi-text">« Code promo bien activé, bonus reçu dès le premier dépôt. Agent rapide et professionnel. Merci Joseph ! »</div>
         </div>
       </div>
     </div>
@@ -466,8 +464,8 @@ footer strong{color:#d32f2f;}
       <div class="card-title">✍️ Laisser votre avis</div>
       <div class="review-form">
         <h4>Partagez votre expérience</h4>
-        <div class="fg"><label>👤 Votre prénom</label><input type="text" id="rev-nom" placeholder="Ex: Moussa"></div>
-        <div class="fg"><label>🌍 Votre pays</label><input type="text" id="rev-pays" placeholder="Ex: Sénégal"></div>
+        <div class="fg"><label>👤 Votre prénom</label><input type="text" id="rev-nom" placeholder="Ex: Mamadou"></div>
+        <div class="fg"><label>🌍 Votre pays</label><input type="text" id="rev-pays" placeholder="Ex: Guinée Conakry" value="Guinée Conakry"></div>
         <div class="fg">
           <label>⭐ Note</label>
           <div class="star-select" id="stars">
@@ -490,7 +488,7 @@ footer strong{color:#d32f2f;}
     <div class="card">
       <div class="card-title">🛡️ Ce que l'agent vous promet</div>
       <div class="gitem"><div class="gicon">⚡</div><div><h4>Retrait en 5 minutes</h4><p>Chaque retrait est traité en moins de 5 minutes après votre demande.</p><span class="gtag">Garanti</span></div></div>
-      <div class="gitem"><div class="gicon">📱</div><div><h4>Mobile Money local</h4><p>Orange Money, MTN, Moov, Wave — la méthode que vous utilisez déjà.</p><span class="gtag">0% frais cachés</span></div></div>
+      <div class="gitem"><div class="gicon">📱</div><div><h4>Mobile Money local</h4><p id="garantie-moyens">Orange Money, MTN, MoneyGo — la méthode que vous utilisez déjà.</p><span class="gtag">0% frais cachés</span></div></div>
       <div class="gitem"><div class="gicon">🔒</div><div><h4>Votre argent sécurisé</h4><p>Votre solde est sur votre compte 1xBet. L'agent ne peut pas y accéder sans vous.</p><span class="gtag">100% sécurisé</span></div></div>
       <div class="gitem"><div class="gicon">🤝</div><div><h4>Agent humain</h4><p>Vous parlez à une vraie personne qui connaît votre dossier.</p><span class="gtag">Service personnalisé</span></div></div>
       <div class="gitem"><div class="gicon">🧾</div><div><h4>Confirmation écrite</h4><p>Chaque dépôt/retrait confirmé par WhatsApp avec heure et montant.</p><span class="gtag">Traçabilité totale</span></div></div>
@@ -513,8 +511,8 @@ footer strong{color:#d32f2f;}
 <script>
 function getAgents(){
   return [
-    {ref:'elena',nom:'Elena',pays:'Russie',phone:'+79108754783',promo:'RUS76',photo:'',clients:0,actif:true},
-    {ref:'joseph',nom:'Joseph Henry',pays:'Guinée Conakry',phone:'+226620611648',promo:'JHL224',photo:'https://lh3.googleusercontent.com/d/1z_QWYLS2TxF_BeLAIkyvrHJv8NTgVkj_=w200',clients:0,actif:false},
+    {ref:'elena',nom:'Elena',pays:'Russie',phone:'+79108754783',promo:'RUS76',photo:'',clients:0,actif:true,pays_code:'+7'},
+    {ref:'joseph',nom:'Joseph Henry',pays:'Guinée Conakry',phone:'+224620611648',promo:'JHL224',photo:'https://lh3.googleusercontent.com/d/1z_QWYLS2TxF_BeLAIkyvrHJv8NTgVkj_=w200',clients:0,actif:true,pays_code:'+224'},
   ];
 }
 
@@ -566,6 +564,53 @@ function applyAgent(a){
     else{w.innerHTML='<div class="agent-initials">'+a.nom.charAt(0).toUpperCase()+'</div>';}
   }
   document.title='Guide 1xBet — '+a.nom;
+
+  /* Moyens de paiement selon l'agent */
+  var isJoseph = a.ref === 'joseph';
+  var moyens = isJoseph
+    ? [{ico:'🟠',lbl:'Orange Money'},{ico:'🟡',lbl:'MTN MoMo'},{ico:'💚',lbl:'MoneyGo'},{ico:'💵',lbl:'Cash'}]
+    : [{ico:'🟠',lbl:'Orange Money'},{ico:'🟡',lbl:'MTN MoMo'},{ico:'🔵',lbl:'Moov Money'},{ico:'🌊',lbl:'Wave'},{ico:'💵',lbl:'Cash'}];
+
+  /* Payment bar */
+  var pb=document.getElementById('payment-bar');
+  if(pb){pb.innerHTML=moyens.map(function(m){return '<span>'+m.ico+' '+m.lbl+'</span>';}).join('');}
+
+  /* Ticker */
+  var tk=document.getElementById('ticker-moyens');
+  if(tk){tk.textContent='📱 '+moyens.filter(function(m){return m.lbl!=='Cash';}).map(function(m){return m.lbl;}).join(' · ')+' — Instantané';}
+
+  /* Garanties */
+  var gm=document.getElementById('garantie-moyens');
+  if(gm){gm.textContent=moyens.filter(function(m){return m.lbl!=='Cash';}).map(function(m){return m.lbl;}).join(', ')+' — la méthode que vous utilisez déjà.';}
+
+  /* Selects dépôt et retrait */
+  var depOpts = isJoseph
+    ? '<option value="">-- Choisissez --</option><option>Orange Money</option><option>MTN Mobile Money</option><option>MoneyGo</option><option>MobCash</option><option>Cash (en main)</option><option>Autre</option>'
+    : '<option value="">-- Choisissez --</option><option>Orange Money</option><option>MTN Mobile Money</option><option>Moov Money</option><option>Wave</option><option>MobCash</option><option>Cash (en main)</option><option>Autre</option>';
+  var retOpts = isJoseph
+    ? '<option value="">-- Choisissez --</option><option>Orange Money</option><option>MTN Mobile Money</option><option>MoneyGo</option><option>Cash (en main)</option><option>Autre</option>'
+    : '<option value="">-- Choisissez --</option><option>Orange Money</option><option>MTN Mobile Money</option><option>Moov Money</option><option>Wave</option><option>Cash (en main)</option><option>Autre</option>';
+  var dm=document.getElementById('dep-methode');if(dm)dm.innerHTML=depOpts;
+  var rm=document.getElementById('ret-methode');if(rm)rm.innerHTML=retOpts;
+
+  /* Indicatif téléphonique par défaut */
+  var code = a.pays_code || '';
+  var phFields=['dep-wa','ret-wa','ret-num'];
+  phFields.forEach(function(id){
+    var el=document.getElementById(id);
+    if(el && code){
+      el.placeholder='Ex: '+code+' 620 000 000';
+      el.value='';
+    }
+  });
+
+  /* Indicatif dans la page inscription */
+  var inscInd=document.getElementById('insc-indicatif');
+  if(inscInd && code){inscInd.textContent=code;}
+
+  /* Pré-remplir le pays dans le formulaire avis */
+  var revPays=document.getElementById('rev-pays');
+  if(revPays && a.pays){revPays.value=a.pays; revPays.placeholder='Ex: '+a.pays;}
 }
 
 function sendDepot(){
