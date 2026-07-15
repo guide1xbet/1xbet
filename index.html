@@ -119,7 +119,14 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#0a0e1a;color:#222;}
 .fg input,.fg select{width:100%;padding:.58rem .85rem;border:1.5px solid #1e2d4a;border-radius:8px;font-size:.85rem;font-family:inherit;color:#fff;background:#141d30;transition:border-color .15s;}
 .fg input::placeholder{color:#556a8a;}
 .fg select option{background:#141d30;color:#fff;}
-.fg input:focus,.fg select:focus{outline:none;border-color:#d32f2f;background:#fff;}
+.fg input:focus,.fg select:focus{outline:none;border-color:#d32f2f;background:#141d30;}
+input, select, textarea {color:#fff !important;background:#141d30 !important;-webkit-text-fill-color:#fff !important;}
+input::placeholder, textarea::placeholder{color:#556a8a !important;opacity:1;}
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus{
+  -webkit-text-fill-color:#fff !important;
+  -webkit-box-shadow:0 0 0 1000px #141d30 inset !important;
+  background:#141d30 !important;
+}
 .success-msg{display:none;background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;border-radius:8px;padding:.7rem 1rem;font-size:.82rem;font-weight:600;margin-top:.7rem;}
 
 /* INNER TABS */
