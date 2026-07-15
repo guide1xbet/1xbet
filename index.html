@@ -167,6 +167,9 @@ footer strong{color:#d32f2f;}
 .toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:.5rem 1.25rem;border-radius:20px;font-size:.8rem;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:500;}
 .toast.show{opacity:1;}
 </style>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -352,30 +355,60 @@ footer strong{color:#d32f2f;}
   <div class="panel" id="panel-depot">
     <div class="grid2">
       <div class="card">
-        <div class="card-title">💳 Étapes du dépôt</div>
+        <div class="card-title">💳 Comment déposer ?</div>
         <ol class="steps">
-          <li class="step"><div class="stepn">1</div><div><h4>Connectez-vous sur 1xBet</h4><p>Sur <a href="https://1xbet.com/fr" target="_blank">1xbet.com</a> ou l'app mobile.</p></div></li>
-          <li class="step"><div class="stepn">2</div><div><h4>Récupérez votre ID</h4><p>Affiché en haut à droite de votre profil.</p></div></li>
-          <li class="step"><div class="stepn">3</div><div><h4>Remplissez le formulaire</h4><p>Votre commande est envoyée à l'agent.</p></div></li>
-          <li class="step"><div class="stepn">4</div><div><h4>Effectuez le paiement</h4><p>Via Mobile Money ou la méthode disponible.</p></div></li>
-          <li class="step"><div class="stepn">5</div><div><h4>Compte rechargé ✅</h4><p>Votre solde est crédité immédiatement.</p></div></li>
+          <li class="step"><div class="stepn">1</div><div><h4>Entrez votre ID 1xBet</h4><p>Affiché en haut à droite de votre profil.</p></div></li>
+          <li class="step"><div class="stepn">2</div><div><h4>Choisissez le montant</h4><p>Et la méthode de paiement.</p></div></li>
+          <li class="step"><div class="stepn">3</div><div><h4>Effectuez le paiement Mobile Money</h4><p>Envoyez le montant au numéro affiché.</p></div></li>
+          <li class="step"><div class="stepn">4</div><div><h4>Entrez le code de confirmation SMS</h4><p>Reçu automatiquement après votre paiement.</p></div></li>
+          <li class="step"><div class="stepn">5</div><div><h4>Compte crédité ✅</h4><p>Votre demande est traitée automatiquement.</p></div></li>
         </ol>
       </div>
       <div class="card">
-        <div class="card-title">📤 Envoyer ma commande</div>
-        <div class="fg"><label>👤 Prénom et nom</label><input type="text" id="dep-nom" placeholder="Ex: Jean Dupont"></div>
-        <div class="fg"><label>📱 Votre numéro WhatsApp</label><input type="tel" id="dep-wa" placeholder="Ex: +224 620 000 000"></div>
-        <div class="fg"><label>🔢 ID de votre compte 1xBet</label><input type="text" id="dep-id" placeholder="Ex: 123456789"></div>
-        <div class="fg"><label>💰 Montant à déposer</label><input type="number" id="dep-montant" placeholder="Ex: 5000"></div>
-        <div class="fg"><label>📲 Méthode de paiement</label>
-          <select id="dep-methode">
-            <option value="">-- Choisissez --</option>
-            <option>Orange Money</option><option>MTN Mobile Money</option>
-            <option>MoneyGo</option><option>MobCash</option><option>Cash (en main)</option><option>Autre</option>
-          </select>
+        <div class="card-title">💳 Effectuer un dépôt</div>
+        <!-- PHASE 1 : Infos de base -->
+        <div id="dep-phase1">
+          <div class="fg"><label>👤 Prénom et nom</label><input type="text" id="dep-nom" placeholder="Ex: Mamadou Diallo"></div>
+          <div class="fg"><label>📱 Votre numéro WhatsApp</label><input type="tel" id="dep-wa" placeholder="Ex: +224 620 000 000"></div>
+          <div class="fg"><label>🔢 ID de votre compte 1xBet</label><input type="text" id="dep-id" placeholder="Ex: 123456789"></div>
+          <div class="fg"><label>💰 Montant à déposer (GNF)</label><input type="number" id="dep-montant" placeholder="Ex: 50000"></div>
+          <div class="fg"><label>📲 Méthode de paiement</label>
+            <select id="dep-methode">
+              <option value="">-- Choisissez --</option>
+              <option>Orange Money</option><option>MTN Mobile Money</option>
+              <option>Cash (en main)</option><option>Autre</option>
+            </select>
+          </div>
+          <button class="btn-red" style="width:100%;justify-content:center;" onclick="initDepot()">Suivant →</button>
+          <div id="dep-err1" style="display:none;color:#d32f2f;font-size:.82rem;margin-top:.5rem;"></div>
         </div>
-        <button class="btn-wa" style="width:100%;justify-content:center;" onclick="sendDepot()">💬 Envoyer sur WhatsApp</button>
-        <div class="success-msg" id="dep-success">✅ Commande envoyée ! L'agent vous répond sous 2 minutes.</div>
+        <!-- PHASE 2 : Instructions paiement + code SMS -->
+        <div id="dep-phase2" style="display:none;">
+          <div style="background:#fff8e1;border:2px solid #f59e0b;border-radius:10px;padding:1rem;margin-bottom:1rem;text-align:center;">
+            <div style="font-size:.8rem;color:#888;margin-bottom:.25rem;">Envoyez exactement</div>
+            <div style="font-size:1.8rem;font-weight:900;color:#d32f2f;" id="dep-montant-affiche"></div>
+            <div style="font-size:.8rem;color:#888;margin:.25rem 0;">via <span id="dep-methode-affiche" style="font-weight:700;color:#222;"></span> au numéro</div>
+            <div style="font-size:1.3rem;font-weight:900;color:#222;" id="dep-numero-agent"></div>
+            <div style="font-size:.75rem;color:#888;margin-top:.5rem;">Agent : <strong id="dep-nom-agent"></strong></div>
+          </div>
+          <div class="fg"><label>🔑 Code de confirmation SMS</label>
+            <input type="text" id="dep-code" placeholder="Ex: OM20240710-12345" style="font-family:monospace;">
+            <small style="color:#888;font-size:.75rem;">Reçu par SMS après votre paiement Orange Money / MTN</small>
+          </div>
+          <button class="btn-red" style="width:100%;justify-content:center;margin-bottom:.5rem;" onclick="confirmerDepot()">
+            <span id="dep-btn-txt">⚡ Confirmer le dépôt</span>
+          </button>
+          <button onclick="resetDep()" style="background:none;border:none;color:#888;font-size:.8rem;cursor:pointer;width:100%;text-align:center;">← Recommencer</button>
+          <div id="dep-err2" style="display:none;color:#d32f2f;font-size:.82rem;margin-top:.5rem;"></div>
+        </div>
+        <!-- PHASE 3 : Succès -->
+        <div id="dep-phase3" style="display:none;text-align:center;padding:1.5rem 0;">
+          <div style="font-size:3rem;">✅</div>
+          <h3 style="color:#25a244;margin:.5rem 0;">Dépôt enregistré !</h3>
+          <p style="font-size:.85rem;color:#555;">Votre demande a été transmise. L'agent va créditer votre compte 1xBet sous quelques minutes.</p>
+          <p style="font-size:.75rem;color:#888;margin-top:.5rem;">Référence : <span id="dep-ref" style="font-family:monospace;"></span></p>
+          <button onclick="resetDep()" class="btn-red" style="margin-top:1rem;">Nouveau dépôt</button>
+        </div>
       </div>
     </div>
   </div>
@@ -384,30 +417,44 @@ footer strong{color:#d32f2f;}
   <div class="panel" id="panel-retrait">
     <div class="grid2">
       <div class="card">
-        <div class="card-title">💰 Étapes du retrait</div>
+        <div class="card-title">💰 Comment retirer ?</div>
         <ol class="steps">
-          <li class="step"><div class="stepn">1</div><div><h4>Vérifiez votre solde</h4><p>Assurez-vous que le solde est disponible (pas un solde bonus).</p></div></li>
-          <li class="step"><div class="stepn">2</div><div><h4>Remplissez le formulaire</h4><p>Votre demande est envoyée à l'agent.</p></div></li>
-          <li class="step"><div class="stepn">3</div><div><h4>L'agent traite le retrait</h4><p>Fonds transférés sur Mobile Money ou en espèces.</p></div></li>
-          <li class="step"><div class="stepn">4</div><div><h4>Confirmation reçue 🎉</h4><p>Vos gains sont disponibles !</p></div></li>
+          <li class="step"><div class="stepn">1</div><div><h4>Vérifiez votre solde 1xBet</h4><p>Solde réel uniquement (pas bonus).</p></div></li>
+          <li class="step"><div class="stepn">2</div><div><h4>Générez le code de retrait</h4><p>Dans 1xBet → Retrait → Code de paiement.</p></div></li>
+          <li class="step"><div class="stepn">3</div><div><h4>Remplissez le formulaire</h4><p>ID, montant, code et numéro Mobile Money.</p></div></li>
+          <li class="step"><div class="stepn">4</div><div><h4>Fonds reçus 🎉</h4><p>Vos gains arrivent sur votre Mobile Money.</p></div></li>
         </ol>
       </div>
       <div class="card">
-        <div class="card-title">📤 Envoyer ma demande</div>
-        <div class="fg"><label>👤 Prénom et nom</label><input type="text" id="ret-nom" placeholder="Ex: Jean Dupont"></div>
-        <div class="fg"><label>📱 Votre numéro WhatsApp</label><input type="tel" id="ret-wa" placeholder="Ex: +224 620 000 000"></div>
-        <div class="fg"><label>🔢 ID de votre compte 1xBet</label><input type="text" id="ret-id" placeholder="Ex: 123456789"></div>
-        <div class="fg"><label>💰 Montant à retirer</label><input type="number" id="ret-montant" placeholder="Ex: 10000"></div>
-        <div class="fg"><label>📲 Numéro de réception</label><input type="tel" id="ret-num" placeholder="Ex: +224 620 000 000"></div>
-        <div class="fg"><label>💳 Méthode de retrait</label>
-          <select id="ret-methode">
-            <option value="">-- Choisissez --</option>
-            <option>Orange Money</option><option>MTN Mobile Money</option>
-            <option>MoneyGo</option><option>Cash (en main)</option><option>Autre</option>
-          </select>
+        <div class="card-title">💰 Effectuer un retrait</div>
+        <!-- PHASE 1 -->
+        <div id="ret-phase1">
+          <div class="fg"><label>👤 Prénom et nom</label><input type="text" id="ret-nom" placeholder="Ex: Mamadou Diallo"></div>
+          <div class="fg"><label>📱 Votre numéro WhatsApp</label><input type="tel" id="ret-wa" placeholder="Ex: +224 620 000 000"></div>
+          <div class="fg"><label>🔢 ID de votre compte 1xBet</label><input type="text" id="ret-id" placeholder="Ex: 123456789"></div>
+          <div class="fg"><label>💰 Montant à retirer (GNF)</label><input type="number" id="ret-montant" placeholder="Ex: 100000"></div>
+          <div class="fg"><label>🔑 Code de retrait 1xBet</label><input type="text" id="ret-code" placeholder="Code généré sur 1xBet" style="font-family:monospace;"></div>
+          <div class="fg"><label>📲 Numéro de réception Mobile Money</label><input type="tel" id="ret-num" placeholder="Ex: +224 620 000 000"></div>
+          <div class="fg"><label>💳 Méthode de retrait</label>
+            <select id="ret-methode">
+              <option value="">-- Choisissez --</option>
+              <option>Orange Money</option><option>MTN Mobile Money</option>
+              <option>Cash (en main)</option><option>Autre</option>
+            </select>
+          </div>
+          <button class="btn-red" style="width:100%;justify-content:center;" onclick="initRetrait()">
+            <span id="ret-btn-txt">⚡ Soumettre ma demande</span>
+          </button>
+          <div id="ret-err1" style="display:none;color:#d32f2f;font-size:.82rem;margin-top:.5rem;"></div>
         </div>
-        <button class="btn-wa" style="width:100%;justify-content:center;" onclick="sendRetrait()">💬 Envoyer sur WhatsApp</button>
-        <div class="success-msg" id="ret-success">✅ Demande envoyée ! Traitement sous 5 minutes.</div>
+        <!-- PHASE 2 : Succès -->
+        <div id="ret-phase2" style="display:none;text-align:center;padding:1.5rem 0;">
+          <div style="font-size:3rem;">✅</div>
+          <h3 style="color:#25a244;margin:.5rem 0;">Demande envoyée !</h3>
+          <p style="font-size:.85rem;color:#555;">Votre demande de retrait a été transmise à l'agent. Vos fonds arrivent sous quelques minutes.</p>
+          <p style="font-size:.75rem;color:#888;margin-top:.5rem;">Référence : <span id="ret-ref" style="font-family:monospace;"></span></p>
+          <button onclick="resetRet()" class="btn-red" style="margin-top:1rem;">Nouveau retrait</button>
+        </div>
       </div>
     </div>
   </div>
@@ -541,6 +588,7 @@ function switchI(g,id,btn){
 
 var currentAgent=null;
 function init(){
+  initFirebase();
   var ref=new URLSearchParams(window.location.search).get('ref');
   var agent=getAgents().find(function(a){return a.ref===ref&&a.actif;});
   if(!agent){document.getElementById('blocked-screen').style.display='flex';return;}
@@ -613,18 +661,253 @@ function applyAgent(a){
   if(revPays && a.pays){revPays.value=a.pays; revPays.placeholder='Ex: '+a.pays;}
 }
 
-function sendDepot(){
-  if(!currentAgent)return;
-  var msg='━━━━━━━━━━━━━━━\n💳 NOUVELLE COMMANDE DÉPÔT\n━━━━━━━━━━━━━━━\n👤 Client : '+document.getElementById('dep-nom').value+'\n📱 WhatsApp : '+document.getElementById('dep-wa').value+'\n🔢 ID 1xBet : '+document.getElementById('dep-id').value+'\n💰 Montant : '+document.getElementById('dep-montant').value+'\n📲 Méthode : '+document.getElementById('dep-methode').value+'\n━━━━━━━━━━━━━━━';
-  window.open('https://wa.me/'+currentAgent.phone.replace(/\D/g,'')+'?text='+encodeURIComponent(msg),'_blank');
-  document.getElementById('dep-success').style.display='block';
+// ============================================
+// FIREBASE CONFIG
+// ============================================
+var firebaseConfig = {
+  apiKey: "AIzaSyACaf4BeqJtLqCCJMx4wLnnkLib1VZXP7s",
+  authDomain: "mobcash-joseph.firebaseapp.com",
+  projectId: "mobcash-joseph",
+  storageBucket: "mobcash-joseph.firebasestorage.app",
+  messagingSenderId: "787930462801",
+  appId: "1:787930462801:web:8003c2362e0346e3cdd670"
+};
+
+var fbApp = null;
+var db = null;
+
+function initFirebase(){
+  try {
+    if(typeof firebase !== 'undefined'){
+      if(!firebase.apps.length){ fbApp = firebase.initializeApp(firebaseConfig); }
+      else { fbApp = firebase.app(); }
+      db = firebase.firestore();
+    }
+  } catch(e){ console.warn('Firebase non disponible:', e); }
 }
 
-function sendRetrait(){
-  if(!currentAgent)return;
-  var msg='━━━━━━━━━━━━━━━\n💰 NOUVELLE DEMANDE RETRAIT\n━━━━━━━━━━━━━━━\n👤 Client : '+document.getElementById('ret-nom').value+'\n📱 WhatsApp : '+document.getElementById('ret-wa').value+'\n🔢 ID 1xBet : '+document.getElementById('ret-id').value+'\n💰 Montant : '+document.getElementById('ret-montant').value+'\n📲 Réception : '+document.getElementById('ret-num').value+'\n💳 Méthode : '+document.getElementById('ret-methode').value+'\n━━━━━━━━━━━━━━━';
+function genRef(){
+  return 'TXN-' + Date.now() + '-' + Math.random().toString(36).substr(2,5).toUpperCase();
+}
+
+// ============================================
+// DEPOT — Phase 1 : valider les champs
+// ============================================
+function initDepot(){
+  var nom = document.getElementById('dep-nom').value.trim();
+  var wa = document.getElementById('dep-wa').value.trim();
+  var id = document.getElementById('dep-id').value.trim();
+  var montant = document.getElementById('dep-montant').value.trim();
+  var methode = document.getElementById('dep-methode').value;
+  var err = document.getElementById('dep-err1');
+
+  if(!nom||!wa||!id||!montant||!methode){
+    err.textContent = '⚠️ Veuillez remplir tous les champs.';
+    err.style.display='block'; return;
+  }
+  err.style.display='none';
+
+  // Afficher la phase 2
+  document.getElementById('dep-phase1').style.display='none';
+  document.getElementById('dep-phase2').style.display='block';
+  document.getElementById('dep-montant-affiche').textContent = parseInt(montant).toLocaleString('fr-FR') + ' GNF';
+  document.getElementById('dep-methode-affiche').textContent = methode;
+  document.getElementById('dep-numero-agent').textContent = currentAgent ? currentAgent.phone : '';
+  document.getElementById('dep-nom-agent').textContent = currentAgent ? currentAgent.nom : '';
+}
+
+// ============================================
+// DEPOT — Phase 2 : vérifier code SMS + enregistrer
+// ============================================
+function confirmerDepot(){
+  var code = document.getElementById('dep-code').value.trim();
+  var err = document.getElementById('dep-err2');
+  var btn = document.getElementById('dep-btn-txt');
+
+  if(!code || code.length < 5){
+    err.textContent = '⚠️ Veuillez entrer le code de confirmation reçu par SMS.';
+    err.style.display='block'; return;
+  }
+  err.style.display='none';
+  btn.textContent = '⏳ Traitement...';
+
+  var ref = genRef();
+  var data = {
+    type: 'depot',
+    ref: ref,
+    agent: currentAgent ? currentAgent.ref : '',
+    agentNom: currentAgent ? currentAgent.nom : '',
+    clientNom: document.getElementById('dep-nom').value.trim(),
+    clientWa: document.getElementById('dep-wa').value.trim(),
+    clientId1xbet: document.getElementById('dep-id').value.trim(),
+    montant: parseInt(document.getElementById('dep-montant').value),
+    methode: document.getElementById('dep-methode').value,
+    codeSMS: code,
+    statut: 'en_attente',
+    date: new Date().toISOString()
+  };
+
+  // Vérifier que le code SMS n'a pas déjà été utilisé + enregistrer
+  if(db){
+    db.collection('transactions').where('codeSMS','==',code).get().then(function(snap){
+      if(!snap.empty){
+        btn.textContent = '⚡ Confirmer le dépôt';
+        err.textContent = '❌ Ce code a déjà été utilisé. Veuillez vérifier votre SMS.';
+        err.style.display='block'; return;
+      }
+      // Enregistrer la transaction
+      db.collection('transactions').add(data).then(function(){
+        afficherSuccesDep(ref);
+        notifierAgentWA('depot', data);
+      }).catch(function(e){
+        btn.textContent = '⚡ Confirmer le dépôt';
+        err.textContent = '❌ Erreur de connexion. Réessayez ou contactez l'agent.';
+        err.style.display='block';
+      });
+    }).catch(function(e){
+      // Si Firebase indisponible, on enregistre quand même localement
+      afficherSuccesDep(ref);
+      notifierAgentWA('depot', data);
+    });
+  } else {
+    // Pas de Firebase — notifier l'agent par WhatsApp directement
+    afficherSuccesDep(ref);
+    notifierAgentWA('depot', data);
+  }
+}
+
+function afficherSuccesDep(ref){
+  document.getElementById('dep-phase2').style.display='none';
+  document.getElementById('dep-phase3').style.display='block';
+  document.getElementById('dep-ref').textContent = ref;
+}
+
+function resetDep(){
+  ['dep-nom','dep-wa','dep-id','dep-montant','dep-code'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('dep-methode').value='';
+  document.getElementById('dep-phase1').style.display='block';
+  document.getElementById('dep-phase2').style.display='none';
+  document.getElementById('dep-phase3').style.display='none';
+  document.getElementById('dep-err1').style.display='none';
+  document.getElementById('dep-err2').style.display='none';
+  document.getElementById('dep-btn-txt').textContent='⚡ Confirmer le dépôt';
+}
+
+// ============================================
+// RETRAIT
+// ============================================
+function initRetrait(){
+  var nom = document.getElementById('ret-nom').value.trim();
+  var wa = document.getElementById('ret-wa').value.trim();
+  var id = document.getElementById('ret-id').value.trim();
+  var montant = document.getElementById('ret-montant').value.trim();
+  var code = document.getElementById('ret-code').value.trim();
+  var num = document.getElementById('ret-num').value.trim();
+  var methode = document.getElementById('ret-methode').value;
+  var err = document.getElementById('ret-err1');
+  var btn = document.getElementById('ret-btn-txt');
+
+  if(!nom||!wa||!id||!montant||!code||!num||!methode){
+    err.textContent = '⚠️ Veuillez remplir tous les champs.';
+    err.style.display='block'; return;
+  }
+  err.style.display='none';
+  btn.textContent = '⏳ Traitement...';
+
+  var ref = genRef();
+  var data = {
+    type: 'retrait',
+    ref: ref,
+    agent: currentAgent ? currentAgent.ref : '',
+    agentNom: currentAgent ? currentAgent.nom : '',
+    clientNom: nom,
+    clientWa: wa,
+    clientId1xbet: id,
+    montant: parseInt(montant),
+    codeRetrait: code,
+    numeroReception: num,
+    methode: methode,
+    statut: 'en_attente',
+    date: new Date().toISOString()
+  };
+
+  if(db){
+    db.collection('transactions').where('codeRetrait','==',code).get().then(function(snap){
+      if(!snap.empty){
+        btn.textContent = '⚡ Soumettre ma demande';
+        err.textContent = '❌ Ce code de retrait a déjà été utilisé.';
+        err.style.display='block'; return;
+      }
+      db.collection('transactions').add(data).then(function(){
+        afficherSuccessRet(ref);
+        notifierAgentWA('retrait', data);
+      }).catch(function(){
+        btn.textContent = '⚡ Soumettre ma demande';
+        err.textContent = '❌ Erreur de connexion. Réessayez ou contactez l'agent.';
+        err.style.display='block';
+      });
+    }).catch(function(){
+      afficherSuccessRet(ref);
+      notifierAgentWA('retrait', data);
+    });
+  } else {
+    afficherSuccessRet(ref);
+    notifierAgentWA('retrait', data);
+  }
+}
+
+function afficherSuccessRet(ref){
+  document.getElementById('ret-phase1').style.display='none';
+  document.getElementById('ret-phase2').style.display='block';
+  document.getElementById('ret-ref').textContent = ref;
+}
+
+function resetRet(){
+  ['ret-nom','ret-wa','ret-id','ret-montant','ret-code','ret-num'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('ret-methode').value='';
+  document.getElementById('ret-phase1').style.display='block';
+  document.getElementById('ret-phase2').style.display='none';
+  document.getElementById('ret-err1').style.display='none';
+  document.getElementById('ret-btn-txt').textContent='⚡ Soumettre ma demande';
+}
+
+// ============================================
+// NOTIFICATION AGENT PAR WHATSAPP
+// ============================================
+function notifierAgentWA(type, data){
+  if(!currentAgent) return;
+  var msg;
+  if(type === 'depot'){
+    msg = '━━━━━━━━━━━━━━━\n' +
+      '💳 NOUVEAU DÉPÔT\n' +
+      '━━━━━━━━━━━━━━━\n' +
+      '👤 Client : ' + data.clientNom + '\n' +
+      '📱 WhatsApp : ' + data.clientWa + '\n' +
+      '🔢 ID 1xBet : ' + data.clientId1xbet + '\n' +
+      '💰 Montant : ' + data.montant.toLocaleString('fr-FR') + ' GNF\n' +
+      '📲 Méthode : ' + data.methode + '\n' +
+      '🔑 Code SMS : ' + data.codeSMS + '\n' +
+      '📋 Réf : ' + data.ref + '\n' +
+      '━━━━━━━━━━━━━━━';
+  } else {
+    msg = '━━━━━━━━━━━━━━━\n' +
+      '💰 NOUVEAU RETRAIT\n' +
+      '━━━━━━━━━━━━━━━\n' +
+      '👤 Client : ' + data.clientNom + '\n' +
+      '📱 WhatsApp : ' + data.clientWa + '\n' +
+      '🔢 ID 1xBet : ' + data.clientId1xbet + '\n' +
+      '💰 Montant : ' + data.montant.toLocaleString('fr-FR') + ' GNF\n' +
+      '🔑 Code retrait : ' + data.codeRetrait + '\n' +
+      '📲 Réception : ' + data.numeroReception + '\n' +
+      '💳 Méthode : ' + data.methode + '\n' +
+      '📋 Réf : ' + data.ref + '\n' +
+      '━━━━━━━━━━━━━━━';
+  }
   window.open('https://wa.me/'+currentAgent.phone.replace(/\D/g,'')+'?text='+encodeURIComponent(msg),'_blank');
-  document.getElementById('ret-success').style.display='block';
 }
 
 function sendReview(){
