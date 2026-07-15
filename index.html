@@ -432,7 +432,7 @@ footer strong{color:#d32f2f;}
           <li class="step"><div class="stepn">2</div><div><h4>Choisir « Par numéro de téléphone »</h4><p>La méthode la plus rapide.</p></div></li>
           <li class="step"><div class="stepn">3</div><div><h4>Entrez votre numéro et votre devise</h4><p>Numéro avec indicatif (<span id="insc-indicatif">+224</span>, +225, +229…) et votre devise locale.</p></div></li>
           <li class="step"><div class="stepn">4</div><div><h4>Entrez le code promo</h4><p>Saisissez <strong id="step-promo-1">—</strong> dans le champ « Code promo ».</p></div></li>
-          <li class="step"><div class="stepn">5</div><div><h4>Valider avec le code SMS</h4><p>Entrez le code reçu sur votre téléphone.</p></div></li>
+          <li class="step"><div class="stepn">5</div><div><h4>Valider avec le ID de transaction</h4><p>Entrez le code reçu sur votre téléphone.</p></div></li>
           <li class="step"><div class="stepn">6</div><div><h4>Contactez votre agent</h4><p>Pour effectuer votre premier dépôt et activer votre bonus.</p></div></li>
         </ol>
       </div>
@@ -469,7 +469,7 @@ footer strong{color:#d32f2f;}
           <li class="step"><div class="stepn">1</div><div><h4>Entrez votre ID 1xBet</h4><p>Affiché en haut à droite de votre profil.</p></div></li>
           <li class="step"><div class="stepn">2</div><div><h4>Choisissez le montant</h4><p>Et la méthode de paiement.</p></div></li>
           <li class="step"><div class="stepn">3</div><div><h4>Effectuez le paiement Mobile Money</h4><p>Envoyez le montant au numéro affiché.</p></div></li>
-          <li class="step"><div class="stepn">4</div><div><h4>Entrez le code de confirmation SMS</h4><p>Reçu automatiquement après votre paiement.</p></div></li>
+          <li class="step"><div class="stepn">4</div><div><h4>Entrez le ID de transaction</h4><p>Reçu automatiquement après votre paiement.</p></div></li>
           <li class="step"><div class="stepn">5</div><div><h4>Compte crédité ✅</h4><p>Votre demande est traitée automatiquement.</p></div></li>
         </ol>
       </div>
@@ -491,7 +491,7 @@ footer strong{color:#d32f2f;}
           <button class="btn-red" style="width:100%;justify-content:center;" onclick="initDepot()">Suivant →</button>
           <div id="dep-err1" style="display:none;color:#d32f2f;font-size:.82rem;margin-top:.5rem;"></div>
         </div>
-        <!-- PHASE 2 : Instructions paiement + code SMS -->
+        <!-- PHASE 2 : Instructions paiement + ID de transaction -->
         <div id="dep-phase2" style="display:none;">
           <div style="background:#fff8e1;border:2px solid #f59e0b;border-radius:10px;padding:1rem;margin-bottom:1rem;text-align:center;">
             <div style="font-size:.8rem;color:#888;margin-bottom:.25rem;">Envoyez exactement</div>
@@ -500,9 +500,9 @@ footer strong{color:#d32f2f;}
             <div style="font-size:1.3rem;font-weight:900;color:#222;" id="dep-numero-agent"></div>
             <div style="font-size:.75rem;color:#888;margin-top:.5rem;">Agent : <strong id="dep-nom-agent"></strong></div>
           </div>
-          <div class="fg"><label>🔑 Code de confirmation SMS</label>
-            <input type="text" id="dep-code" placeholder="Ex: OM20240710-12345" style="font-family:monospace;">
-            <small style="color:#888;font-size:.75rem;">Reçu par SMS après votre paiement Orange Money / MTN</small>
+          <div class="fg"><label>🔑 ID de transaction</label>
+            <input type="text" id="dep-code" placeholder="Ex: TXN-MTN-20250715-98765" style="font-family:monospace;">
+            <small style="color:#888;font-size:.75rem;">Reçu par SMS après votre paiement Mobile Money Orange Money / MTN</small>
           </div>
           <button class="btn-red" style="width:100%;justify-content:center;margin-bottom:.5rem;" onclick="confirmerDepot()">
             <span id="dep-btn-txt">⚡ Confirmer le dépôt</span>
@@ -856,7 +856,7 @@ function initDepot(){
 }
 
 // ============================================
-// DEPOT — Phase 2 : vérifier code SMS + enregistrer
+// DEPOT — Phase 2 : vérifier ID de transaction + enregistrer
 // ============================================
 function confirmerDepot(){
   var code = document.getElementById('dep-code').value.trim();
@@ -881,14 +881,14 @@ function confirmerDepot(){
     clientId1xbet: document.getElementById('dep-id').value.trim(),
     montant: parseInt(document.getElementById('dep-montant').value),
     methode: document.getElementById('dep-methode').value,
-    codeSMS: code,
+    idTransaction: code,
     statut: 'en_attente',
     date: new Date().toISOString()
   };
 
-  // Vérifier que le code SMS n\'a pas déjà été utilisé + enregistrer
+  // Vérifier que le ID de transaction n\'a pas déjà été utilisé + enregistrer
   if(db){
-    db.collection('transactions').where('codeSMS','==',code).get().then(function(snap){
+    db.collection('transactions').where('idTransaction','==',code).get().then(function(snap){
       if(!snap.empty){
         btn.textContent = '⚡ Confirmer le dépôt';
         err.textContent = '❌ Ce code a déjà été utilisé. Veuillez vérifier votre SMS.';
