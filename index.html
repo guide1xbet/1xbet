@@ -613,7 +613,7 @@ function applyAgent(a){
   }
   document.title='Guide 1xBet — '+a.nom;
 
-  /* Moyens de paiement selon l'agent */
+  /* Moyens de paiement selon l\'agent */
   var isJoseph = a.ref === 'joseph';
   var moyens = isJoseph
     ? [{ico:'🟠',lbl:'Orange Money'},{ico:'🟡',lbl:'MTN MoMo'},{ico:'💵',lbl:'Cash'}]
@@ -747,7 +747,7 @@ function confirmerDepot(){
     date: new Date().toISOString()
   };
 
-  // Vérifier que le code SMS n'a pas déjà été utilisé + enregistrer
+  // Vérifier que le code SMS n\'a pas déjà été utilisé + enregistrer
   if(db){
     db.collection('transactions').where('codeSMS','==',code).get().then(function(snap){
       if(!snap.empty){
@@ -761,7 +761,7 @@ function confirmerDepot(){
         notifierAgentWA('depot', data);
       }).catch(function(e){
         btn.textContent = '⚡ Confirmer le dépôt';
-        err.textContent = '❌ Erreur de connexion. Réessayez ou contactez l'agent.';
+        err.textContent = '❌ Erreur de connexion. Réessayez ou contactez l\'agent.';
         err.style.display='block';
       });
     }).catch(function(e){
@@ -770,7 +770,7 @@ function confirmerDepot(){
       notifierAgentWA('depot', data);
     });
   } else {
-    // Pas de Firebase — notifier l'agent par WhatsApp directement
+    // Pas de Firebase — notifier l\'agent par WhatsApp directement
     afficherSuccesDep(ref);
     notifierAgentWA('depot', data);
   }
@@ -845,7 +845,7 @@ function initRetrait(){
         notifierAgentWA('retrait', data);
       }).catch(function(){
         btn.textContent = '⚡ Soumettre ma demande';
-        err.textContent = '❌ Erreur de connexion. Réessayez ou contactez l'agent.';
+        err.textContent = '❌ Erreur de connexion. Réessayez ou contactez l\'agent.';
         err.style.display='block';
       });
     }).catch(function(){
