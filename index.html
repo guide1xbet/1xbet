@@ -876,62 +876,25 @@ function resetRet(){
 }
 
 // ============================================
-// CONFIGURATION TELEGRAM
+// SERVEUR RENDER — URL
 // ============================================
-var TELEGRAM_CONFIG = {
-  token: '8846519263:AAElTs6UGuo1WfjZfHQQcK3E3HVfDHRZhys',
-  chatId: '8022571456'
-};
-
-function envoyerTelegram(message){
-  var url = 'https://api.telegram.org/bot' + TELEGRAM_CONFIG.token + '/sendMessage';
-  fetch(url, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      chat_id: TELEGRAM_CONFIG.chatId,
-      text: message,
-      parse_mode: 'HTML'
-    })
-  }).then(function(res){ return res.json(); })
-  .then(function(data){
-    if(!data.ok){ console.warn('Telegram error:', data.description); }
-  })
-  .catch(function(e){ console.warn('Telegram unavailable:', e); });
-}
+var RENDER_SERVER = 'https://mobcash-server.onrender.com';
 
 // ============================================
-// NOTIFICATION AGENT
+// NOTIFICATION AGENT via Render
 // ============================================
 function notifierAgentWA(type, data){
-  var msg;
-  if(type === 'depot'){
-    msg = '<b>💳 NOUVEAU DÉPÔT</b>\n' +
-      '━━━━━━━━━━━━━━━\n' +
-      '👤 <b>Client :</b> ' + data.clientNom + '\n' +
-      '📱 <b>WhatsApp :</b> ' + data.clientWa + '\n' +
-      '🔢 <b>ID 1xBet :</b> ' + data.clientId1xbet + '\n' +
-      '💰 <b>Montant :</b> ' + data.montant.toLocaleString('fr-FR') + ' GNF\n' +
-      '📲 <b>Méthode :</b> ' + data.methode + '\n' +
-      '🔑 <b>Code SMS :</b> <code>' + data.codeSMS + '</code>\n' +
-      '📋 <b>Réf :</b> <code>' + data.ref + '</code>\n' +
-      '━━━━━━━━━━━━━━━\n' +
-      '⚡ <i>Vérifiez le code et créditez via MobCash</i>';
-  } else {
-    msg = '<b>💰 NOUVEAU RETRAIT</b>\n' +
-      '━━━━━━━━━━━━━━━\n' +
-      '👤 <b>Client :</b> ' + data.clientNom + '\n' +
-      '📱 <b>WhatsApp :</b> ' + data.clientWa + '\n' +
-      '🔢 <b>ID 1xBet :</b> ' + data.clientId1xbet + '\n' +
-      '💰 <b>Montant :</b> ' + data.montant.toLocaleString('fr-FR') + ' GNF\n' +
-      '🔑 <b>Code retrait :</b> <code>' + data.codeRetrait + '</code>\n' +
-      '📲 <b>Réception :</b> ' + data.numeroReception + '\n' +
-      '💳 <b>Méthode :</b> ' + data.methode + '\n' +
-      '📋 <b>Réf :</b> <code>' + data.ref + '</code>\n' +
-      '━━━━━━━━━━━━━━━\n' +
-      '⚡ <i>Traitez le retrait via MobCash</i>';
-  }
-  envoyerTelegram(msg);
+  var endpoint = type === 'depot' ? '/depot' : '/retrait';
+  fetch(RENDER_SERVER + endpoint, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  }).then(function(res){ return res.json(); })
+  .then(function(result){
+    if(!result.success){ console.warn('Erreur serveur:', result); }
+    else { console.log('Transaction envoyée au serveur:', result.ref); }
+  })
+  .catch(function(e){ console.warn('Serveur indisponible:', e); });
 }
 
 function sendReview(){
