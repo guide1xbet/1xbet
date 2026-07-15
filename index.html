@@ -737,7 +737,7 @@ function init(){
 }
 
 function applyAgent(a){
-  var waMsg=encodeURIComponent('Bonjour '+a.nom+", je veux m'inscrire sur 1xBet avec le code promo "+a.promo);
+  var waMsg=encodeURIComponent('Bonjour et bienvenue ! 👋\nMerci de votre intérêt. Je suis '+a.nom+'. Je peux vous accompagner pour créer votre compte 1xBet avec le code promo '+a.promo+' et vous aider à effectuer votre premier dépôt ou votre premier retrait.');
   var waUrl='https://wa.me/'+a.phone.replace(/\D/g,'')+'?text='+waMsg;
   ['hero-wa','insc-wa','bonus-wa','cta-wa','float-wa'].forEach(function(id){var el=document.getElementById(id);if(el)el.href=waUrl;});
   var tel=document.getElementById('hero-tel');if(tel)tel.href='tel:'+a.phone;
