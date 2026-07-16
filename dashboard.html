@@ -1,0 +1,811 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manager Dashboard — 1xBet</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d1117;
+  --bg2:#161b22;
+  --bg3:#21262d;
+  --border:#30363d;
+  --text:#e6edf3;
+  --text2:#8b949e;
+  --blue:#58a6ff;
+  --green:#3fb950;
+  --red:#f85149;
+  --yellow:#d29922;
+  --purple:#bc8cff;
+  --orange:#f0883e;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+
+/* SIDEBAR */
+.sidebar{width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;}
+.sidebar-logo{padding:1.25rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.6rem;}
+.sidebar-logo .logo-text{font-size:1.1rem;font-weight:900;color:var(--text);}
+.sidebar-logo .logo-x{color:#f0883e;}
+.sidebar-logo .logo-badge{font-size:.6rem;background:var(--blue);color:#000;padding:.1rem .4rem;border-radius:4px;font-weight:800;}
+.sidebar-section{padding:.75rem 0;border-bottom:1px solid var(--border);}
+.sidebar-label{font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;padding:.3rem 1rem .5rem;}
+.nav-item{display:flex;align-items:center;gap:.6rem;padding:.5rem 1rem;color:var(--text2);cursor:pointer;font-size:.82rem;font-weight:500;transition:all .15s;border-left:2px solid transparent;}
+.nav-item:hover{background:var(--bg3);color:var(--text);}
+.nav-item.active{background:rgba(88,166,255,.08);color:var(--blue);border-left-color:var(--blue);}
+.nav-item .nav-icon{font-size:.9rem;width:16px;text-align:center;}
+.sidebar-footer{margin-top:auto;padding:1rem;border-top:1px solid var(--border);}
+.agent-pill{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.5rem .75rem;font-size:.75rem;color:var(--text2);}
+.agent-pill strong{color:var(--text);display:block;font-size:.8rem;}
+
+/* MAIN */
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+
+/* TOPBAR */
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99;}
+.topbar-title{font-size:.95rem;font-weight:700;color:var(--text);}
+.topbar-right{display:flex;align-items:center;gap:.75rem;}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(63,185,80,.4);}50%{box-shadow:0 0 0 6px rgba(63,185,80,0);}}
+.live-label{font-size:.75rem;color:var(--green);font-weight:600;}
+.refresh-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:.35rem .75rem;border-radius:6px;font-size:.75rem;cursor:pointer;transition:all .15s;}
+.refresh-btn:hover{border-color:var(--blue);color:var(--blue);}
+.last-update{font-size:.72rem;color:var(--text2);}
+
+/* CONTENT */
+.content{padding:1.5rem;flex:1;}
+.page{display:none;}
+.page.active{display:block;}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1.5rem;}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.1rem;}
+.stat-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem;}
+.stat-card-label{font-size:.72rem;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+.stat-card-icon{font-size:1rem;}
+.stat-card-val{font-size:1.6rem;font-weight:900;color:var(--text);margin-bottom:.2rem;}
+.stat-card-sub{font-size:.72rem;color:var(--text2);}
+.stat-card.green .stat-card-val{color:var(--green);}
+.stat-card.blue .stat-card-val{color:var(--blue);}
+.stat-card.red .stat-card-val{color:var(--red);}
+.stat-card.yellow .stat-card-val{color:var(--yellow);}
+
+/* SECTION */
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:1rem;overflow:hidden;}
+.section-header{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.1rem;border-bottom:1px solid var(--border);}
+.section-title{font-size:.85rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:.4rem;}
+
+/* FILTERS */
+.filters{display:flex;gap:.5rem;padding:.75rem 1.1rem;border-bottom:1px solid var(--border);flex-wrap:wrap;background:var(--bg);}
+.filter-select{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:.35rem .6rem;border-radius:6px;font-size:.75rem;cursor:pointer;}
+.filter-select:focus{outline:none;border-color:var(--blue);}
+.filter-input{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:.35rem .75rem;border-radius:6px;font-size:.75rem;width:160px;}
+.filter-input::placeholder{color:var(--text2);}
+.filter-input:focus{outline:none;border-color:var(--blue);}
+.btn-filter{background:var(--blue);color:#000;border:none;padding:.35rem .85rem;border-radius:6px;font-size:.75rem;font-weight:700;cursor:pointer;}
+.btn-clear{background:var(--bg3);color:var(--text2);border:1px solid var(--border);padding:.35rem .75rem;border-radius:6px;font-size:.75rem;cursor:pointer;}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:.78rem;}
+th{padding:.65rem 1rem;text-align:left;color:var(--text2);font-weight:600;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--bg);}
+td{padding:.65rem 1rem;border-bottom:1px solid rgba(48,54,61,.5);color:var(--text);vertical-align:middle;}
+tr:hover td{background:rgba(255,255,255,.02);}
+tr:last-child td{border-bottom:none;}
+.badge{display:inline-flex;align-items:center;gap:.3rem;padding:.15rem .6rem;border-radius:20px;font-size:.68rem;font-weight:700;}
+.badge-green{background:rgba(63,185,80,.12);color:var(--green);border:1px solid rgba(63,185,80,.3);}
+.badge-yellow{background:rgba(210,153,34,.12);color:var(--yellow);border:1px solid rgba(210,153,34,.3);}
+.badge-red{background:rgba(248,81,73,.12);color:var(--red);border:1px solid rgba(248,81,73,.3);}
+.badge-blue{background:rgba(88,166,255,.12);color:var(--blue);border:1px solid rgba(88,166,255,.3);}
+.badge-purple{background:rgba(188,140,255,.12);color:var(--purple);border:1px solid rgba(188,140,255,.3);}
+.amount{font-family:monospace;font-weight:700;}
+.amount-pos{color:var(--green);}
+.amount-neg{color:var(--orange);}
+
+/* AGENT CARDS */
+.agents-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;padding:1.1rem;}
+.agent-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:1.1rem;}
+.agent-card-top{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;}
+.agent-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#0d47a1);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:900;color:#fff;flex-shrink:0;}
+.agent-info-name{font-size:.9rem;font-weight:700;}
+.agent-info-pays{font-size:.72rem;color:var(--text2);}
+.agent-stats{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+.agent-stat{background:var(--bg2);border-radius:6px;padding:.5rem .75rem;}
+.agent-stat-label{font-size:.65rem;color:var(--text2);margin-bottom:.15rem;}
+.agent-stat-val{font-size:.9rem;font-weight:700;}
+
+/* LOADING */
+.loading{text-align:center;padding:3rem;color:var(--text2);}
+.loading-spinner{display:inline-block;width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:.75rem;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* EMPTY */
+.empty{text-align:center;padding:3rem;color:var(--text2);}
+.empty-icon{font-size:2.5rem;margin-bottom:.75rem;}
+
+/* BLOCKED */
+#blocked{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:1rem;}
+.blocked-icon{font-size:4rem;}
+.blocked-title{font-size:1.3rem;font-weight:700;}
+.blocked-text{color:var(--text2);font-size:.85rem;}
+
+/* PAGINATION */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.1rem;border-top:1px solid var(--border);}
+.pagination-info{font-size:.75rem;color:var(--text2);}
+.pagination-btns{display:flex;gap:.4rem;}
+.page-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:.3rem .7rem;border-radius:6px;font-size:.75rem;cursor:pointer;}
+.page-btn:hover{border-color:var(--blue);color:var(--blue);}
+.page-btn.active{background:var(--blue);color:#000;border-color:var(--blue);}
+
+/* CHART */
+.chart-wrap{padding:1.1rem;height:200px;display:flex;align-items:flex-end;gap:4px;}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:.3rem;}
+.chart-bar{width:100%;background:linear-gradient(180deg,var(--blue),rgba(88,166,255,.3));border-radius:3px 3px 0 0;min-height:2px;transition:height .3s;}
+.chart-label{font-size:.6rem;color:var(--text2);}
+.chart-val{font-size:.6rem;color:var(--blue);font-weight:700;}
+
+@media(max-width:768px){
+  .sidebar{width:60px;}
+  .sidebar-logo .logo-text,.sidebar-logo .logo-badge,.sidebar-label,.nav-item span,.sidebar-footer{display:none;}
+  .nav-item{justify-content:center;padding:.6rem;}
+  .main{margin-left:60px;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- BLOCKED SCREEN -->
+<div id="blocked" style="display:none;">
+  <div class="blocked-icon">🔒</div>
+  <div class="blocked-title">Accès refusé</div>
+  <div class="blocked-text">Clé d'accès invalide</div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">1<span class="logo-x">X</span>BET</div>
+    <div class="logo-badge">MANAGER</div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Principal</div>
+    <div class="nav-item active" onclick="showPage('overview',this)">
+      <span class="nav-icon">📊</span><span>Vue d'ensemble</span>
+    </div>
+    <div class="nav-item" onclick="showPage('transactions',this)">
+      <span class="nav-icon">💳</span><span>Transactions</span>
+    </div>
+    <div class="nav-item" onclick="showPage('agents',this)">
+      <span class="nav-icon">👥</span><span>Agents</span>
+    </div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Rapports</div>
+    <div class="nav-item" onclick="showPage('depots',this)">
+      <span class="nav-icon">💰</span><span>Dépôts</span>
+    </div>
+    <div class="nav-item" onclick="showPage('retraits',this)">
+      <span class="nav-icon">💸</span><span>Retraits</span>
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="agent-pill">
+      <strong id="manager-name">Manager</strong>
+      <span id="manager-email">filarolf2015@gmail.com</span>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="page-title">Vue d'ensemble</div>
+    <div class="topbar-right">
+      <div class="live-dot"></div>
+      <div class="live-label">En direct</div>
+      <div class="last-update" id="last-update">—</div>
+      <button class="refresh-btn" onclick="loadAll()">🔄 Actualiser</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- VUE D'ENSEMBLE -->
+    <div class="page active" id="page-overview">
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-card-top"><div class="stat-card-label">Total dépôts</div><div class="stat-card-icon">💳</div></div>
+          <div class="stat-card-val" id="stat-total-depot">—</div>
+          <div class="stat-card-sub" id="stat-total-depot-gnf">Chargement...</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-card-top"><div class="stat-card-label">Total retraits</div><div class="stat-card-icon">💸</div></div>
+          <div class="stat-card-val" id="stat-total-retrait">—</div>
+          <div class="stat-card-sub" id="stat-total-retrait-gnf">Chargement...</div>
+        </div>
+        <div class="stat-card yellow">
+          <div class="stat-card-top"><div class="stat-card-label">En attente</div><div class="stat-card-icon">⏳</div></div>
+          <div class="stat-card-val" id="stat-en-attente">—</div>
+          <div class="stat-card-sub">À traiter</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-card-top"><div class="stat-card-label">Rejetées</div><div class="stat-card-icon">❌</div></div>
+          <div class="stat-card-val" id="stat-rejete">—</div>
+          <div class="stat-card-sub">Ce mois</div>
+        </div>
+      </div>
+
+      <!-- GRAPHIQUE -->
+      <div class="section" style="margin-bottom:1rem;">
+        <div class="section-header">
+          <div class="section-title">📈 Transactions des 7 derniers jours</div>
+        </div>
+        <div class="chart-wrap" id="chart-wrap">
+          <div class="loading"><div class="loading-spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- DERNIÈRES TRANSACTIONS -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">🕐 Dernières transactions</div>
+          <div style="font-size:.72rem;color:var(--text2);" id="recent-count">—</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Agent</th>
+                <th>Client</th>
+                <th>ID 1xBet</th>
+                <th>Montant</th>
+                <th>Type</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody id="recent-tbody">
+              <tr><td colspan="7"><div class="loading"><div class="loading-spinner"></div><br>Chargement...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOUTES LES TRANSACTIONS -->
+    <div class="page" id="page-transactions">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">💳 Toutes les transactions</div>
+          <div style="font-size:.72rem;color:var(--text2);" id="all-count">—</div>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="f-agent" onchange="filterTransactions()">
+            <option value="">Tous les agents</option>
+            <option value="joseph">Joseph</option>
+            <option value="elena">Elena</option>
+          </select>
+          <select class="filter-select" id="f-type" onchange="filterTransactions()">
+            <option value="">Tous les types</option>
+            <option value="depot">Dépôt</option>
+            <option value="retrait">Retrait</option>
+          </select>
+          <select class="filter-select" id="f-statut" onchange="filterTransactions()">
+            <option value="">Tous les statuts</option>
+            <option value="en_attente">En attente</option>
+            <option value="credite">Crédité</option>
+            <option value="traite">Traité</option>
+            <option value="rejete">Rejeté</option>
+            <option value="confirme_test">Test</option>
+          </select>
+          <input class="filter-input" type="text" id="f-search" placeholder="🔍 Nom, ID, Réf..." oninput="filterTransactions()">
+          <button class="btn-clear" onclick="clearFilters()">✕ Effacer</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date & Heure</th>
+                <th>Agent</th>
+                <th>Client</th>
+                <th>WhatsApp</th>
+                <th>ID 1xBet</th>
+                <th>Montant</th>
+                <th>Méthode</th>
+                <th>Type</th>
+                <th>Statut</th>
+                <th>Réf</th>
+              </tr>
+            </thead>
+            <tbody id="all-tbody">
+              <tr><td colspan="10"><div class="loading"><div class="loading-spinner"></div><br>Chargement...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <div class="pagination-info" id="pagination-info">—</div>
+          <div class="pagination-btns" id="pagination-btns"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AGENTS -->
+    <div class="page" id="page-agents">
+      <div class="agents-grid" id="agents-grid">
+        <div class="loading"><div class="loading-spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- DÉPÔTS -->
+    <div class="page" id="page-depots">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">💰 Rapport des dépôts</div>
+          <div style="font-size:.72rem;color:var(--text2);" id="depot-count">—</div>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="fd-agent" onchange="filterDepots()">
+            <option value="">Tous les agents</option>
+            <option value="joseph">Joseph</option>
+            <option value="elena">Elena</option>
+          </select>
+          <select class="filter-select" id="fd-statut" onchange="filterDepots()">
+            <option value="">Tous les statuts</option>
+            <option value="en_attente">En attente</option>
+            <option value="credite">Crédité</option>
+            <option value="rejete">Rejeté</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Agent</th>
+                <th>Client</th>
+                <th>ID 1xBet</th>
+                <th>Montant</th>
+                <th>Méthode</th>
+                <th>ID Transaction</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody id="depot-tbody">
+              <tr><td colspan="8"><div class="loading"><div class="loading-spinner"></div><br>Chargement...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- RETRAITS -->
+    <div class="page" id="page-retraits">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">💸 Rapport des retraits</div>
+          <div style="font-size:.72rem;color:var(--text2);" id="retrait-count">—</div>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="fr-agent" onchange="filterRetraits()">
+            <option value="">Tous les agents</option>
+            <option value="joseph">Joseph</option>
+            <option value="elena">Elena</option>
+          </select>
+          <select class="filter-select" id="fr-statut" onchange="filterRetraits()">
+            <option value="">Tous les statuts</option>
+            <option value="en_attente">En attente</option>
+            <option value="traite">Traité</option>
+            <option value="rejete">Rejeté</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Agent</th>
+                <th>Client</th>
+                <th>ID 1xBet</th>
+                <th>Montant</th>
+                <th>Méthode</th>
+                <th>Réception</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody id="retrait-tbody">
+              <tr><td colspan="8"><div class="loading"><div class="loading-spinner"></div><br>Chargement...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+// ============================================
+// SÉCURITÉ — Clé d'accès
+// ============================================
+const SECRET_KEY = 'manager1xbet2025';
+const params = new URLSearchParams(window.location.search);
+if(params.get('key') !== SECRET_KEY){
+  document.getElementById('blocked').style.display = 'flex';
+}
+
+// ============================================
+// FIREBASE
+// ============================================
+const firebaseConfig = {
+  apiKey: "AIzaSyACaf4BeqJtLqCCJMx4wLnnkLib1VZXP7s",
+  authDomain: "mobcash-joseph.firebaseapp.com",
+  projectId: "mobcash-joseph",
+  storageBucket: "mobcash-joseph.firebasestorage.app",
+  messagingSenderId: "787930462801",
+  appId: "1:787930462801:web:8003c2362e0346e3cdd670"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ============================================
+// DATA
+// ============================================
+var allTransactions = [];
+var filteredTransactions = [];
+var currentPage = 1;
+var perPage = 20;
+
+// ============================================
+// NAVIGATION
+// ============================================
+var pageTitles = {
+  overview: 'Vue d\'ensemble',
+  transactions: 'Toutes les transactions',
+  agents: 'Agents',
+  depots: 'Rapport des dépôts',
+  retraits: 'Rapport des retraits'
+};
+
+function showPage(id, el){
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  document.getElementById('page-title').textContent = pageTitles[id] || id;
+}
+
+// ============================================
+// FORMATAGE
+// ============================================
+function formatDate(dateStr){
+  if(!dateStr) return '—';
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('fr-FR') + ' ' + d.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+  } catch(e){ return dateStr; }
+}
+
+function formatMontant(m){
+  return Number(m).toLocaleString('fr-FR') + ' GNF';
+}
+
+function getBadge(statut){
+  const badges = {
+    'credite': '<span class="badge badge-green">✅ Crédité</span>',
+    'traite': '<span class="badge badge-green">✅ Traité</span>',
+    'en_attente': '<span class="badge badge-yellow">⏳ En attente</span>',
+    'rejete': '<span class="badge badge-red">❌ Rejeté</span>',
+    'confirme_test': '<span class="badge badge-blue">🧪 Test</span>',
+  };
+  return badges[statut] || '<span class="badge badge-purple">'+statut+'</span>';
+}
+
+function getTypeBadge(type){
+  if(type === 'depot') return '<span class="badge badge-blue">💳 Dépôt</span>';
+  if(type === 'retrait') return '<span class="badge badge-purple">💸 Retrait</span>';
+  return '<span class="badge">'+type+'</span>';
+}
+
+function getAgentBadge(agent){
+  const colors = { joseph: 'badge-green', elena: 'badge-blue' };
+  return '<span class="badge '+(colors[agent]||'badge-purple')+'">'+agent+'</span>';
+}
+
+// ============================================
+// CHARGER LES DONNÉES
+// ============================================
+async function loadAll(){
+  document.getElementById('last-update').textContent = 'Chargement...';
+  try {
+    const snap = await db.collection('transactions').orderBy('date','desc').get();
+    allTransactions = [];
+    snap.forEach(doc => {
+      allTransactions.push({ id: doc.id, ...doc.data() });
+    });
+    document.getElementById('last-update').textContent = 'Mis à jour ' + new Date().toLocaleTimeString('fr-FR');
+    renderAll();
+  } catch(e){
+    console.error('Erreur Firebase:', e);
+    document.getElementById('last-update').textContent = 'Erreur de connexion';
+  }
+}
+
+function renderAll(){
+  renderStats();
+  renderRecent();
+  renderChart();
+  renderAgents();
+  filterTransactions();
+  filterDepots();
+  filterRetraits();
+}
+
+// ============================================
+// STATISTIQUES
+// ============================================
+function renderStats(){
+  const depots = allTransactions.filter(t => t.type === 'depot');
+  const retraits = allTransactions.filter(t => t.type === 'retrait');
+  const enAttente = allTransactions.filter(t => t.statut === 'en_attente');
+  const rejete = allTransactions.filter(t => t.statut === 'rejete');
+
+  const totalDepotGNF = depots.filter(t => t.statut === 'credite' || t.statut === 'confirme_test')
+    .reduce((s,t) => s + Number(t.montant||0), 0);
+  const totalRetraitGNF = retraits.filter(t => t.statut === 'traite' || t.statut === 'confirme_test')
+    .reduce((s,t) => s + Number(t.montant||0), 0);
+
+  document.getElementById('stat-total-depot').textContent = depots.length;
+  document.getElementById('stat-total-depot-gnf').textContent = formatMontant(totalDepotGNF);
+  document.getElementById('stat-total-retrait').textContent = retraits.length;
+  document.getElementById('stat-total-retrait-gnf').textContent = formatMontant(totalRetraitGNF);
+  document.getElementById('stat-en-attente').textContent = enAttente.length;
+  document.getElementById('stat-rejete').textContent = rejete.length;
+}
+
+// ============================================
+// GRAPHIQUE
+// ============================================
+function renderChart(){
+  const chartWrap = document.getElementById('chart-wrap');
+  const days = [];
+  for(let i=6; i>=0; i--){
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push(d.toISOString().substr(0,10));
+  }
+
+  const counts = days.map(day => {
+    return allTransactions.filter(t => t.date && t.date.substr(0,10) === day).length;
+  });
+
+  const maxCount = Math.max(...counts, 1);
+  const dayNames = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+
+  chartWrap.innerHTML = counts.map((count, i) => {
+    const height = Math.max(4, (count / maxCount) * 160);
+    const d = new Date(days[i]+'T12:00:00');
+    const label = dayNames[d.getDay()];
+    return '<div class="chart-bar-wrap">' +
+      '<div class="chart-val">'+(count||'')+'</div>' +
+      '<div class="chart-bar" style="height:'+height+'px"></div>' +
+      '<div class="chart-label">'+label+'</div>' +
+      '</div>';
+  }).join('');
+}
+
+// ============================================
+// TRANSACTIONS RÉCENTES
+// ============================================
+function renderRecent(){
+  const recent = allTransactions.slice(0, 10);
+  document.getElementById('recent-count').textContent = allTransactions.length + ' total';
+  const tbody = document.getElementById('recent-tbody');
+  if(!recent.length){
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="empty-icon">📭</div>Aucune transaction</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = recent.map(t => '<tr>' +
+    '<td>'+formatDate(t.date)+'</td>' +
+    '<td>'+getAgentBadge(t.agent||t.agentNom||'—')+'</td>' +
+    '<td>'+escHtml(t.clientNom||'—')+'</td>' +
+    '<td><code style="font-size:.72rem;color:var(--blue)">'+escHtml(t.clientId1xbet||'—')+'</code></td>' +
+    '<td class="amount '+(t.type==='depot'?'amount-pos':'amount-neg')+'">'+formatMontant(t.montant||0)+'</td>' +
+    '<td>'+getTypeBadge(t.type)+'</td>' +
+    '<td>'+getBadge(t.statut)+'</td>' +
+    '</tr>').join('');
+}
+
+// ============================================
+// TOUTES LES TRANSACTIONS
+// ============================================
+function filterTransactions(){
+  const agent = document.getElementById('f-agent').value;
+  const type = document.getElementById('f-type').value;
+  const statut = document.getElementById('f-statut').value;
+  const search = document.getElementById('f-search').value.toLowerCase();
+
+  filteredTransactions = allTransactions.filter(t => {
+    if(agent && (t.agent||'') !== agent) return false;
+    if(type && t.type !== type) return false;
+    if(statut && t.statut !== statut) return false;
+    if(search){
+      const hay = (t.clientNom+t.clientId1xbet+t.ref+t.clientWa).toLowerCase();
+      if(!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  currentPage = 1;
+  renderAllTable();
+}
+
+function clearFilters(){
+  document.getElementById('f-agent').value = '';
+  document.getElementById('f-type').value = '';
+  document.getElementById('f-statut').value = '';
+  document.getElementById('f-search').value = '';
+  filterTransactions();
+}
+
+function renderAllTable(){
+  const total = filteredTransactions.length;
+  const start = (currentPage-1)*perPage;
+  const end = Math.min(start+perPage, total);
+  const page = filteredTransactions.slice(start, end);
+
+  document.getElementById('all-count').textContent = total + ' transaction(s)';
+  document.getElementById('pagination-info').textContent = 'Affichage '+( total?start+1:0)+' - '+end+' sur '+total;
+
+  const tbody = document.getElementById('all-tbody');
+  if(!page.length){
+    tbody.innerHTML = '<tr><td colspan="10"><div class="empty"><div class="empty-icon">🔍</div>Aucune transaction trouvée</div></td></tr>';
+  } else {
+    tbody.innerHTML = page.map(t => '<tr>' +
+      '<td style="white-space:nowrap">'+formatDate(t.date)+'</td>' +
+      '<td>'+getAgentBadge(t.agent||'—')+'</td>' +
+      '<td>'+escHtml(t.clientNom||'—')+'</td>' +
+      '<td>'+escHtml(t.clientWa||'—')+'</td>' +
+      '<td><code style="font-size:.72rem;color:var(--blue)">'+escHtml(t.clientId1xbet||'—')+'</code></td>' +
+      '<td class="amount '+(t.type==='depot'?'amount-pos':'amount-neg')+'">'+formatMontant(t.montant||0)+'</td>' +
+      '<td>'+escHtml(t.methode||'—')+'</td>' +
+      '<td>'+getTypeBadge(t.type)+'</td>' +
+      '<td>'+getBadge(t.statut)+'</td>' +
+      '<td><code style="font-size:.65rem;color:var(--text2)">'+escHtml((t.ref||'').substr(0,20))+'</code></td>' +
+      '</tr>').join('');
+  }
+
+  // Pagination
+  const totalPages = Math.ceil(total/perPage);
+  const btns = document.getElementById('pagination-btns');
+  if(totalPages <= 1){ btns.innerHTML=''; return; }
+  let html = '';
+  for(let i=1; i<=Math.min(totalPages,7); i++){
+    html += '<button class="page-btn'+(i===currentPage?' active':'')+'" onclick="goPage('+i+')">'+i+'</button>';
+  }
+  btns.innerHTML = html;
+}
+
+function goPage(n){ currentPage = n; renderAllTable(); }
+
+// ============================================
+// DÉPÔTS
+// ============================================
+function filterDepots(){
+  const agent = document.getElementById('fd-agent').value;
+  const statut = document.getElementById('fd-statut').value;
+  const depots = allTransactions.filter(t => {
+    if(t.type !== 'depot') return false;
+    if(agent && (t.agent||'') !== agent) return false;
+    if(statut && t.statut !== statut) return false;
+    return true;
+  });
+  document.getElementById('depot-count').textContent = depots.length + ' dépôt(s)';
+  const totalGNF = depots.reduce((s,t) => s + Number(t.montant||0), 0);
+  const tbody = document.getElementById('depot-tbody');
+  if(!depots.length){
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty"><div class="empty-icon">💳</div>Aucun dépôt</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = depots.map(t => '<tr>' +
+    '<td style="white-space:nowrap">'+formatDate(t.date)+'</td>' +
+    '<td>'+getAgentBadge(t.agent||'—')+'</td>' +
+    '<td>'+escHtml(t.clientNom||'—')+'</td>' +
+    '<td><code style="font-size:.72rem;color:var(--blue)">'+escHtml(t.clientId1xbet||'—')+'</code></td>' +
+    '<td class="amount amount-pos">'+formatMontant(t.montant||0)+'</td>' +
+    '<td>'+escHtml(t.methode||'—')+'</td>' +
+    '<td><code style="font-size:.7rem;color:var(--yellow)">'+escHtml(t.idTransaction||t.codeSMS||'—')+'</code></td>' +
+    '<td>'+getBadge(t.statut)+'</td>' +
+    '</tr>').join('') +
+    '<tr style="background:var(--bg3)"><td colspan="4"><strong>TOTAL</strong></td>' +
+    '<td class="amount amount-pos"><strong>'+formatMontant(totalGNF)+'</strong></td>' +
+    '<td colspan="3"></td></tr>';
+}
+
+// ============================================
+// RETRAITS
+// ============================================
+function filterRetraits(){
+  const agent = document.getElementById('fr-agent').value;
+  const statut = document.getElementById('fr-statut').value;
+  const retraits = allTransactions.filter(t => {
+    if(t.type !== 'retrait') return false;
+    if(agent && (t.agent||'') !== agent) return false;
+    if(statut && t.statut !== statut) return false;
+    return true;
+  });
+  document.getElementById('retrait-count').textContent = retraits.length + ' retrait(s)';
+  const totalGNF = retraits.reduce((s,t) => s + Number(t.montant||0), 0);
+  const tbody = document.getElementById('retrait-tbody');
+  if(!retraits.length){
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty"><div class="empty-icon">💸</div>Aucun retrait</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = retraits.map(t => '<tr>' +
+    '<td style="white-space:nowrap">'+formatDate(t.date)+'</td>' +
+    '<td>'+getAgentBadge(t.agent||'—')+'</td>' +
+    '<td>'+escHtml(t.clientNom||'—')+'</td>' +
+    '<td><code style="font-size:.72rem;color:var(--blue)">'+escHtml(t.clientId1xbet||'—')+'</code></td>' +
+    '<td class="amount amount-neg">'+formatMontant(t.montant||0)+'</td>' +
+    '<td>'+escHtml(t.methode||'—')+'</td>' +
+    '<td>'+escHtml(t.numeroReception||'—')+'</td>' +
+    '<td>'+getBadge(t.statut)+'</td>' +
+    '</tr>').join('') +
+    '<tr style="background:var(--bg3)"><td colspan="4"><strong>TOTAL</strong></td>' +
+    '<td class="amount amount-neg"><strong>'+formatMontant(totalGNF)+'</strong></td>' +
+    '<td colspan="3"></td></tr>';
+}
+
+// ============================================
+// AGENTS
+// ============================================
+function renderAgents(){
+  const agents = ['joseph', 'elena'];
+  const grid = document.getElementById('agents-grid');
+  grid.innerHTML = agents.map(agent => {
+    const txs = allTransactions.filter(t => t.agent === agent);
+    const depots = txs.filter(t => t.type === 'depot' && (t.statut==='credite'||t.statut==='confirme_test'));
+    const retraits = txs.filter(t => t.type === 'retrait' && (t.statut==='traite'||t.statut==='confirme_test'));
+    const enAttente = txs.filter(t => t.statut === 'en_attente');
+    const totalDepots = depots.reduce((s,t) => s+Number(t.montant||0), 0);
+    const totalRetraits = retraits.reduce((s,t) => s+Number(t.montant||0), 0);
+    const initiale = agent.charAt(0).toUpperCase();
+    const noms = { joseph: 'Joseph Henry', elena: 'Elena' };
+    const pays = { joseph: '🇬🇳 Guinée Conakry', elena: '🇷🇺 Russie' };
+    return '<div class="agent-card">' +
+      '<div class="agent-card-top">' +
+      '<div class="agent-avatar">'+initiale+'</div>' +
+      '<div><div class="agent-info-name">'+noms[agent]+'</div>' +
+      '<div class="agent-info-pays">'+pays[agent]+'</div></div>' +
+      '<div style="margin-left:auto">'+getBadge(enAttente.length > 0 ? 'en_attente' : 'credite')+'</div>' +
+      '</div>' +
+      '<div class="agent-stats">' +
+      '<div class="agent-stat"><div class="agent-stat-label">Total transactions</div><div class="agent-stat-val" style="color:var(--blue)">'+txs.length+'</div></div>' +
+      '<div class="agent-stat"><div class="agent-stat-label">En attente</div><div class="agent-stat-val" style="color:var(--yellow)">'+enAttente.length+'</div></div>' +
+      '<div class="agent-stat"><div class="agent-stat-label">Total dépôts</div><div class="agent-stat-val" style="color:var(--green);font-size:.75rem">'+formatMontant(totalDepots)+'</div></div>' +
+      '<div class="agent-stat"><div class="agent-stat-label">Total retraits</div><div class="agent-stat-val" style="color:var(--orange);font-size:.75rem">'+formatMontant(totalRetraits)+'</div></div>' +
+      '</div></div>';
+  }).join('');
+}
+
+// ============================================
+// UTILITAIRES
+// ============================================
+function escHtml(str){
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ============================================
+// AUTO-REFRESH toutes les 30 secondes
+// ============================================
+loadAll();
+setInterval(loadAll, 30000);
+</script>
+</body>
+</html>
