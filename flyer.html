@@ -1,0 +1,654 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Générateur de Flyers — 1xBet</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0a0e1a;
+  --bg2:#0f1626;
+  --bg3:#141d30;
+  --border:#1e2d4a;
+  --red:#d32f2f;
+  --gold:#ffd700;
+  --blue:#1565c0;
+  --text:#fff;
+  --grey:#8899bb;
+}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* TOPBAR */
+.topbar{background:rgba(10,14,26,.95);border-bottom:2px solid var(--red);padding:0 1.25rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
+.topbar-logo{font-size:1.1rem;font-weight:900;color:#fff;}
+.topbar-logo span{color:var(--gold);}
+.topbar-badge{background:var(--red);color:#fff;font-size:.6rem;padding:.1rem .4rem;border-radius:4px;font-weight:800;margin-left:.3rem;}
+.topbar-agent{font-size:.78rem;color:var(--grey);}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:340px 1fr;gap:1.5rem;padding:1.5rem;max-width:1100px;margin:0 auto;}
+@media(max-width:768px){.layout{grid-template-columns:1fr;}}
+
+/* PANEL */
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.25rem;}
+.panel-title{font-size:.9rem;font-weight:800;color:var(--gold);margin-bottom:1.1rem;padding-bottom:.6rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.4rem;}
+
+/* TABS */
+.type-tabs{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-bottom:1rem;}
+.type-tab{background:var(--bg3);border:1.5px solid var(--border);border-radius:8px;padding:.6rem;text-align:center;cursor:pointer;font-size:.75rem;font-weight:700;color:var(--grey);transition:all .15s;}
+.type-tab:hover{border-color:var(--red);color:#fff;}
+.type-tab.active{background:rgba(211,47,47,.15);border-color:var(--red);color:var(--red);}
+.type-tab .tab-icon{font-size:1.2rem;display:block;margin-bottom:.2rem;}
+
+/* FORM */
+.fg{margin-bottom:.85rem;}
+.fg label{display:block;font-size:.72rem;font-weight:700;color:var(--grey);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.04em;}
+.fg input,.fg select,.fg textarea{width:100%;padding:.55rem .85rem;border:1.5px solid var(--border);border-radius:8px;font-size:.82rem;font-family:inherit;color:#fff;background:var(--bg);transition:border-color .15s;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--red);}
+.fg select option{background:#0f1626;}
+.fg textarea{resize:vertical;min-height:70px;}
+.fg input::placeholder,.fg textarea::placeholder{color:#2a3a52;}
+
+/* COLOR PICKERS */
+.color-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.3rem;}
+.color-opt{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;}
+.color-opt.active{border-color:#fff;transform:scale(1.2);}
+
+/* BUTTONS */
+.btn-generate{background:linear-gradient(135deg,var(--red),#b71c1c);color:#fff;border:none;width:100%;padding:.75rem;border-radius:8px;font-size:.88rem;font-weight:800;cursor:pointer;margin-top:.5rem;transition:transform .1s;}
+.btn-generate:hover{transform:translateY(-1px);}
+.btn-download{background:linear-gradient(135deg,var(--gold),#ffe54c);color:#000;border:none;width:100%;padding:.65rem;border-radius:8px;font-size:.85rem;font-weight:800;cursor:pointer;margin-top:.6rem;display:none;}
+.btn-share-wa{background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;width:100%;padding:.65rem;border-radius:8px;font-size:.85rem;font-weight:800;cursor:pointer;margin-top:.4rem;display:none;}
+
+/* PREVIEW */
+.preview-wrap{display:flex;flex-direction:column;align-items:center;gap:1rem;}
+.canvas-wrap{position:relative;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.5);}
+canvas{display:block;max-width:100%;height:auto;}
+.preview-label{font-size:.72rem;color:var(--grey);text-align:center;}
+
+/* BLOCKED */
+#blocked{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;z-index:999;}
+.blocked-icon{font-size:4rem;}
+.blocked-title{font-size:1.2rem;font-weight:800;}
+.blocked-text{font-size:.82rem;color:var(--grey);}
+</style>
+</head>
+<body>
+
+<div id="blocked" style="display:none;">
+  <div class="blocked-icon">🔒</div>
+  <div class="blocked-title">Accès refusé</div>
+  <div class="blocked-text">Lien invalide ou expiré</div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div>
+    <span class="topbar-logo">1<span>X</span>BET<span class="topbar-badge">FLYERS</span></span>
+  </div>
+  <div class="topbar-agent" id="topbar-agent">Agent : —</div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- PANEL GAUCHE : FORMULAIRE -->
+  <div>
+    <div class="panel">
+      <div class="panel-title">🎨 Type de flyer</div>
+      <div class="type-tabs">
+        <div class="type-tab active" onclick="setType('bonus',this)">
+          <span class="tab-icon">🎁</span>Bonus
+        </div>
+        <div class="type-tab" onclick="setType('match',this)">
+          <span class="tab-icon">⚽</span>Match
+        </div>
+        <div class="type-tab" onclick="setType('promo',this)">
+          <span class="tab-icon">🔥</span>Promo
+        </div>
+        <div class="type-tab" onclick="setType('temoignage',this)">
+          <span class="tab-icon">⭐</span>Témoignage
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:1rem;">
+      <div class="panel-title">✏️ Contenu</div>
+
+      <!-- BONUS -->
+      <div id="form-bonus">
+        <div class="fg"><label>Titre principal</label><input type="text" id="b-titre" value="BONUS 200%" oninput="genFlyer()"></div>
+        <div class="fg"><label>Sous-titre</label><input type="text" id="b-sous" value="Sur votre 1er dépôt !" oninput="genFlyer()"></div>
+        <div class="fg"><label>Message</label><textarea id="b-msg" oninput="genFlyer()">Inscrivez-vous maintenant et doublez votre mise dès le premier dépôt !</textarea></div>
+      </div>
+
+      <!-- MATCH -->
+      <div id="form-match" style="display:none;">
+        <div class="fg"><label>Équipe 1</label><input type="text" id="m-eq1" value="PSG" oninput="genFlyer()"></div>
+        <div class="fg"><label>Équipe 2</label><input type="text" id="m-eq2" value="Real Madrid" oninput="genFlyer()"></div>
+        <div class="fg"><label>Compétition</label><input type="text" id="m-comp" value="Champions League" oninput="genFlyer()"></div>
+        <div class="fg"><label>Date & Heure</label><input type="text" id="m-date" value="Ce soir à 21:00" oninput="genFlyer()"></div>
+        <div class="fg"><label>Offre spéciale</label><input type="text" id="m-offre" value="Bonus 200% sur ce match !" oninput="genFlyer()"></div>
+      </div>
+
+      <!-- PROMO -->
+      <div id="form-promo" style="display:none;">
+        <div class="fg"><label>Titre promo</label><input type="text" id="p-titre" value="OFFRE LIMITÉE !" oninput="genFlyer()"></div>
+        <div class="fg"><label>Description</label><textarea id="p-desc" oninput="genFlyer()">Déposez maintenant et recevez 200% de bonus sur votre premier dépôt !</textarea></div>
+        <div class="fg"><label>Expire dans</label><input type="text" id="p-expire" value="48 heures seulement !" oninput="genFlyer()"></div>
+      </div>
+
+      <!-- TÉMOIGNAGE -->
+      <div id="form-temoignage" style="display:none;">
+        <div class="fg"><label>Prénom du client</label><input type="text" id="t-nom" value="Mamadou D." oninput="genFlyer()"></div>
+        <div class="fg"><label>Ville</label><input type="text" id="t-ville" value="Conakry" oninput="genFlyer()"></div>
+        <div class="fg"><label>Témoignage</label><textarea id="t-texte" oninput="genFlyer()">"J'ai retiré 500 000 GNF en moins de 5 minutes ! Service rapide et fiable."</textarea></div>
+        <div class="fg"><label>Note (1-5 étoiles)</label>
+          <select id="t-note" onchange="genFlyer()">
+            <option value="5">★★★★★ — 5 étoiles</option>
+            <option value="4">★★★★☆ — 4 étoiles</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:1rem;">
+      <div class="panel-title">🎨 Style</div>
+      <div class="fg">
+        <label>Couleur principale</label>
+        <div class="color-row">
+          <div class="color-opt active" style="background:#d32f2f;" onclick="setColor('#d32f2f','#ffd700',this)" title="Rouge/Or"></div>
+          <div class="color-opt" style="background:#1565c0;" onclick="setColor('#1565c0','#ffd700',this)" title="Bleu/Or"></div>
+          <div class="color-opt" style="background:#1a1a2e;" onclick="setColor('#1a1a2e','#e94560',this)" title="Sombre/Rose"></div>
+          <div class="color-opt" style="background:#0d47a1;" onclick="setColor('#0d47a1','#00e5ff',this)" title="Bleu foncé/Cyan"></div>
+          <div class="color-opt" style="background:#1b5e20;" onclick="setColor('#1b5e20','#00e676',this)" title="Vert/Lime"></div>
+          <div class="color-opt" style="background:#4a148c;" onclick="setColor('#4a148c','#e040fb',this)" title="Violet/Rose"></div>
+        </div>
+      </div>
+      <div class="fg" style="margin-top:.75rem;">
+        <label>Format</label>
+        <select id="format-select" onchange="genFlyer()">
+          <option value="carre">Carré (1080×1080) — Instagram</option>
+          <option value="story">Story (1080×1920) — WhatsApp Status</option>
+          <option value="paysage">Paysage (1200×630) — Facebook</option>
+        </select>
+      </div>
+      <button class="btn-generate" onclick="genFlyer()">⚡ Générer le flyer</button>
+      <button class="btn-download" id="btn-dl" onclick="downloadFlyer()">⬇️ Télécharger l'image</button>
+      <button class="btn-share-wa" id="btn-wa" onclick="shareWA()">💬 Partager sur WhatsApp</button>
+    </div>
+  </div>
+
+  <!-- PANEL DROIT : APERÇU -->
+  <div class="preview-wrap">
+    <div class="panel" style="width:100%;">
+      <div class="panel-title">👁️ Aperçu en temps réel</div>
+      <div style="text-align:center;padding:.5rem 0 1rem;">
+        <div class="canvas-wrap">
+          <canvas id="flyerCanvas"></canvas>
+        </div>
+      </div>
+      <div class="preview-label">Le flyer se met à jour automatiquement ✨</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================
+// CONFIG AGENTS
+// ============================================
+var AGENTS = {
+  joseph: { nom:'Joseph Henry', phone:'+224 620 611 648', promo:'JHL224', pays:'Guinée Conakry', flag:'🇬🇳', key:'joseph2025' },
+  elena:  { nom:'Elena', phone:'+7 910 875 4783', promo:'RUS76', pays:'Russie', flag:'🇷🇺', key:'elena2025' }
+};
+
+var currentAgent = null;
+var currentType = 'bonus';
+var primaryColor = '#d32f2f';
+var accentColor = '#ffd700';
+
+// ============================================
+// SÉCURITÉ
+// ============================================
+function init(){
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get('ref');
+  const key = params.get('key');
+  const agent = AGENTS[ref];
+  if(!agent || key !== agent.key){
+    document.getElementById('blocked').style.display = 'flex';
+    return;
+  }
+  currentAgent = agent;
+  document.getElementById('topbar-agent').textContent = agent.flag + ' Agent : ' + agent.nom;
+  genFlyer();
+}
+
+// ============================================
+// TYPE DE FLYER
+// ============================================
+function setType(type, el){
+  currentType = type;
+  document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['bonus','match','promo','temoignage'].forEach(t => {
+    document.getElementById('form-'+t).style.display = t===type ? 'block' : 'none';
+  });
+  genFlyer();
+}
+
+// ============================================
+// COULEUR
+// ============================================
+function setColor(primary, accent, el){
+  primaryColor = primary;
+  accentColor = accent;
+  document.querySelectorAll('.color-opt').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  genFlyer();
+}
+
+// ============================================
+// FORMAT
+// ============================================
+function getSize(){
+  const fmt = document.getElementById('format-select').value;
+  if(fmt === 'story') return {w:1080, h:1920};
+  if(fmt === 'paysage') return {w:1200, h:630};
+  return {w:1080, h:1080};
+}
+
+// ============================================
+// GÉNÉRATEUR PRINCIPAL
+// ============================================
+function genFlyer(){
+  if(!currentAgent) return;
+  const canvas = document.getElementById('flyerCanvas');
+  const size = getSize();
+  canvas.width = size.w;
+  canvas.height = size.h;
+  const ctx = canvas.getContext('2d');
+  const s = size.w / 1080; // scale factor
+
+  // Fond
+  const grad = ctx.createLinearGradient(0, 0, size.w, size.h);
+  grad.addColorStop(0, darken(primaryColor, 40));
+  grad.addColorStop(0.5, primaryColor);
+  grad.addColorStop(1, darken(primaryColor, 20));
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, size.w, size.h);
+
+  // Pattern géométrique
+  ctx.save();
+  ctx.globalAlpha = 0.06;
+  for(let i=0; i<20; i++){
+    ctx.beginPath();
+    ctx.arc(size.w*0.8, size.h*0.2, (i+1)*80*s, 0, Math.PI*2);
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2*s;
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // Ligne décorative haut
+  ctx.fillStyle = accentColor;
+  ctx.fillRect(0, 0, size.w, 8*s);
+  ctx.fillRect(0, size.h - 8*s, size.w, 8*s);
+
+  // Logo 1XBET
+  ctx.font = `900 ${72*s}px 'Segoe UI', Arial`;
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.fillText('1', size.w/2 - 75*s, 100*s);
+  ctx.fillStyle = accentColor;
+  ctx.fillText('X', size.w/2, 100*s);
+  ctx.fillStyle = '#fff';
+  ctx.fillText('BET', size.w/2 + 75*s, 100*s);
+
+  // Ligne sous logo
+  ctx.fillStyle = accentColor;
+  ctx.fillRect(size.w/2 - 120*s, 115*s, 240*s, 3*s);
+
+  // Contenu selon le type
+  if(currentType === 'bonus') drawBonus(ctx, size, s);
+  else if(currentType === 'match') drawMatch(ctx, size, s);
+  else if(currentType === 'promo') drawPromo(ctx, size, s);
+  else if(currentType === 'temoignage') drawTemoignage(ctx, size, s);
+
+  // Footer agent
+  drawFooter(ctx, size, s);
+
+  // Afficher boutons
+  document.getElementById('btn-dl').style.display = 'block';
+  document.getElementById('btn-wa').style.display = 'block';
+}
+
+// ============================================
+// BONUS
+// ============================================
+function drawBonus(ctx, size, s){
+  const titre = document.getElementById('b-titre').value || 'BONUS 200%';
+  const sous = document.getElementById('b-sous').value || 'Sur votre 1er dépôt !';
+  const msg = document.getElementById('b-msg').value || '';
+
+  // Icône cadeau
+  ctx.font = `${150*s}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.fillText('🎁', size.w/2, 320*s);
+
+  // Titre
+  ctx.font = `900 ${110*s}px 'Segoe UI', Arial`;
+  ctx.fillStyle = accentColor;
+  ctx.textAlign = 'center';
+  ctx.shadowColor = 'rgba(0,0,0,0.5)';
+  ctx.shadowBlur = 20;
+  wrapText(ctx, titre, size.w/2, 450*s, size.w - 80*s, 120*s);
+  ctx.shadowBlur = 0;
+
+  // Sous-titre
+  ctx.font = `700 ${52*s}px 'Segoe UI', Arial`;
+  ctx.fillStyle = '#fff';
+  ctx.fillText(sous, size.w/2, 580*s);
+
+  // Message
+  if(msg){
+    ctx.font = `${38*s}px 'Segoe UI', Arial`;
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    wrapText(ctx, msg, size.w/2, 680*s, size.w - 120*s, 48*s);
+  }
+
+  // Code promo box
+  drawPromoBox(ctx, size, s, 820*s);
+}
+
+// ============================================
+// MATCH
+// ============================================
+function drawMatch(ctx, size, s){
+  const eq1 = document.getElementById('m-eq1').value || 'PSG';
+  const eq2 = document.getElementById('m-eq2').value || 'Real Madrid';
+  const comp = document.getElementById('m-comp').value || 'Champions League';
+  const date = document.getElementById('m-date').value || 'Ce soir à 21:00';
+  const offre = document.getElementById('m-offre').value || 'Bonus 200% !';
+
+  // Compétition
+  ctx.font = `600 ${38*s}px 'Segoe UI', Arial`;
+  ctx.fillStyle = accentColor;
+  ctx.textAlign = 'center';
+  ctx.fillText('⚽ ' + comp.toUpperCase(), size.w/2, 190*s);
+
+  // Équipes
+  ctx.font = `900 ${90*s}px 'Segoe UI', Arial`;
+  ctx.fillStyle = '#fff';
+  ctx.shadowColor = 'rgba(0,0,0,0.5)';
+  ctx.shadowBlur = 15;
+  ctx.textAlign = 'left';
+  ctx.fillText(eq1, 80*s, 380*s);
+  ctx.textAlign = 'right';
+  ctx.fillText(eq2, size.w - 80*s, 380*s);
+  ctx.shadowBlur = 0;
+
+  // VS
+  ctx.font = `900 ${70*s}px 'Segoe UI', Arial`;
+  ctx.fillStyle = accentColor;
+  ctx.textAlign = 'center';
+  ctx.fillText('VS', size.w/2, 360*s);
+
+  // Ligne séparatrice
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 2*s;
+  ctx.beginPath();
+  ctx.moveTo(60*s, 420*s);
+  ctx.lineTo(size.w - 60*s, 420*s);
+  ctx.stroke();
+
+  // Date
+  ctx.font = `700 ${48*s}px 'Segoe UI', Arial`;
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.fillText('🕐 ' + date, size.w/2, 500*s);
+
+  // Offre
+  ctx.font = `800 ${52*s}px 'Segoe UI', Arial`;
+  ctx.fillStyle = accentColor;
+  wrapText(ctx, '🔥 ' + offre, size.w/2, 600*s, size.w - 80*s, 60*s);
+
+  // Code promo
+  drawPromoBox(ctx, size, s, 760*s);
+}
+
+// ============================================
+// PROMO
+// ============================================
+function drawPromo(ctx, size, s){
+  const titre = document.getElementById('p-titre').value || 'OFFRE LIMITÉE !';
+  const desc = document.getElementById('p-desc').value || '';
+  const expire = document.getElementById('p-expire').value || '';
+
+  ctx.font = `${120*s}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.fillText('🔥', size.w/2, 290*s);
+
+  ctx.font = `900 ${85*s}px 'Segoe UI', Arial`;
+  ctx.fillStyle = accentColor;
+  ctx.shadowColor = 'rgba(0,0,0,0.5)';
+  ctx.shadowBlur = 20;
+  wrapText(ctx, titre, size.w/2, 420*s, size.w - 80*s, 95*s);
+  ctx.shadowBlur = 0;
+
+  ctx.font = `${44*s}px 'Segoe UI', Arial`;
+  ctx.fillStyle = '#fff';
+  wrapText(ctx, desc, size.w/2, 560*s, size.w - 100*s, 52*s);
+
+  if(expire){
+    // Box expire
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    roundRect(ctx, 80*s, 680*s, size.w - 160*s, 80*s, 12*s);
+    ctx.fill();
+    ctx.font = `700 ${40*s}px 'Segoe UI', Arial`;
+    ctx.fillStyle = '#ff5252';
+    ctx.fillText('⏰ ' + expire, size.w/2, 730*s);
+  }
+
+  drawPromoBox(ctx, size, s, 820*s);
+}
+
+// ============================================
+// TÉMOIGNAGE
+// ============================================
+function drawTemoignage(ctx, size, s){
+  const nom = document.getElementById('t-nom').value || 'Mamadou D.';
+  const ville = document.getElementById('t-ville').value || 'Conakry';
+  const texte = document.getElementById('t-texte').value || '';
+  const note = parseInt(document.getElementById('t-note').value || '5');
+  const etoiles = '★'.repeat(note) + '☆'.repeat(5-note);
+
+  // Étoiles
+  ctx.font = `${70*s}px Arial`;
+  ctx.fillStyle = accentColor;
+  ctx.textAlign = 'center';
+  ctx.fillText(etoiles, size.w/2, 230*s);
+
+  // Guillemets décoratifs
+  ctx.font = `900 ${200*s}px Georgia`;
+  ctx.fillStyle = 'rgba(255,255,255,0.06)';
+  ctx.textAlign = 'left';
+  ctx.fillText('"', 40*s, 500*s);
+
+  // Texte témoignage
+  ctx.font = `italic ${46*s}px 'Segoe UI', Arial`;
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.shadowColor = 'rgba(0,0,0,0.3)';
+  ctx.shadowBlur = 10;
+  wrapText(ctx, texte, size.w/2, 360*s, size.w - 120*s, 58*s);
+  ctx.shadowBlur = 0;
+
+  // Avatar client
+  ctx.beginPath();
+  ctx.arc(size.w/2, 680*s, 50*s, 0, Math.PI*2);
+  ctx.fillStyle = accentColor;
+  ctx.fill();
+  ctx.font = `900 ${40*s}px 'Segoe UI', Arial`;
+  ctx.fillStyle = '#000';
+  ctx.textAlign = 'center';
+  ctx.fillText(nom.charAt(0).toUpperCase(), size.w/2, 695*s);
+
+  // Nom et ville
+  ctx.font = `700 ${38*s}px 'Segoe UI', Arial`;
+  ctx.fillStyle = '#fff';
+  ctx.fillText(nom + ' — ' + ville, size.w/2, 770*s);
+
+  // Ligne
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 1*s;
+  ctx.beginPath();
+  ctx.moveTo(size.w/2 - 150*s, 795*s);
+  ctx.lineTo(size.w/2 + 150*s, 795*s);
+  ctx.stroke();
+
+  drawPromoBox(ctx, size, s, 840*s);
+}
+
+// ============================================
+// BOITE CODE PROMO
+// ============================================
+function drawPromoBox(ctx, size, s, y){
+  const agent = currentAgent;
+
+  // Box
+  ctx.save();
+  ctx.globalAlpha = 0.15;
+  roundRect(ctx, 60*s, y, size.w - 120*s, 110*s, 16*s);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+  ctx.restore();
+
+  ctx.strokeStyle = accentColor;
+  ctx.lineWidth = 2*s;
+  roundRect(ctx, 60*s, y, size.w - 120*s, 110*s, 16*s);
+  ctx.stroke();
+
+  ctx.font = `600 ${30*s}px 'Segoe UI', Arial`;
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.textAlign = 'center';
+  ctx.fillText('CODE PROMO EXCLUSIF', size.w/2, y + 38*s);
+
+  ctx.font = `900 ${58*s}px 'Segoe UI', Arial`;
+  ctx.fillStyle = accentColor;
+  ctx.letterSpacing = '0.15em';
+  ctx.fillText(agent.promo, size.w/2, y + 90*s);
+}
+
+// ============================================
+// FOOTER AGENT
+// ============================================
+function drawFooter(ctx, size, s){
+  const agent = currentAgent;
+  const yStart = size.h - 180*s;
+
+  // Fond footer
+  ctx.save();
+  ctx.globalAlpha = 0.3;
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, yStart, size.w, 180*s);
+  ctx.restore();
+
+  // Ligne séparatrice
+  ctx.strokeStyle = accentColor;
+  ctx.lineWidth = 2*s;
+  ctx.beginPath();
+  ctx.moveTo(60*s, yStart + 10*s);
+  ctx.lineTo(size.w - 60*s, yStart + 10*s);
+  ctx.stroke();
+
+  // Nom agent
+  ctx.font = `800 ${42*s}px 'Segoe UI', Arial`;
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.fillText('Agent officiel : ' + agent.nom + ' ' + agent.flag, size.w/2, yStart + 65*s);
+
+  // Téléphone
+  ctx.font = `600 ${38*s}px 'Segoe UI', Arial`;
+  ctx.fillStyle = accentColor;
+  ctx.fillText('📱 ' + agent.phone, size.w/2, yStart + 115*s);
+
+  // WhatsApp
+  ctx.font = `500 ${28*s}px 'Segoe UI', Arial`;
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.fillText('💬 Disponible 7j/7 — Service rapide et fiable', size.w/2, yStart + 155*s);
+}
+
+// ============================================
+// UTILITAIRES CANVAS
+// ============================================
+function wrapText(ctx, text, x, y, maxWidth, lineHeight){
+  if(!text) return;
+  const words = text.split(' ');
+  let line = '';
+  let currentY = y;
+  for(let i=0; i<words.length; i++){
+    const testLine = line + words[i] + ' ';
+    if(ctx.measureText(testLine).width > maxWidth && i > 0){
+      ctx.fillText(line, x, currentY);
+      line = words[i] + ' ';
+      currentY += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  ctx.fillText(line, x, currentY);
+}
+
+function roundRect(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
+
+function darken(hex, pct){
+  const num = parseInt(hex.replace('#',''), 16);
+  const r = Math.max(0, (num>>16) - pct);
+  const g = Math.max(0, ((num>>8)&255) - pct);
+  const b = Math.max(0, (num&255) - pct);
+  return '#' + ((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+}
+
+// ============================================
+// TÉLÉCHARGER
+// ============================================
+function downloadFlyer(){
+  const canvas = document.getElementById('flyerCanvas');
+  const link = document.createElement('a');
+  const type = currentType;
+  const agent = currentAgent ? currentAgent.nom.split(' ')[0] : 'agent';
+  link.download = 'flyer_'+type+'_'+agent+'_'+Date.now()+'.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+// ============================================
+// PARTAGER WHATSAPP
+// ============================================
+function shareWA(){
+  const agent = currentAgent;
+  if(!agent) return;
+  const msg = '🎁 Inscrivez-vous sur 1xBet avec le code promo *'+agent.promo+'* et recevez votre bonus !\n\n📱 Contactez-moi : '+agent.phone;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg), '_blank');
+}
+
+init();
+</script>
+</body>
+</html>
