@@ -693,7 +693,8 @@ function getAgents(){
       clients:0,
       actif:true,
       pays_code:'+224',
-      telegramChatId:'8022571456',
+      telegramChatId:'1010477144',
+      telegramToken:'7979158544:AAG5_MhnoMZ0UpIzU0GC_mEpDIFYqi1l31s',
       moyens_depot:['Orange Money','MTN Mobile Money','Cash'],
       moyens_retrait:['Orange Money','MTN Mobile Money','Cash'],
       avis_pays:'Guinée Conakry',
@@ -1026,7 +1027,8 @@ function notifierAgentWA(type, data){
   var endpoint = type === 'depot' ? '/depot' : '/retrait';
   // Ajouter le Chat ID Telegram de l'agent courant
   var payload = Object.assign({}, data, {
-    telegramChatId: currentAgent ? (currentAgent.telegramChatId || '') : ''
+    telegramChatId: currentAgent ? (currentAgent.telegramChatId || '') : '',
+    telegramToken: currentAgent ? (currentAgent.telegramToken || '') : ''
   });
   fetch(RENDER_SERVER + endpoint, {
     method: 'POST',
