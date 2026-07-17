@@ -906,6 +906,30 @@ function notifierAgentWA(type, data){
   .catch(function(e){ console.warn('Serveur indisponible:', e); });
 }
 
+function resetDep(){
+  ['dep-nom','dep-wa','dep-id','dep-montant','dep-code'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  var dm=document.getElementById('dep-methode'); if(dm) dm.value='';
+  var p1=document.getElementById('dep-phase1'); if(p1) p1.style.display='block';
+  var p2=document.getElementById('dep-phase2'); if(p2) p2.style.display='none';
+  var p3=document.getElementById('dep-phase3'); if(p3) p3.style.display='none';
+  var e1=document.getElementById('dep-err1'); if(e1) e1.style.display='none';
+  var e2=document.getElementById('dep-err2'); if(e2) e2.style.display='none';
+  var btn=document.getElementById('dep-btn-txt'); if(btn) btn.textContent='⚡ Confirmer le dépôt';
+}
+
+function resetRet(){
+  ['ret-nom','ret-wa','ret-id','ret-montant','ret-code','ret-num'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  var rm=document.getElementById('ret-methode'); if(rm) rm.value='';
+  var p1=document.getElementById('ret-phase1'); if(p1) p1.style.display='block';
+  var p2=document.getElementById('ret-phase2'); if(p2) p2.style.display='none';
+  var e1=document.getElementById('ret-err1'); if(e1) e1.style.display='none';
+  var btn=document.getElementById('ret-btn-txt'); if(btn) btn.textContent='⚡ Soumettre ma demande';
+}
+
 function sendReview(){
   if(!currentAgent)return;
   var stars='★'.repeat(currentRating)+'☆'.repeat(5-currentRating);
@@ -916,6 +940,49 @@ function sendReview(){
 
 function copyPromo(){if(!currentAgent)return;navigator.clipboard.writeText(currentAgent.promo).then(function(){showToast('Code copié ! ✅');});}
 function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+
+// ============================================
+// NAVIGATION
+// ============================================
+function showPanel(id, btn){
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  var panel = document.getElementById('panel-'+id);
+  if(panel) panel.classList.add('active');
+  document.querySelectorAll('.navtab').forEach(function(t){ t.classList.remove('active'); });
+  if(btn) btn.classList.add('active');
+  window.scrollTo({top:120, behavior:'smooth'});
+}
+
+function switchTab(group, id, btn){
+  document.querySelectorAll('[id^="'+group+'-"]').forEach(function(el){ el.classList.remove('active'); });
+  var el = document.getElementById(group+'-'+id);
+  if(el) el.classList.add('active');
+  if(btn){
+    btn.closest('.itabs').querySelectorAll('.itab').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+  }
+}
+
+var currentRating = 0;
+function setStar(n){
+  currentRating = n;
+  document.querySelectorAll('.star-btn').forEach(function(b, i){ b.classList.toggle('active', i < n); });
+}
+
+function copyPromo(){
+  if(!currentAgent) return;
+  navigator.clipboard.writeText(currentAgent.promo).then(function(){
+    showToast('Code '+currentAgent.promo+' copié ! ✅');
+  });
+}
+
+function showToast(msg){
+  var t = document.getElementById('toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2500);
+}
 
 // ============================================
 // CONFIG AGENTS — Infos publiques uniquement
