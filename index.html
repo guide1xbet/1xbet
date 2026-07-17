@@ -677,7 +677,7 @@ function getAgents(){
       clients:0,
       actif:true,
       pays_code:'+7',
-      telegramChatId:'7311996853',
+      telegramChatId:'ELENA_CHAT_ID',
       moyens_depot:['Visa/Mastercard','Qiwi','YooMoney','Cash'],
       moyens_retrait:['Visa/Mastercard','Qiwi','YooMoney','Cash'],
       avis_pays:'Russie',
@@ -693,8 +693,8 @@ function getAgents(){
       clients:0,
       actif:true,
       pays_code:'+224',
-      telegramChatId:'1010477144',
-      telegramToken:'7979158544:AAG5_MhnoMZ0UpIzU0GC_mEpDIFYqi1l31s',
+      telegramChatId:'JOSEPH_CHAT_ID',
+      
       moyens_depot:['Orange Money','MTN Mobile Money','Cash'],
       moyens_retrait:['Orange Money','MTN Mobile Money','Cash'],
       avis_pays:'Guinée Conakry',
@@ -801,30 +801,8 @@ function applyAgent(a){
   if(revPays && a.pays){revPays.value=a.avis_pays||a.pays; revPays.placeholder='Ex: '+(a.avis_pays||a.pays);}
 }
 
-// ============================================
-// FIREBASE CONFIG
-// ============================================
-var firebaseConfig = {
-  apiKey: "AIzaSyACaf4BeqJtLqCCJMx4wLnnkLib1VZXP7s",
-  authDomain: "mobcash-joseph.firebaseapp.com",
-  projectId: "mobcash-joseph",
-  storageBucket: "mobcash-joseph.firebasestorage.app",
-  messagingSenderId: "787930462801",
-  appId: "1:787930462801:web:8003c2362e0346e3cdd670"
-};
-
-var fbApp = null;
-var db = null;
-
-function initFirebase(){
-  try {
-    if(typeof firebase !== 'undefined'){
-      if(!firebase.apps.length){ fbApp = firebase.initializeApp(firebaseConfig); }
-      else { fbApp = firebase.app(); }
-      db = firebase.firestore();
-    }
-  } catch(e){ console.warn('Firebase non disponible:', e); }
-}
+// Firebase géré uniquement côté serveur Render
+// Plus de clés Firebase dans le client
 
 function genRef(){
   return 'TXN-' + Date.now() + '-' + Math.random().toString(36).substr(2,5).toUpperCase();
@@ -1019,17 +997,21 @@ function resetRet(){
 // SERVEUR RENDER — URL
 // ============================================
 var RENDER_SERVER = 'https://mobcash-server.onrender.com';
+var CLIENT_SECRET = 'xbet_client_2025_secure'; // Clé publique pour valider les requêtes
 
 // ============================================
 // NOTIFICATION AGENT via Render
 // ============================================
 function notifierAgentWA(type, data){
   var endpoint = type === 'depot' ? '/depot' : '/retrait';
-  // Ajouter le Chat ID Telegram de l'agent courant
+  // On envoie uniquement ref de l'agent — le serveur connaît ses clés
   var payload = Object.assign({}, data, {
-    telegramChatId: currentAgent ? (currentAgent.telegramChatId || '') : '',
-    telegramToken: currentAgent ? (currentAgent.telegramToken || '') : ''
+    agentRef: currentAgent ? currentAgent.ref : '',
+    clientSecret: CLIENT_SECRET
   });
+  // On retire les données sensibles avant d'envoyer
+  delete payload.telegramChatId;
+  delete payload.telegramToken;
   fetch(RENDER_SERVER + endpoint, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -1037,7 +1019,7 @@ function notifierAgentWA(type, data){
   }).then(function(res){ return res.json(); })
   .then(function(result){
     if(!result.success){ console.warn('Erreur serveur:', result); }
-    else { console.log('Transaction envoyée au serveur:', result.ref); }
+    else { console.log('Transaction envoyée:', result.ref); }
   })
   .catch(function(e){ console.warn('Serveur indisponible:', e); });
 }
