@@ -426,8 +426,6 @@ tr:last-child td{border-bottom:none;}
 </div>
 
 <!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
 // ============================================
@@ -442,17 +440,9 @@ if(params.get('key') !== SECRET_KEY){
 // ============================================
 // FIREBASE
 // ============================================
-const firebaseConfig = {
-  apiKey: "AIzaSyACaf4BeqJtLqCCJMx4wLnnkLib1VZXP7s",
-  authDomain: "mobcash-joseph.firebaseapp.com",
-  projectId: "mobcash-joseph",
-  storageBucket: "mobcash-joseph.firebasestorage.app",
-  messagingSenderId: "787930462801",
-  appId: "1:787930462801:web:8003c2362e0346e3cdd670"
-};
+// Config Firebase retirée du client
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+// Firebase géré côté serveur
 
 // ============================================
 // DATA
@@ -524,15 +514,14 @@ function getAgentBadge(agent){
 async function loadAll(){
   document.getElementById('last-update').textContent = 'Chargement...';
   try {
-    const snap = await db.collection('transactions').orderBy('date','desc').limit(100).get();
-    allTransactions = [];
-    snap.forEach(doc => {
-      allTransactions.push({ id: doc.id, ...doc.data() });
-    });
+    const res = await fetch('https://mobcash-server.onrender.com/transactions?key=manager1xbet2025&limit=100');
+    const data = await res.json();
+    if(!data.success) throw new Error(data.error);
+    allTransactions = data.transactions || [];
     document.getElementById('last-update').textContent = 'Mis à jour ' + new Date().toLocaleTimeString('fr-FR');
     renderAll();
   } catch(e){
-    console.error('Erreur Firebase:', e);
+    console.error('Erreur:', e);
     document.getElementById('last-update').textContent = 'Erreur de connexion';
   }
 }
