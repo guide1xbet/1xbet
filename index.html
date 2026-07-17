@@ -210,9 +210,7 @@ footer strong{color:#d32f2f;}
 .toast.show{opacity:1;}
 </style>
   <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-</head>
+    </head>
 <body>
 
 <div id="blocked-screen">
@@ -665,6 +663,7 @@ footer strong{color:#d32f2f;}
 <div class="toast" id="toast"></div>
 
 <script>
+*/
 function getAgents(){
   return [
     {
@@ -865,45 +864,9 @@ function confirmerDepot(){
     date: new Date().toISOString()
   };
 
-  // Vérifier que le ID de transaction n\'a pas déjà été utilisé + enregistrer
-  if(db){
-    db.collection('transactions').where('idTransaction','==',code).get().then(function(snap){
-      if(!snap.empty){
-        btn.textContent = '⚡ Confirmer le dépôt';
-        err.textContent = '❌ Ce code a déjà été utilisé. Veuillez vérifier votre SMS.';
-        err.style.display='block'; return;
-      }
-      // Enregistrer la transaction
-      db.collection('transactions').add(data).then(function(){
-        afficherSuccesDep(ref);
-        notifierAgentWA('depot', data);
-      }).catch(function(e){
-        btn.textContent = '⚡ Confirmer le dépôt';
-        err.textContent = '❌ Erreur de connexion. Réessayez ou contactez l\'agent.';
-        err.style.display='block';
-      });
-    }).catch(function(e){
-      // Si Firebase indisponible, on enregistre quand même localement
-      afficherSuccesDep(ref);
-      notifierAgentWA('depot', data);
-    });
-  } else {
-    // Pas de Firebase — notifier l\'agent par WhatsApp directement
-    afficherSuccesDep(ref);
-    notifierAgentWA('depot', data);
-  }
-}
-
-function afficherSuccesDep(ref){
-  document.getElementById('dep-phase2').style.display='none';
-  document.getElementById('dep-phase3').style.display='block';
-  document.getElementById('dep-ref').textContent = ref;
-}
-
-function resetDep(){
-  ['dep-nom','dep-wa','dep-id','dep-montant','dep-code'].forEach(function(id){
-    var el=document.getElementById(id); if(el) el.value='';
-  });
+  // Envoyer directement au serveur Render (Firebase géré côté serveur)
+  afficherSuccesDep(ref);
+  notifierAgentWA('depot', data);
   document.getElementById('dep-methode').value='';
   document.getElementById('dep-phase1').style.display='block';
   document.getElementById('dep-phase2').style.display='none';
@@ -951,41 +914,9 @@ function initRetrait(){
     date: new Date().toISOString()
   };
 
-  if(db){
-    db.collection('transactions').where('codeRetrait','==',code).get().then(function(snap){
-      if(!snap.empty){
-        btn.textContent = '⚡ Soumettre ma demande';
-        err.textContent = '❌ Ce code de retrait a déjà été utilisé.';
-        err.style.display='block'; return;
-      }
-      db.collection('transactions').add(data).then(function(){
-        afficherSuccessRet(ref);
-        notifierAgentWA('retrait', data);
-      }).catch(function(){
-        btn.textContent = '⚡ Soumettre ma demande';
-        err.textContent = '❌ Erreur de connexion. Réessayez ou contactez l\'agent.';
-        err.style.display='block';
-      });
-    }).catch(function(){
-      afficherSuccessRet(ref);
-      notifierAgentWA('retrait', data);
-    });
-  } else {
-    afficherSuccessRet(ref);
-    notifierAgentWA('retrait', data);
-  }
-}
-
-function afficherSuccessRet(ref){
-  document.getElementById('ret-phase1').style.display='none';
-  document.getElementById('ret-phase2').style.display='block';
-  document.getElementById('ret-ref').textContent = ref;
-}
-
-function resetRet(){
-  ['ret-nom','ret-wa','ret-id','ret-montant','ret-code','ret-num'].forEach(function(id){
-    var el=document.getElementById(id); if(el) el.value='';
-  });
+  // Envoyer directement au serveur Render (Firebase géré côté serveur)
+  afficherSuccessRet(ref);
+  notifierAgentWA('retrait', data);
   document.getElementById('ret-methode').value='';
   document.getElementById('ret-phase1').style.display='block';
   document.getElementById('ret-phase2').style.display='none';
