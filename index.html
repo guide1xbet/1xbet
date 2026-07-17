@@ -727,7 +727,7 @@ function switchI(g,id,btn){
 
 var currentAgent=null;
 function init(){
-  initFirebase();
+  // Firebase géré côté serveur
   var ref=new URLSearchParams(window.location.search).get('ref');
   var agent=getAgents().find(function(a){return a.ref===ref&&a.actif;});
   if(!agent){document.getElementById('blocked-screen').style.display='flex';return;}
