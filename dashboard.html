@@ -524,7 +524,7 @@ function getAgentBadge(agent){
 async function loadAll(){
   document.getElementById('last-update').textContent = 'Chargement...';
   try {
-    const snap = await db.collection('transactions').orderBy('date','desc').get();
+    const snap = await db.collection('transactions').orderBy('date','desc').limit(100).get();
     allTransactions = [];
     snap.forEach(doc => {
       allTransactions.push({ id: doc.id, ...doc.data() });
@@ -805,7 +805,7 @@ function escHtml(str){
 // AUTO-REFRESH toutes les 30 secondes
 // ============================================
 loadAll();
-setInterval(loadAll, 30000);
+setInterval(loadAll, 300000); // 5 minutes au lieu de 30 secondes
 </script>
 </body>
 </html>
