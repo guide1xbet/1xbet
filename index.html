@@ -742,6 +742,16 @@ function applyAgent(a){
   /* Pré-remplir le pays dans le formulaire avis */
   var revPays=document.getElementById('rev-pays');
   if(revPays && a.pays){revPays.value=a.avis_pays||a.pays; revPays.placeholder='Ex: '+(a.avis_pays||a.pays);}
+
+  // Initialiser le slider et les compteurs après affichage
+  setTimeout(function(){
+    initSlider();
+    initHeroSlideshow();
+    animateCounter('cnt-live', 12547, '+', 2000);
+    animateCounter('cnt-sports', 50, '+', 1500);
+    animateCounter('cnt-bonus', 200, '%', 1000);
+    animateCounter('cnt-pays', 60, '+', 1800);
+  }, 500);
 }
 
 // Firebase géré uniquement côté serveur Render
