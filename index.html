@@ -818,16 +818,35 @@ function confirmerDepot(){
     date: new Date().toISOString()
   };
 
-  // Envoyer directement au serveur Render (Firebase géré côté serveur)
-  afficherSuccesDep(ref);
-  notifierAgentWA('depot', data);
-  document.getElementById('dep-methode').value='';
-  document.getElementById('dep-phase1').style.display='block';
-  document.getElementById('dep-phase2').style.display='none';
-  document.getElementById('dep-phase3').style.display='none';
-  document.getElementById('dep-err1').style.display='none';
-  document.getElementById('dep-err2').style.display='none';
-  document.getElementById('dep-btn-txt').textContent='⚡ Confirmer le dépôt';
+  // Envoyer au serveur Render
+  fetch(RENDER_SERVER + '/depot', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      ref: ref,
+      agentRef: currentAgent ? currentAgent.ref : '',
+      agentNom: currentAgent ? currentAgent.nom : '',
+      clientNom: data.clientNom,
+      clientWa: data.clientWa,
+      clientId1xbet: data.clientId1xbet,
+      montant: data.montant,
+      methode: data.methode,
+      idTransaction: data.idTransaction,
+      date: data.date
+    })
+  }).then(function(res){ return res.json(); })
+  .then(function(result){
+    document.getElementById('dep-phase2').style.display='none';
+    document.getElementById('dep-phase3').style.display='block';
+    document.getElementById('dep-ref').textContent = ref;
+    document.getElementById('dep-btn-txt').textContent='⚡ Confirmer le dépôt';
+  })
+  .catch(function(){
+    document.getElementById('dep-phase2').style.display='none';
+    document.getElementById('dep-phase3').style.display='block';
+    document.getElementById('dep-ref').textContent = ref;
+    document.getElementById('dep-btn-txt').textContent='⚡ Confirmer le dépôt';
+  });
 }
 
 // ============================================
@@ -868,14 +887,34 @@ function initRetrait(){
     date: new Date().toISOString()
   };
 
-  // Envoyer directement au serveur Render (Firebase géré côté serveur)
-  afficherSuccessRet(ref);
-  notifierAgentWA('retrait', data);
-  document.getElementById('ret-methode').value='';
-  document.getElementById('ret-phase1').style.display='block';
-  document.getElementById('ret-phase2').style.display='none';
-  document.getElementById('ret-err1').style.display='none';
-  document.getElementById('ret-btn-txt').textContent='⚡ Soumettre ma demande';
+  // Envoyer au serveur Render
+  fetch(RENDER_SERVER + '/retrait', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      ref: ref,
+      agentRef: currentAgent ? currentAgent.ref : '',
+      agentNom: currentAgent ? currentAgent.nom : '',
+      clientNom: nom,
+      clientWa: wa,
+      clientId1xbet: id,
+      montant: parseInt(montant),
+      codeRetrait: code,
+      numeroReception: num,
+      methode: methode,
+      date: data.date
+    })
+  }).then(function(res){ return res.json(); })
+  .then(function(result){
+    document.getElementById('ret-phase1').style.display='none';
+    document.getElementById('ret-phase2').style.display='block';
+    document.getElementById('ret-ref').textContent = ref;
+  })
+  .catch(function(){
+    document.getElementById('ret-phase1').style.display='none';
+    document.getElementById('ret-phase2').style.display='block';
+    document.getElementById('ret-ref').textContent = ref;
+  });
 }
 
 // ============================================
