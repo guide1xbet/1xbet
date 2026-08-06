@@ -1,0 +1,914 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Générateur de Flyers Premium — 1xBet</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#07090f;color:#e8eaf2;min-height:100vh;}
+.topbar{background:#0c0f1c;border-bottom:1px solid #1a1f35;padding:0 1.5rem;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.logo{font-size:1.05rem;font-weight:800;color:#fff;letter-spacing:-.01em;}
+.logo em{color:#e53935;font-style:normal;}
+.badge{background:#e53935;color:#fff;font-size:.56rem;font-weight:800;padding:.12rem .45rem;border-radius:4px;margin-left:.35rem;letter-spacing:.05em;}
+.agent-tag{font-size:.72rem;color:#5a6490;background:#12162a;padding:.3rem .85rem;border-radius:20px;border:1px solid #1a1f35;}
+.layout{display:grid;grid-template-columns:310px 1fr;height:calc(100vh - 54px);}
+.sidebar{background:#0c0f1c;border-right:1px solid #1a1f35;overflow-y:auto;padding:1.1rem;}
+.preview-area{background:#05070d;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:1.5rem;overflow-y:auto;gap:1rem;}
+.sec{margin-bottom:1.1rem;}
+.sec-title{font-size:.6rem;font-weight:700;color:#3a4265;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.6rem;}
+
+/* TEMPLATES GRID */
+.templates-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+.tpl-btn{background:#12162a;border:1.5px solid #1a1f35;border-radius:8px;padding:.65rem .4rem;text-align:center;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;}
+.tpl-btn:hover{border-color:#e53935;transform:translateY(-1px);}
+.tpl-btn.active{border-color:#e53935;background:rgba(229,57,53,.1);}
+.tpl-btn .tpl-ico{font-size:1.3rem;display:block;margin-bottom:.25rem;}
+.tpl-btn .tpl-name{font-size:.68rem;font-weight:700;color:#8892b0;line-height:1.3;}
+.tpl-btn.active .tpl-name{color:#e53935;}
+.tpl-hot{position:absolute;top:4px;right:4px;background:#e53935;color:#fff;font-size:.5rem;font-weight:800;padding:.1rem .3rem;border-radius:3px;}
+
+/* FORM */
+.fg{margin-bottom:.7rem;}
+.fg label{display:block;font-size:.63rem;font-weight:700;color:#3a4265;margin-bottom:.28rem;letter-spacing:.05em;text-transform:uppercase;}
+.fg input,.fg textarea,.fg select{width:100%;padding:.48rem .7rem;background:#07090f;border:1px solid #1a1f35;border-radius:6px;font-size:.78rem;color:#e8eaf2;font-family:inherit;transition:border-color .15s;}
+.fg input:focus,.fg textarea:focus,.fg select:focus{outline:none;border-color:#e53935;}
+.fg input::placeholder,.fg textarea::placeholder{color:#1e2440;}
+.fg select option{background:#0c0f1c;}
+.fg textarea{resize:vertical;min-height:55px;line-height:1.5;}
+
+/* COLORS */
+.color-row{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.35rem;}
+.sw{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;flex-shrink:0;}
+.sw.active{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.2);}
+
+/* BTNS */
+.btn-gen{width:100%;background:linear-gradient(135deg,#e53935,#b71c1c);color:#fff;border:none;padding:.68rem;border-radius:8px;font-size:.83rem;font-weight:700;cursor:pointer;margin-top:.2rem;letter-spacing:.02em;transition:opacity .15s;}
+.btn-gen:hover{opacity:.88;}
+.btn-dl,.btn-wa{width:100%;padding:.58rem;border-radius:8px;font-size:.78rem;font-weight:600;cursor:pointer;margin-top:.4rem;display:none;transition:all .15s;}
+.btn-dl{background:#12162a;border:1px solid #1a1f35;color:#e8eaf2;}
+.btn-dl:hover{border-color:#e53935;}
+.btn-wa{background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);color:#25d366;}
+
+/* PREVIEW */
+.canvas-wrap{border-radius:12px;overflow:hidden;box-shadow:0 25px 80px rgba(0,0,0,.8);position:relative;}
+canvas{display:block;max-width:460px;width:100%;height:auto;}
+.hint{font-size:.68rem;color:#1e2440;text-align:center;}
+
+/* FORMAT */
+.fmt-row{display:flex;gap:.35rem;margin-bottom:.7rem;}
+.fmt{flex:1;background:#12162a;border:1px solid #1a1f35;border-radius:6px;padding:.38rem .25rem;text-align:center;cursor:pointer;font-size:.63rem;color:#3a4265;line-height:1.4;transition:all .15s;}
+.fmt.active{border-color:#e53935;color:#e53935;background:rgba(229,57,53,.07);}
+
+#blocked{position:fixed;inset:0;background:#07090f;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.75rem;z-index:999;}
+@media(max-width:700px){.layout{grid-template-columns:1fr;height:auto;}.preview-area{padding:1rem;}.canvas-wrap canvas{max-width:100%;}}
+</style>
+</head>
+<body>
+
+<div id="blocked" style="display:none;">
+  <div style="font-size:3rem">🔒</div>
+  <div style="font-size:1rem;font-weight:700">Accès refusé</div>
+  <div style="font-size:.78rem;color:#3a4265">Lien invalide</div>
+</div>
+
+<div class="topbar">
+  <div><span class="logo">1<em>X</em>BET<span class="badge">FLYERS PRO</span></span></div>
+  <div class="agent-tag" id="agent-tag">—</div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+
+    <div class="sec">
+      <div class="sec-title">Template</div>
+      <div class="templates-grid">
+        <div class="tpl-btn active" onclick="setTpl('football',this)">
+          <span class="tpl-hot">🔥</span>
+          <span class="tpl-ico">⚽</span>
+          <span class="tpl-name">Match Football</span>
+        </div>
+        <div class="tpl-btn" onclick="setTpl('bonus',this)">
+          <span class="tpl-ico">🎁</span>
+          <span class="tpl-name">Bonus 200%</span>
+        </div>
+        <div class="tpl-btn" onclick="setTpl('can',this)">
+          <span class="tpl-hot">🏆</span>
+          <span class="tpl-ico">🌍</span>
+          <span class="tpl-name">CAN / Coupe</span>
+        </div>
+        <div class="tpl-btn" onclick="setTpl('temoignage',this)">
+          <span class="tpl-ico">⭐</span>
+          <span class="tpl-name">Avis client</span>
+        </div>
+        <div class="tpl-btn" onclick="setTpl('promo',this)">
+          <span class="tpl-ico">⚡</span>
+          <span class="tpl-name">Offre Flash</span>
+        </div>
+        <div class="tpl-btn" onclick="setTpl('retrait',this)">
+          <span class="tpl-ico">💰</span>
+          <span class="tpl-name">Retrait Rapide</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">Format</div>
+      <div class="fmt-row">
+        <div class="fmt active" onclick="setFmt('carre',this)">Carré<br><span style="font-size:.55rem;color:#3a4265">Instagram</span></div>
+        <div class="fmt" onclick="setFmt('story',this)">Story<br><span style="font-size:.55rem;color:#3a4265">WhatsApp</span></div>
+        <div class="fmt" onclick="setFmt('paysage',this)">Paysage<br><span style="font-size:.55rem;color:#3a4265">Facebook</span></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">Contenu</div>
+      <div id="form-football">
+        <div class="fg"><label>Équipe 1</label><input id="f-eq1" value="Guinée" oninput="draw()"></div>
+        <div class="fg"><label>Drapeau équipe 1</label><input id="f-flag1" value="🇬🇳" oninput="draw()"></div>
+        <div class="fg"><label>Équipe 2</label><input id="f-eq2" value="Sénégal" oninput="draw()"></div>
+        <div class="fg"><label>Drapeau équipe 2</label><input id="f-flag2" value="🇸🇳" oninput="draw()"></div>
+        <div class="fg"><label>Compétition</label><input id="f-comp" value="CAN 2025 — Quart de finale" oninput="draw()"></div>
+        <div class="fg"><label>Date & Heure</label><input id="f-date" value="Samedi 19 Juillet à 20:00" oninput="draw()"></div>
+      </div>
+      <div id="form-bonus" style="display:none">
+        <div class="fg"><label>Pourcentage bonus</label><input id="b-pct" value="200%" oninput="draw()"></div>
+        <div class="fg"><label>Condition</label><input id="b-cond" value="Sur votre 1er dépôt !" oninput="draw()"></div>
+        <div class="fg"><label>Message</label><textarea id="b-msg" oninput="draw()">Inscrivez-vous maintenant et doublez votre mise dès le premier dépôt !</textarea></div>
+      </div>
+      <div id="form-can" style="display:none">
+        <div class="fg"><label>Titre événement</label><input id="c-titre" value="CAN 2025" oninput="draw()"></div>
+        <div class="fg"><label>Sous-titre</label><input id="c-sous" value="DEMI-FINALE" oninput="draw()"></div>
+        <div class="fg"><label>Équipe 1</label><input id="c-eq1" value="Guinée" oninput="draw()"></div>
+        <div class="fg"><label>Drapeau 1</label><input id="c-f1" value="🇬🇳" oninput="draw()"></div>
+        <div class="fg"><label>Équipe 2</label><input id="c-eq2" value="Maroc" oninput="draw()"></div>
+        <div class="fg"><label>Drapeau 2</label><input id="c-f2" value="🇲🇦" oninput="draw()"></div>
+        <div class="fg"><label>Date</label><input id="c-date" value="19.07.2026" oninput="draw()"></div>
+      </div>
+      <div id="form-temoignage" style="display:none">
+        <div class="fg"><label>Prénom</label><input id="t-nom" value="Abdoule S." oninput="draw()"></div>
+        <div class="fg"><label>Ville</label><input id="t-ville" value="Conakry" oninput="draw()"></div>
+        <div class="fg"><label>Montant gagné</label><input id="t-gain" value="500 000 GNF" oninput="draw()"></div>
+        <div class="fg"><label>Témoignage</label><textarea id="t-texte" oninput="draw()">"J'ai retiré mon gain en moins de 5 minutes ! Service incroyable, je recommande à 100%."</textarea></div>
+        <div class="fg"><label>Note</label>
+          <select id="t-note" onchange="draw()">
+            <option value="5">★★★★★ — 5 étoiles</option>
+            <option value="4">★★★★☆ — 4 étoiles</option>
+          </select>
+        </div>
+      </div>
+      <div id="form-promo" style="display:none">
+        <div class="fg"><label>Titre</label><input id="p-titre" value="OFFRE FLASH !" oninput="draw()"></div>
+        <div class="fg"><label>Offre</label><input id="p-offre" value="Bonus 250% ce week-end !" oninput="draw()"></div>
+        <div class="fg"><label>Expire dans</label><input id="p-expire" value="24 heures seulement" oninput="draw()"></div>
+        <div class="fg"><label>Condition</label><input id="p-cond" value="Dépôt minimum : 5 000 GNF" oninput="draw()"></div>
+      </div>
+      <div id="form-retrait" style="display:none">
+        <div class="fg"><label>Délai de retrait</label><input id="r-delai" value="5 minutes" oninput="draw()"></div>
+        <div class="fg"><label>Méthode</label><input id="r-methode" value="Orange Money & MTN" oninput="draw()"></div>
+        <div class="fg"><label>Message</label><textarea id="r-msg" oninput="draw()">Retirez vos gains directement sur votre Mobile Money, sans délai !</textarea></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">Palette</div>
+      <div class="color-row">
+        <div class="sw active" style="background:linear-gradient(135deg,#c62828,#e65100)" onclick="setPalette('red',this)" title="Rouge/Or"></div>
+        <div class="sw" style="background:linear-gradient(135deg,#0d47a1,#1565c0)" onclick="setPalette('blue',this)" title="Bleu/Or"></div>
+        <div class="sw" style="background:linear-gradient(135deg,#1b5e20,#2e7d32)" onclick="setPalette('green',this)" title="Vert"></div>
+        <div class="sw" style="background:linear-gradient(135deg,#4a148c,#6a1b9a)" onclick="setPalette('purple',this)" title="Violet"></div>
+        <div class="sw" style="background:linear-gradient(135deg,#0a0a0a,#1a1a2e)" onclick="setPalette('dark',this)" title="Sombre"></div>
+        <div class="sw" style="background:linear-gradient(135deg,#bf360c,#e64a19)" onclick="setPalette('orange',this)" title="Orange"></div>
+      </div>
+    </div>
+
+    <button class="btn-gen" onclick="draw()">⚡ Générer le flyer</button>
+    <button class="btn-dl" id="btn-dl" onclick="dlFlyer()">⬇ Télécharger PNG</button>
+    <button class="btn-wa" id="btn-wa" onclick="shareWA()">💬 Partager WhatsApp</button>
+
+  </div>
+
+  <div class="preview-area">
+    <div class="canvas-wrap"><canvas id="c"></canvas></div>
+    <div class="hint">Modifiez les champs pour voir les changements en temps réel ✨</div>
+  </div>
+</div>
+
+<script>
+var AGENTS={
+  joseph:{nom:'Joseph Henry',phone:'+224 620 611 648',promo:'JHL224',pays:'Guinée Conakry',flag:'🇬🇳',key:'joseph2025'},
+  elena:{nom:'Elena',phone:'+7 910 875 4783',promo:'RUS76',pays:'Russie',flag:'🇷🇺',key:'elena2025'}
+};
+var AG=null,TPL='football',FMT='carre';
+var PALETTES={
+  red:{bg1:'#0d0002',bg2:'#1a0005',acc:'#e53935',acc2:'#ff8f00',glow:'rgba(229,57,53,0.4)'},
+  blue:{bg1:'#000d1a',bg2:'#001529',acc:'#1565c0',acc2:'#ffd700',glow:'rgba(21,101,192,0.4)'},
+  green:{bg1:'#001a05',bg2:'#00260a',acc:'#2e7d32',acc2:'#76ff03',glow:'rgba(46,125,50,0.4)'},
+  purple:{bg1:'#0d0018',bg2:'#1a0030',acc:'#6a1b9a',acc2:'#ea80fc',glow:'rgba(106,27,154,0.4)'},
+  dark:{bg1:'#05050f',bg2:'#0d0d1f',acc:'#e94560',acc2:'#0f3460',glow:'rgba(233,69,96,0.4)'},
+  orange:{bg1:'#1a0500',bg2:'#2d0a00',acc:'#e64a19',acc2:'#ffd740',glow:'rgba(230,74,25,0.4)'}
+};
+var PAL=PALETTES.red;
+
+function init(){
+  var p=new URLSearchParams(location.search),ref=p.get('ref'),key=p.get('key'),ag=AGENTS[ref];
+  if(!ag||key!==ag.key){document.getElementById('blocked').style.display='flex';return;}
+  AG=ag;
+  document.getElementById('agent-tag').textContent=ag.flag+' '+ag.nom;
+  draw();
+}
+
+function setTpl(t,el){
+  TPL=t;
+  document.querySelectorAll('.tpl-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  ['football','bonus','can','temoignage','promo','retrait'].forEach(f=>{
+    document.getElementById('form-'+f).style.display=f===t?'block':'none';
+  });
+  draw();
+}
+
+function setFmt(f,el){
+  FMT=f;
+  document.querySelectorAll('.fmt').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  draw();
+}
+
+function setPalette(name,el){
+  PAL=PALETTES[name];
+  document.querySelectorAll('.sw').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  draw();
+}
+
+function getSz(){
+  if(FMT==='story')return{w:1080,h:1920};
+  if(FMT==='paysage')return{w:1200,h:630};
+  return{w:1080,h:1080};
+}
+
+function draw(){
+  if(!AG)return;
+  var sz=getSz(),W=sz.w,H=sz.h,s=W/1080;
+  var cv=document.getElementById('c');
+  cv.width=W;cv.height=H;
+  var ctx=cv.getContext('2d');
+
+  drawBG(ctx,W,H,s);
+  drawHeader(ctx,W,H,s);
+
+  if(TPL==='football')tplFootball(ctx,W,H,s);
+  else if(TPL==='bonus')tplBonus(ctx,W,H,s);
+  else if(TPL==='can')tplCAN(ctx,W,H,s);
+  else if(TPL==='temoignage')tplTemoignage(ctx,W,H,s);
+  else if(TPL==='promo')tplPromo(ctx,W,H,s);
+  else if(TPL==='retrait')tplRetrait(ctx,W,H,s);
+
+  drawFooter(ctx,W,H,s);
+  document.getElementById('btn-dl').style.display='block';
+  document.getElementById('btn-wa').style.display='block';
+}
+
+function drawBG(ctx,W,H,s){
+  // Fond principal
+  var bg=ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,PAL.bg1);
+  bg.addColorStop(0.5,PAL.bg2);
+  bg.addColorStop(1,PAL.bg1);
+  ctx.fillStyle=bg;
+  ctx.fillRect(0,0,W,H);
+
+  // Effet lumière gauche (bleu)
+  var gl=ctx.createRadialGradient(0,H*0.4,0,0,H*0.4,W*0.7);
+  gl.addColorStop(0,'rgba(30,60,180,0.25)');
+  gl.addColorStop(1,'transparent');
+  ctx.fillStyle=gl;
+  ctx.fillRect(0,0,W,H);
+
+  // Effet lumière droite (couleur accent)
+  var gr=ctx.createRadialGradient(W,H*0.4,0,W,H*0.4,W*0.7);
+  gr.addColorStop(0,PAL.glow);
+  gr.addColorStop(1,'transparent');
+  ctx.fillStyle=gr;
+  ctx.fillRect(0,0,W,H);
+
+  // Lignes diagonales subtiles
+  ctx.save();
+  ctx.globalAlpha=0.025;
+  for(var i=0;i<12;i++){
+    ctx.beginPath();
+    ctx.moveTo(-200*s+i*200*s,0);
+    ctx.lineTo(W-200*s+i*200*s,H);
+    ctx.strokeStyle='#fff';
+    ctx.lineWidth=80*s;
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // Cercles décoratifs
+  ctx.save();
+  ctx.globalAlpha=0.06;
+  for(var j=0;j<5;j++){
+    ctx.beginPath();
+    ctx.arc(W*0.85,H*0.2,(j+1)*120*s,0,Math.PI*2);
+    ctx.strokeStyle=PAL.acc;
+    ctx.lineWidth=2*s;
+    ctx.stroke();
+  }
+  for(var k=0;k<4;k++){
+    ctx.beginPath();
+    ctx.arc(W*0.15,H*0.8,(k+1)*100*s,0,Math.PI*2);
+    ctx.strokeStyle='#3060cc';
+    ctx.lineWidth=2*s;
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // Bande top
+  var topG=ctx.createLinearGradient(0,0,W,0);
+  topG.addColorStop(0,'rgba(30,60,180,0.8)');
+  topG.addColorStop(0.5,PAL.acc);
+  topG.addColorStop(1,'rgba(30,60,180,0.8)');
+  ctx.fillStyle=topG;
+  ctx.fillRect(0,0,W,5*s);
+}
+
+function drawHeader(ctx,W,H,s){
+  ctx.save();
+  ctx.textAlign='center';
+
+  // Logo 1XBET avec style premium
+  var logoY=80*s;
+  ctx.font='900 '+(72*s)+'px "Segoe UI",Arial Black';
+  ctx.fillStyle='rgba(255,255,255,0.95)';
+  ctx.shadowColor=PAL.acc;
+  ctx.shadowBlur=0;
+  // Dessiner "1" "X" "BET" séparément
+  var metrics1=ctx.measureText('1');
+  var metricsX=ctx.measureText('X');
+  var metricsB=ctx.measureText('BET');
+  var totalW=metrics1.width+metricsX.width+metricsB.width;
+  var startX=W/2-totalW/2;
+  ctx.textAlign='left';
+  ctx.fillStyle='#fff';
+  ctx.fillText('1',startX,logoY);
+  ctx.fillStyle=PAL.acc2;
+  ctx.shadowColor=PAL.acc2;
+  ctx.shadowBlur=15*s;
+  ctx.fillText('X',startX+metrics1.width,logoY);
+  ctx.shadowBlur=0;
+  ctx.fillStyle='#fff';
+  ctx.fillText('BET',startX+metrics1.width+metricsX.width,logoY);
+  ctx.restore();
+
+  // Ligne séparatrice header
+  var lg=ctx.createLinearGradient(0,0,W,0);
+  lg.addColorStop(0,'transparent');
+  lg.addColorStop(0.3,PAL.acc2);
+  lg.addColorStop(0.7,PAL.acc2);
+  lg.addColorStop(1,'transparent');
+  ctx.fillStyle=lg;
+  ctx.fillRect(W/2-280*s,92*s,560*s,2*s);
+}
+
+function tplFootball(ctx,W,H,s){
+  var eq1=v('f-eq1')||'Guinée',eq2=v('f-eq2')||'Sénégal';
+  var fl1=v('f-flag1')||'🇬🇳',fl2=v('f-flag2')||'🇸🇳';
+  var comp=v('f-comp')||'Champions League',date=v('f-date')||'Ce soir à 21:00';
+  var isStory=FMT==='story';
+  var baseY=isStory?1.7:1;
+
+  // Badge compétition
+  ctx.save();
+  ctx.textAlign='center';
+  var compText=comp.toUpperCase();
+  ctx.font='700 '+(30*s)+'px "Segoe UI",Arial';
+  var compW=ctx.measureText(compText).width+70*s;
+  var compX=W/2-compW/2,compY=115*s;
+  roundRect(ctx,compX,compY,compW,44*s,22*s);
+  ctx.fillStyle='rgba(255,255,255,0.06)';
+  ctx.fill();
+  var bdG=ctx.createLinearGradient(compX,0,compX+compW,0);
+  bdG.addColorStop(0,PAL.acc);
+  bdG.addColorStop(1,'rgba(30,60,180,0.8)');
+  ctx.strokeStyle=bdG;
+  ctx.lineWidth=1.5*s;
+  ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,0.8)';
+  ctx.fillText('⚽ '+compText,W/2,145*s);
+  ctx.restore();
+
+  var teamsY=(isStory?580:360)*s;
+
+  // Zone équipes avec fond glassmorphism
+  ctx.save();
+  roundRect(ctx,50*s,teamsY-80*s,W-100*s,180*s,20*s);
+  ctx.fillStyle='rgba(255,255,255,0.04)';
+  ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.08)';
+  ctx.lineWidth=1*s;
+  ctx.stroke();
+  ctx.restore();
+
+  // Drapeaux et noms équipes
+  ctx.save();
+  // Équipe 1 (gauche)
+  ctx.font=(90*s)+'px Arial';
+  ctx.textAlign='center';
+  ctx.fillText(fl1,160*s,teamsY-10*s);
+  ctx.font='800 '+(52*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle='#fff';
+  ctx.shadowColor='rgba(0,0,0,0.8)';
+  ctx.shadowBlur=10*s;
+  ctx.fillText(eq1.toUpperCase(),160*s,teamsY+65*s);
+
+  // Équipe 2 (droite)
+  ctx.font=(90*s)+'px Arial';
+  ctx.textAlign='center';
+  ctx.fillText(fl2,W-160*s,teamsY-10*s);
+  ctx.font='800 '+(52*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle='#fff';
+  ctx.fillText(eq2.toUpperCase(),W-160*s,teamsY+65*s);
+  ctx.restore();
+
+  // VS central avec effet premium
+  ctx.save();
+  // Cercle VS
+  ctx.beginPath();
+  ctx.arc(W/2,teamsY+20*s,62*s,0,Math.PI*2);
+  var vsG=ctx.createRadialGradient(W/2,teamsY+20*s,0,W/2,teamsY+20*s,62*s);
+  vsG.addColorStop(0,PAL.acc);
+  vsG.addColorStop(1,lerpHex(PAL.acc,'#000000',0.5));
+  ctx.fillStyle=vsG;
+  ctx.fill();
+  ctx.strokeStyle=PAL.acc2;
+  ctx.lineWidth=2.5*s;
+  ctx.stroke();
+  ctx.shadowColor=PAL.acc;
+  ctx.shadowBlur=20*s;
+  ctx.font='900 '+(48*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle='#fff';
+  ctx.textAlign='center';
+  ctx.fillText('VS',W/2,teamsY+35*s);
+  ctx.restore();
+
+  // Date avec icône calendrier
+  var dateY=teamsY+130*s;
+  ctx.save();
+  var dw=ctx.measureText(date).width*0.9+80*s;
+  ctx.font='700 '+(36*s)+'px "Segoe UI",Arial';
+  roundRect(ctx,W/2-dw/2,dateY,dw,52*s,26*s);
+  ctx.fillStyle='rgba(255,255,255,0.07)';
+  ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.15)';
+  ctx.lineWidth=1*s;
+  ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,0.85)';
+  ctx.textAlign='center';
+  ctx.fillText('📅 '+date,W/2,dateY+35*s);
+  ctx.restore();
+
+  // Texte paris
+  ctx.save();
+  ctx.textAlign='center';
+  ctx.font='700 '+(38*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle=PAL.acc2;
+  ctx.shadowColor=PAL.acc2;
+  ctx.shadowBlur=12*s;
+  ctx.fillText('🔥 Pariez maintenant — Bonus 200% !',W/2,dateY+110*s);
+  ctx.restore();
+
+  drawPromoBlock(ctx,W,H,s,dateY+180*s);
+}
+
+function tplBonus(ctx,W,H,s){
+  var pct=v('b-pct')||'200%',cond=v('b-cond')||'Sur votre 1er dépôt !';
+  var msg=v('b-msg')||'';
+
+  // Icône cadeau géant
+  ctx.font=(160*s)+'px Arial';
+  ctx.textAlign='center';
+  ctx.fillText('🎁',W/2,320*s);
+
+  // BONUS
+  ctx.save();
+  ctx.textAlign='center';
+  ctx.font='700 '+(38*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle='rgba(255,255,255,0.5)';
+  ctx.letterSpacing='0.15em';
+  ctx.fillText('BONUS EXCLUSIF',W/2,380*s);
+
+  // Pourcentage géant
+  ctx.shadowColor=PAL.acc2;
+  ctx.shadowBlur=40*s;
+  ctx.font='900 '+(120*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle=PAL.acc2;
+  ctx.fillText(pct,W/2,510*s);
+  ctx.shadowBlur=0;
+
+  ctx.font='700 '+(46*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle='rgba(255,255,255,0.85)';
+  ctx.fillText(cond,W/2,575*s);
+  ctx.restore();
+
+  if(msg){
+    ctx.font='500 '+(34*s)+'px "Segoe UI",Arial';
+    ctx.fillStyle='rgba(255,255,255,0.45)';
+    ctx.textAlign='center';
+    wrapText(ctx,msg,W/2,640*s,W-140*s,44*s);
+  }
+
+  drawPromoBlock(ctx,W,H,s,760*s);
+}
+
+function tplCAN(ctx,W,H,s){
+  var titre=v('c-titre')||'CAN 2025',sous=v('c-sous')||'DEMI-FINALE';
+  var eq1=v('c-eq1')||'Guinée',eq2=v('c-eq2')||'Maroc';
+  var fl1=v('c-f1')||'🇬🇳',fl2=v('c-f2')||'🇲🇦';
+  var date=v('c-date')||'19.07.2026';
+
+  // Trophée
+  ctx.font=(100*s)+'px Arial';
+  ctx.textAlign='center';
+  ctx.fillText('🏆',W/2,220*s);
+
+  // Titre événement
+  ctx.save();
+  ctx.textAlign='center';
+  ctx.shadowColor=PAL.acc2;
+  ctx.shadowBlur=30*s;
+  ctx.font='900 '+(95*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle=PAL.acc2;
+  ctx.fillText(titre,W/2,330*s);
+  ctx.shadowBlur=0;
+  ctx.font='800 '+(52*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle='rgba(255,255,255,0.6)';
+  ctx.fillText(sous,W/2,395*s);
+  ctx.restore();
+
+  // Badge date
+  ctx.save();
+  var dw2=280*s;
+  roundRect(ctx,W/2-dw2/2,420*s,dw2,50*s,25*s);
+  ctx.fillStyle='rgba(255,255,255,0.06)';
+  ctx.fill();
+  ctx.strokeStyle=PAL.acc2;
+  ctx.lineWidth=1.5*s;
+  ctx.stroke();
+  ctx.font='700 '+(32*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle=PAL.acc2;
+  ctx.textAlign='center';
+  ctx.fillText('📅 '+date,W/2,453*s);
+  ctx.restore();
+
+  // Drapeaux géants
+  ctx.font=(100*s)+'px Arial';
+  ctx.textAlign='center';
+  ctx.fillText(fl1,200*s,590*s);
+  ctx.fillText(fl2,W-200*s,590*s);
+
+  // VS
+  ctx.save();
+  ctx.font='900 '+(60*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle=PAL.acc2;
+  ctx.shadowColor=PAL.acc2;
+  ctx.shadowBlur=20*s;
+  ctx.fillText('VS',W/2,575*s);
+  ctx.shadowBlur=0;
+  ctx.font='800 '+(46*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle='#fff';
+  ctx.fillText(eq1.toUpperCase(),200*s,640*s);
+  ctx.fillText(eq2.toUpperCase(),W-200*s,640*s);
+  ctx.restore();
+
+  ctx.save();
+  ctx.font='700 '+(36*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle=PAL.acc2;
+  ctx.textAlign='center';
+  ctx.shadowColor=PAL.acc2;
+  ctx.shadowBlur=10*s;
+  ctx.fillText('🔥 Pariez et gagnez gros !',W/2,720*s);
+  ctx.restore();
+
+  drawPromoBlock(ctx,W,H,s,790*s);
+}
+
+function tplTemoignage(ctx,W,H,s){
+  var nom=v('t-nom')||'Abdoule S.',ville=v('t-ville')||'Conakry';
+  var gain=v('t-gain')||'500 000 GNF',texte=v('t-texte')||'';
+  var note=parseInt(v('t-note')||'5');
+
+  // Titre
+  ctx.save();
+  ctx.textAlign='center';
+  ctx.font='700 '+(34*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle='rgba(255,255,255,0.4)';
+  ctx.letterSpacing='.1em';
+  ctx.fillText('TÉMOIGNAGE CLIENT VÉRIFIÉ',W/2,170*s);
+  ctx.restore();
+
+  // Étoiles
+  ctx.save();
+  ctx.textAlign='center';
+  ctx.font=(60*s)+'px Arial';
+  ctx.fillStyle=PAL.acc2;
+  ctx.shadowColor=PAL.acc2;
+  ctx.shadowBlur=15*s;
+  ctx.fillText('★'.repeat(note)+'☆'.repeat(5-note),W/2,240*s);
+  ctx.restore();
+
+  // Montant gagné
+  ctx.save();
+  var gw=480*s;
+  roundRect(ctx,W/2-gw/2,258*s,gw,70*s,14*s);
+  var gBg=ctx.createLinearGradient(W/2-gw/2,258*s,W/2+gw/2,328*s);
+  gBg.addColorStop(0,PAL.acc);
+  gBg.addColorStop(1,lerpHex(PAL.acc,'#000',0.3));
+  ctx.fillStyle=gBg;
+  ctx.fill();
+  ctx.font='800 '+(42*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle='#fff';
+  ctx.textAlign='center';
+  ctx.fillText('💰 Gain : '+gain,W/2,303*s);
+  ctx.restore();
+
+  // Card témoignage
+  ctx.save();
+  roundRect(ctx,60*s,345*s,W-120*s,280*s,18*s);
+  ctx.fillStyle='rgba(255,255,255,0.04)';
+  ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.07)';
+  ctx.lineWidth=1*s;
+  ctx.stroke();
+
+  // Guillemet déco
+  ctx.font='900 '+(180*s)+'px Georgia,serif';
+  ctx.fillStyle=hexA(PAL.acc,0.12);
+  ctx.textAlign='left';
+  ctx.fillText('"',75*s,530*s);
+
+  ctx.font='italic '+(40*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle='rgba(255,255,255,0.85)';
+  ctx.textAlign='center';
+  wrapText(ctx,texte,W/2,415*s,W-180*s,52*s);
+  ctx.restore();
+
+  // Avatar
+  ctx.save();
+  var avY=680*s;
+  ctx.beginPath();
+  ctx.arc(W/2,avY,46*s,0,Math.PI*2);
+  var avG=ctx.createRadialGradient(W/2,avY,0,W/2,avY,46*s);
+  avG.addColorStop(0,PAL.acc);
+  avG.addColorStop(1,lerpHex(PAL.acc,'#000',0.4));
+  ctx.fillStyle=avG;
+  ctx.fill();
+  ctx.font='900 '+(38*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle='#fff';
+  ctx.textAlign='center';
+  ctx.fillText(nom.charAt(0).toUpperCase(),W/2,avY+14*s);
+  ctx.restore();
+
+  ctx.font='700 '+(36*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle='#fff';
+  ctx.textAlign='center';
+  ctx.fillText(nom+' · '+ville,W/2,760*s);
+
+  drawPromoBlock(ctx,W,H,s,810*s);
+}
+
+function tplPromo(ctx,W,H,s){
+  var titre=v('p-titre')||'OFFRE FLASH !',offre=v('p-offre')||'Bonus 250% !';
+  var expire=v('p-expire')||'24 heures',cond=v('p-cond')||'';
+
+  ctx.font=(120*s)+'px Arial';
+  ctx.textAlign='center';
+  ctx.fillText('⚡',W/2,255*s);
+
+  ctx.save();
+  ctx.textAlign='center';
+  ctx.font='900 '+(82*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle=PAL.acc2;
+  ctx.shadowColor=PAL.acc2;
+  ctx.shadowBlur=35*s;
+  wrapText(ctx,titre,W/2,375*s,W-80*s,95*s);
+  ctx.shadowBlur=0;
+
+  ctx.font='700 '+(52*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle='#fff';
+  ctx.fillText(offre,W/2,470*s);
+  ctx.restore();
+
+  // Badge expire
+  ctx.save();
+  var ew=460*s;
+  roundRect(ctx,W/2-ew/2,500*s,ew,58*s,29*s);
+  ctx.fillStyle='rgba(255,80,80,0.12)';
+  ctx.fill();
+  ctx.strokeStyle='rgba(255,80,80,0.4)';
+  ctx.lineWidth=1.5*s;
+  ctx.stroke();
+  ctx.font='700 '+(34*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle='#ff5252';
+  ctx.textAlign='center';
+  ctx.fillText('⏰ Expire dans : '+expire,W/2,539*s);
+  ctx.restore();
+
+  if(cond){
+    ctx.font='500 '+(30*s)+'px "Segoe UI",Arial';
+    ctx.fillStyle='rgba(255,255,255,0.4)';
+    ctx.textAlign='center';
+    ctx.fillText(cond,W/2,610*s);
+  }
+
+  drawPromoBlock(ctx,W,H,s,680*s);
+}
+
+function tplRetrait(ctx,W,H,s){
+  var delai=v('r-delai')||'5 minutes',methode=v('r-methode')||'Orange Money & MTN';
+  var msg=v('r-msg')||'';
+
+  ctx.font=(130*s)+'px Arial';
+  ctx.textAlign='center';
+  ctx.fillText('💸',W/2,265*s);
+
+  ctx.save();
+  ctx.textAlign='center';
+  ctx.font='700 '+(36*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle='rgba(255,255,255,0.45)';
+  ctx.fillText('RETRAIT INSTANTANÉ',W/2,330*s);
+
+  ctx.shadowColor=PAL.acc2;
+  ctx.shadowBlur=30*s;
+  ctx.font='900 '+(95*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle=PAL.acc2;
+  ctx.fillText(delai,W/2,440*s);
+  ctx.shadowBlur=0;
+  ctx.restore();
+
+  // Méthodes
+  ctx.save();
+  var mw=520*s;
+  roundRect(ctx,W/2-mw/2,465*s,mw,58*s,12*s);
+  ctx.fillStyle='rgba(255,255,255,0.05)';
+  ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.1)';
+  ctx.lineWidth=1*s;
+  ctx.stroke();
+  ctx.font='700 '+(34*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle='rgba(255,255,255,0.7)';
+  ctx.textAlign='center';
+  ctx.fillText('📱 '+methode,W/2,504*s);
+  ctx.restore();
+
+  if(msg){
+    ctx.font='500 '+(36*s)+'px "Segoe UI",Arial';
+    ctx.fillStyle='rgba(255,255,255,0.5)';
+    ctx.textAlign='center';
+    wrapText(ctx,msg,W/2,590*s,W-120*s,46*s);
+  }
+
+  // Stats
+  ctx.save();
+  var stats=[['⚡','Instantané'],['🔒','Sécurisé'],['✅','Garanti']];
+  var sw2=240*s,startX2=W/2-sw2*1.5;
+  stats.forEach(function(st,i){
+    var sx=startX2+i*sw2+sw2/2;
+    var sy=700*s;
+    ctx.beginPath();
+    ctx.arc(sx,sy,40*s,0,Math.PI*2);
+    ctx.fillStyle=hexA(PAL.acc,0.2);
+    ctx.fill();
+    ctx.strokeStyle=hexA(PAL.acc,0.4);
+    ctx.lineWidth=1.5*s;
+    ctx.stroke();
+    ctx.font=(32*s)+'px Arial';
+    ctx.textAlign='center';
+    ctx.fillText(st[0],sx,sy+12*s);
+    ctx.font='600 '+(26*s)+'px "Segoe UI",Arial';
+    ctx.fillStyle='rgba(255,255,255,0.6)';
+    ctx.fillText(st[1],sx,sy+62*s);
+  });
+  ctx.restore();
+
+  drawPromoBlock(ctx,W,H,s,800*s);
+}
+
+function drawPromoBlock(ctx,W,H,s,y){
+  // Fond glassmorphism
+  ctx.save();
+  roundRect(ctx,60*s,y,W-120*s,130*s,18*s);
+  var pbG=ctx.createLinearGradient(60*s,y,W-60*s,y+130*s);
+  pbG.addColorStop(0,hexA(PAL.acc,0.15));
+  pbG.addColorStop(1,hexA(PAL.acc2,0.08));
+  ctx.fillStyle=pbG;
+  ctx.fill();
+  // Bordure gradient
+  var bG=ctx.createLinearGradient(60*s,y,W-60*s,y);
+  bG.addColorStop(0,hexA(PAL.acc2,0.6));
+  bG.addColorStop(0.5,hexA(PAL.acc,0.8));
+  bG.addColorStop(1,hexA(PAL.acc2,0.6));
+  ctx.strokeStyle=bG;
+  ctx.lineWidth=1.5*s;
+  ctx.stroke();
+
+  ctx.font='600 '+(24*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle='rgba(255,255,255,0.35)';
+  ctx.textAlign='center';
+  ctx.letterSpacing='.12em';
+  ctx.fillText('CODE PROMO EXCLUSIF',W/2,y+40*s);
+
+  ctx.shadowColor=PAL.acc2;
+  ctx.shadowBlur=18*s;
+  ctx.font='900 '+(64*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle=PAL.acc2;
+  ctx.letterSpacing='.18em';
+  ctx.fillText(AG.promo,W/2,y+108*s);
+  ctx.restore();
+}
+
+function drawFooter(ctx,W,H,s){
+  var fy=H-170*s;
+  // Fondu sombre
+  var fg=ctx.createLinearGradient(0,fy,0,H);
+  fg.addColorStop(0,'transparent');
+  fg.addColorStop(0.25,'rgba(0,0,0,0.75)');
+  fg.addColorStop(1,'rgba(0,0,0,0.92)');
+  ctx.fillStyle=fg;
+  ctx.fillRect(0,fy,W,H-fy);
+
+  // Ligne
+  var lg=ctx.createLinearGradient(0,0,W,0);
+  lg.addColorStop(0,'transparent');
+  lg.addColorStop(0.4,PAL.acc2);
+  lg.addColorStop(0.6,PAL.acc);
+  lg.addColorStop(1,'transparent');
+  ctx.fillStyle=lg;
+  ctx.fillRect(0,fy+18*s,W,1.5*s);
+
+  ctx.textAlign='center';
+  ctx.font='700 '+(40*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle='#fff';
+  ctx.fillText('Agent officiel : '+AG.nom+' '+AG.flag,W/2,fy+65*s);
+
+  ctx.font='700 '+(36*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle=PAL.acc2;
+  ctx.fillText('📱 '+AG.phone,W/2,fy+112*s);
+
+  ctx.font='500 '+(26*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle='rgba(255,255,255,0.3)';
+  ctx.fillText('✅ Disponible 7j/7  ·  Dépôt & Retrait rapides  ·  1xBet Officiel',W/2,fy+152*s);
+
+  // Bande bas
+  var botG=ctx.createLinearGradient(0,0,W,0);
+  botG.addColorStop(0,PAL.acc);
+  botG.addColorStop(0.5,PAL.acc2);
+  botG.addColorStop(1,PAL.acc);
+  ctx.fillStyle=botG;
+  ctx.fillRect(0,H-5*s,W,5*s);
+}
+
+function wrapText(ctx,text,x,y,maxW,lh){
+  if(!text)return;
+  var words=text.split(' '),line='',cy=y;
+  for(var i=0;i<words.length;i++){
+    var tl=line+words[i]+' ';
+    if(ctx.measureText(tl).width>maxW&&i>0){ctx.fillText(line.trim(),x,cy);line=words[i]+' ';cy+=lh;}
+    else line=tl;
+  }
+  ctx.fillText(line.trim(),x,cy);
+}
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+}
+function lerpHex(a,b,t){
+  var ah=parseInt(a.replace('#',''),16),bh=parseInt(b.replace('#',''),16);
+  var r=Math.round(((ah>>16)&255)+(((bh>>16)&255)-((ah>>16)&255))*t);
+  var g=Math.round(((ah>>8)&255)+(((bh>>8)&255)-((ah>>8)&255))*t);
+  var bl=Math.round((ah&255)+((bh&255)-(ah&255))*t);
+  return '#'+((1<<24)+(r<<16)+(g<<8)+bl).toString(16).slice(1);
+}
+function hexA(hex,alpha){
+  var h=parseInt(hex.replace('#',''),16);
+  return 'rgba('+((h>>16)&255)+','+((h>>8)&255)+','+(h&255)+','+alpha+')';
+}
+function v(id){return(document.getElementById(id)||{}).value||'';}
+function dlFlyer(){
+  var cv=document.getElementById('c'),a=document.createElement('a');
+  a.download='flyer_'+TPL+'_'+AG.nom.split(' ')[0]+'_'+Date.now()+'.png';
+  a.href=cv.toDataURL('image/png');a.click();
+}
+function shareWA(){
+  var msg='🎁 *1xBet — Offre exclusive !*\n\nCode promo : *'+AG.promo+'*\n📱 Contactez : '+AG.phone+'\n✅ Disponible 7j/7';
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+init();
+</script>
+</body>
+</html>
