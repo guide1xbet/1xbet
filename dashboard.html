@@ -285,7 +285,7 @@ tr:last-child td{border-bottom:none;}
           <select class="filter-select" id="f-agent" onchange="filterTransactions()">
             <option value="">Tous les agents</option>
             <option value="joseph">Joseph</option>
-            <option value="elena">Elena</option>
+            <option value="nouhou">Nouhou Zanguina</option>
           </select>
           <select class="filter-select" id="f-type" onchange="filterTransactions()">
             <option value="">Tous les types</option>
@@ -349,7 +349,7 @@ tr:last-child td{border-bottom:none;}
           <select class="filter-select" id="fd-agent" onchange="filterDepots()">
             <option value="">Tous les agents</option>
             <option value="joseph">Joseph</option>
-            <option value="elena">Elena</option>
+            <option value="nouhou">Nouhou Zanguina</option>
           </select>
           <select class="filter-select" id="fd-statut" onchange="filterDepots()">
             <option value="">Tous les statuts</option>
@@ -391,7 +391,7 @@ tr:last-child td{border-bottom:none;}
           <select class="filter-select" id="fr-agent" onchange="filterRetraits()">
             <option value="">Tous les agents</option>
             <option value="joseph">Joseph</option>
-            <option value="elena">Elena</option>
+            <option value="nouhou">Nouhou Zanguina</option>
           </select>
           <select class="filter-select" id="fr-statut" onchange="filterRetraits()">
             <option value="">Tous les statuts</option>
@@ -504,7 +504,7 @@ function getTypeBadge(type){
 }
 
 function getAgentBadge(agent){
-  const colors = { joseph: 'badge-green', elena: 'badge-blue' };
+  const colors = { joseph: 'badge-green', nouhou: 'badge-blue' };
   return '<span class="badge '+(colors[agent]||'badge-purple')+'">'+agent+'</span>';
 }
 
@@ -755,7 +755,7 @@ function filterRetraits(){
 // AGENTS
 // ============================================
 function renderAgents(){
-  const agents = ['joseph', 'elena'];
+  const agents = ['joseph', 'nouhou'];
   const grid = document.getElementById('agents-grid');
   grid.innerHTML = agents.map(agent => {
     const txs = allTransactions.filter(t => t.agent === agent);
@@ -765,8 +765,8 @@ function renderAgents(){
     const totalDepots = depots.reduce((s,t) => s+Number(t.montant||0), 0);
     const totalRetraits = retraits.reduce((s,t) => s+Number(t.montant||0), 0);
     const initiale = agent.charAt(0).toUpperCase();
-    const noms = { joseph: 'Joseph Henry', elena: 'Elena' };
-    const pays = { joseph: '🇬🇳 Guinée Conakry', elena: '🇷🇺 Russie' };
+    const noms = { joseph: 'Joseph Henry', nouhou: 'Nouhou Zanguina' };
+    const pays = { joseph: '🇬🇳 Guinée Conakry', nouhou: '🇳🇪 Niger' };
     return '<div class="agent-card">' +
       '<div class="agent-card-top">' +
       '<div class="agent-avatar">'+initiale+'</div>' +
