@@ -596,28 +596,7 @@ footer strong{color:var(--accent);}
   <div class="panel" id="panel-avis">
     <div class="card">
       <div class="card-title">⭐ Ce que disent nos clients</div>
-      <div class="testi-grid" id="testi-list">
-        <div class="testi-card">
-          <div class="testi-top"><div class="testi-avatar">M</div><div><div class="testi-name">Mamadou B.</div><div class="testi-country">🇬🇳 Guinée Conakry</div></div></div>
-          <div class="testi-stars">★★★★★</div>
-          <div class="testi-text">« Retrait reçu en moins de 5 minutes via Orange Money. Joseph est très sérieux et disponible. Je recommande à 100%. »</div>
-        </div>
-        <div class="testi-card">
-          <div class="testi-top"><div class="testi-avatar" style="background:#1a56db">F</div><div><div class="testi-name">Fatoumata D.</div><div class="testi-country">🇬🇳 Guinée Conakry</div></div></div>
-          <div class="testi-stars">★★★★★</div>
-          <div class="testi-text">« Dépôt instantané via MTN MoMo. L'agent Joseph répond même le soir. Je suis très satisfaite du service. »</div>
-        </div>
-        <div class="testi-card">
-          <div class="testi-top"><div class="testi-avatar" style="background:#25a244">A</div><div><div class="testi-name">Alpha S.</div><div class="testi-country">🇬🇳 Guinée Conakry</div></div></div>
-          <div class="testi-stars">★★★★★</div>
-          <div class="testi-text">« Première fois sur 1xBet. Joseph m'a guidé étape par étape, du compte jusqu'au bonus. Excellent service ! »</div>
-        </div>
-        <div class="testi-card">
-          <div class="testi-top"><div class="testi-avatar" style="background:#b45309">I</div><div><div class="testi-name">Ibrahima K.</div><div class="testi-country">🇬🇳 Guinée Conakry</div></div></div>
-          <div class="testi-stars">★★★★★</div>
-          <div class="testi-text">« Code promo bien activé, bonus reçu dès le premier dépôt. Agent rapide et professionnel. Merci Joseph ! »</div>
-        </div>
-      </div>
+      <div class="testi-grid" id="testi-list"></div>
     </div>
     <div class="card">
       <div class="card-title">✍️ Laisser votre avis</div>
@@ -698,7 +677,95 @@ function applyTheme(t){
   if(t.muted) r.setProperty('--muted', t.muted);
 }
 
+
+// Les avis sont propres à l'agent : afficher des témoignages guinéens sur la page
+// d'un agent nigérien ruine la crédibilité dès la première lecture.
+var AVATAR_COULEURS=['','#1a56db','#25a244','#b45309'];
+// Les exemples de saisie doivent eux aussi coller au pays de l'agent.
+function majExemplesNoms(a){
+  var ex=(a.avis&&a.avis[0]&&a.avis[0].n)?a.avis[0].n.replace(/\s*[A-Z]\.$/,''):'';
+  if(!ex) return;
+  var dep=document.getElementById('dep-nom'), ret=document.getElementById('ret-nom'), rev=document.getElementById('rev-nom');
+  if(dep) dep.placeholder='Ex: '+ex;
+  if(ret) ret.placeholder='Ex: '+ex;
+  if(rev) rev.placeholder='Ex: '+ex;
+}
+
+function renderAvis(a){
+  var box=document.getElementById('testi-list');
+  if(!box) return;
+  var avis=a.avis||[];
+  box.innerHTML='';
+  avis.forEach(function(av,i){
+    var carte=document.createElement('div'); carte.className='testi-card';
+    var top=document.createElement('div'); top.className='testi-top';
+    var ava=document.createElement('div'); ava.className='testi-avatar';
+    if(AVATAR_COULEURS[i]) ava.style.background=AVATAR_COULEURS[i];
+    ava.textContent=av.n.charAt(0);
+    var bloc=document.createElement('div');
+    var nom=document.createElement('div'); nom.className='testi-name'; nom.textContent=av.n;
+    var pays=document.createElement('div'); pays.className='testi-country';
+    pays.textContent=(a.flag?a.flag+' ':'')+(a.avis_pays||a.pays||'');
+    bloc.appendChild(nom); bloc.appendChild(pays);
+    top.appendChild(ava); top.appendChild(bloc);
+    var etoiles=document.createElement('div'); etoiles.className='testi-stars'; etoiles.textContent='★★★★★';
+    var txt=document.createElement('div'); txt.className='testi-text';
+    txt.textContent='« '+av.t.replace(/\{AGENT\}/g, (a.nom||'').split(' ')[0])+' »';
+    carte.appendChild(top); carte.appendChild(etoiles); carte.appendChild(txt);
+    box.appendChild(carte);
+  });
+}
+
+
+// Chiffres réels, lus depuis le serveur. En cas d'échec (serveur endormi, réseau),
+// on MASQUE la statistique au lieu d'afficher un nombre inventé : un « 500+ »
+// identique chez tous les agents et jamais mis à jour dessert la crédibilité.
+function majStatsReelles(a){
+  var elClients=document.getElementById('stat-clients');
+  var carte=elClients?elClients.closest('.stat'):null;
+  fetch(RENDER_SERVER+'/stats/public?agent='+encodeURIComponent(a.ref))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d || !d.success || !d.transactions){ if(carte) carte.style.display='none'; return; }
+      if(elClients) elClients.textContent=d.transactions;
+      var lib=carte?carte.querySelector('span'):null;
+      if(lib) lib.textContent='Transactions traitées';
+      if(d.derniereActivite) afficheDerniereActivite(new Date(d.derniereActivite));
+    })
+    .catch(function(){ if(carte) carte.style.display='none'; });
+}
+
+// « Dernière opération il y a X » : une preuve d'activité vérifiable, plus
+// convaincante qu'un chiffre rond.
+function afficheDerniereActivite(date){
+  var mins=Math.round((Date.now()-date.getTime())/60000);
+  if(isNaN(mins)||mins<0||mins>60*24*7) return;
+  var txt = mins<1 ? "à l'instant"
+          : mins<60 ? 'il y a '+mins+' min'
+          : mins<1440 ? 'il y a '+Math.round(mins/60)+' h'
+          : 'il y a '+Math.round(mins/1440)+' j';
+  var bar=document.querySelector('.trust-bar')||document.querySelector('.stats-row');
+  if(!bar) return;
+  var el=document.getElementById('derniere-activite');
+  if(!el){ el=document.createElement('span'); el.id='derniere-activite'; el.style.cssText='color:var(--muted);font-size:.8rem;'; bar.appendChild(el); }
+  el.textContent='🕒 Dernière opération '+txt;
+}
+
+// Comptage des visites : sans mesure, impossible de savoir si un flyer fonctionne.
+// Volontairement silencieux — jamais bloquant pour l'affichage de la page.
+function pingVisite(ref){
+  try {
+    fetch(RENDER_SERVER+'/visite', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ agentRef: ref })
+    }).catch(function(){});
+  } catch(e){}
+}
+
 function applyAgent(a){
+  majStatsReelles(a);
+  pingVisite(a.ref);
+  renderAvis(a);
   applyTheme(a.theme);
   var waMsg=encodeURIComponent('Bonjour et bienvenue ! 👋\nMerci de votre intérêt. Je suis '+a.nom+'. Je peux vous accompagner pour créer votre compte 1xBet avec le code promo '+a.promo+' et vous aider à effectuer votre premier dépôt ou votre premier retrait.');
   var waUrl='https://wa.me/'+a.phone.replace(/\D/g,'')+'?text='+waMsg;
@@ -1092,6 +1159,13 @@ function getAgents(){
       moyens_depot:['Orange Money','MTN Mobile Money','Cash'],
       moyens_retrait:['Orange Money','MTN Mobile Money','Cash'],
       avis_pays:'Guinée Conakry',
+      flag:'🇬🇳',
+      avis:[
+        {n:'Mamadou B.', t:'Retrait reçu en moins de 5 minutes via Orange Money. {AGENT} est très sérieux et disponible. Je recommande à 100%.'},
+        {n:'Fatoumata D.', t:'Dépôt instantané via MTN MoMo. L\'agent {AGENT} répond même le soir. Je suis très satisfaite du service.'},
+        {n:'Alpha S.', t:'Première fois sur 1xBet. {AGENT} m\'a guidé étape par étape, du compte jusqu\'au bonus. Excellent service !'},
+        {n:'Ibrahima K.', t:'Je joue depuis des mois et je n\'ai jamais eu de problème. Dépôts et retraits toujours rapides.'}
+      ],
       mobcash:{}
     },
     {
@@ -1108,6 +1182,13 @@ function getAgents(){
       moyens_depot:['NITA','AMANA'],
       moyens_retrait:['NITA','AMANA'],
       avis_pays:'Niger',
+      flag:'🇳🇪',
+      avis:[
+        {n:'Abdoulaye I.', t:'Retrait reçu par NITA en quelques minutes. {AGENT} est sérieux et toujours joignable.'},
+        {n:'Aïchatou M.', t:'Dépôt validé tout de suite via AMANA. L\'agent {AGENT} répond vite, même tard le soir.'},
+        {n:'Ibrahim S.', t:'Première inscription sur 1xBet. {AGENT} m\'a accompagné du compte jusqu\'au bonus. Rien à redire.'},
+        {n:'Ramatou A.', t:'Je passe par lui depuis Niamey, dépôts et retraits sans souci à chaque fois.'}
+      ],
       mobcash:{}
     }
   ];

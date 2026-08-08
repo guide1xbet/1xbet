@@ -120,6 +120,9 @@ canvas{display:block;max-width:460px;width:100%;height:auto;}
         <div class="fmt" onclick="setFmt('story',this)">Story<br><span style="font-size:.55rem;color:#3a4265">WhatsApp</span></div>
         <div class="fmt" onclick="setFmt('paysage',this)">Paysage<br><span style="font-size:.55rem;color:#3a4265">Facebook</span></div>
       </div>
+      <label style="display:flex;align-items:center;gap:.5rem;margin-top:.7rem;font-size:.8rem;cursor:pointer;">
+        <input type="checkbox" id="opt-qr" onchange="draw()"> QR code du lien agent
+      </label>
     </div>
 
     <div class="sec">
@@ -214,7 +217,9 @@ var PAL=PALETTES.red;
 function init(){
   var p=new URLSearchParams(location.search),ref=p.get('ref'),key=p.get('key'),ag=AGENTS[ref];
   if(!ag||key!==ag.key){document.getElementById('blocked').style.display='flex';return;}
-  AG=ag;
+  // AGENTS est indexé par ref, mais l'objet ne la porte pas : on l'y ajoute, le QR
+  // en a besoin pour construire le lien de l'agent.
+  AG=Object.assign({ref:ref}, ag);
   document.getElementById('agent-tag').textContent=ag.flag+' '+ag.nom;
   draw();
 }
@@ -249,6 +254,39 @@ function getSz(){
   return{w:1080,h:1080};
 }
 
+var SERVEUR_QR = 'https://mobcash-server.onrender.com';
+var qrCache = {};
+// crossOrigin est indispensable : sans lui, dessiner l'image teinte le canvas et
+// toDataURL() lève une erreur au moment du téléchargement.
+function chargeQR(ref){
+  if(qrCache[ref]) return Promise.resolve(qrCache[ref]);
+  return new Promise(function(res, rej){
+    var img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function(){ qrCache[ref] = img; res(img); };
+    img.onerror = function(){ rej(new Error('QR indisponible')); };
+    img.src = SERVEUR_QR + '/qr/' + ref + '?size=512';
+  });
+}
+
+function dessineQR(ctx, img, W, H, s){
+  // Coin superieur droit : le bas du visuel porte deja le nom de l'agent, son
+  // telephone et le bandeau de confiance. Un QR pose la l'ecrasait.
+  var taille = Math.round(165 * s);
+  var marge = Math.round(40 * s);
+  var x = W - taille - marge;
+  var y = marge + Math.round((H > W ? 150 : 118) * s);
+  ctx.save();
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(x - 8 * s, y - 8 * s, taille + 16 * s, taille + 16 * s + 26 * s);
+  ctx.drawImage(img, x, y, taille, taille);
+  ctx.fillStyle = '#111';
+  ctx.font = '700 ' + Math.round(15 * s) + 'px system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Scannez pour jouer', x + taille / 2, y + taille + 19 * s);
+  ctx.restore();
+}
+
 function draw(){
   if(!AG)return;
   var sz=getSz(),W=sz.w,H=sz.h,s=W/1080;
@@ -269,6 +307,13 @@ function draw(){
   drawFooter(ctx,W,H,s);
   document.getElementById('btn-dl').style.display='block';
   document.getElementById('btn-wa').style.display='block';
+
+  var opt=document.getElementById('opt-qr');
+  if(opt && opt.checked && AG && AG.ref){
+    chargeQR(AG.ref)
+      .then(function(img){ dessineQR(ctx,img,W,H,s); })
+      .catch(function(){ /* serveur endormi : le flyer reste utilisable sans QR */ });
+  }
 }
 
 function drawBG(ctx,W,H,s){
