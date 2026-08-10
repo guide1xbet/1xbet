@@ -6,6 +6,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Guide 1xBet — Agent Officiel</title>
 <style>
+.ico-lg{width:3rem;height:3rem;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;color:#3ecf8e;}
+.card-title,.itab,.fg label,.btn-red,.btn-white,.agent-badge,.topbar-logo{display:inline-flex;align-items:center;}
+.ico{width:1.05em;height:1.05em;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.16em;margin-right:.4em;flex-shrink:0;}
+.navtab{display:inline-flex;align-items:center;}
+.trust-bar span{display:inline-flex;align-items:center;}
 :root{
   --accent:#d32f2f; --accent-dark:#b00000; --accent-rgb:211,47,47; --accent-light:#ff6b6b;
   --bg-1:#0f1626; --bg-2:#141d30; --surface:#1e2d4a; --muted:#8899bb;
@@ -95,7 +100,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#0a0e1a;color:#222;}
 /* QUICK CARD */
 .qcard{background:var(--bg-2);border:1px solid var(--surface);border-radius:12px;padding:1.25rem;cursor:pointer;transition:border-color .2s,box-shadow .2s;}
 .qcard:hover{border-color:var(--accent);box-shadow:0 4px 16px rgba(var(--accent-rgb),.12);}
-.qcard-icon{font-size:1.6rem;margin-bottom:.6rem;}
+.qcard-icon{margin-bottom:.6rem;color:var(--accent);}
+.qcard-icon .ico{width:1.7rem;height:1.7rem;margin:0;stroke-width:1.7;}
 .qcard h3{font-size:.92rem;font-weight:800;color:#fff;margin-bottom:.25rem;}
 .qcard p{font-size:.78rem;color:var(--muted);line-height:1.5;}
 .qcard-arrow{color:var(--accent);font-size:.78rem;font-weight:700;margin-top:.6rem;display:block;}
@@ -163,7 +169,8 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 
 /* GUARANTEE */
 .gitem{display:flex;gap:.75rem;align-items:flex-start;padding:.85rem;background:var(--bg-2);border-radius:10px;margin-bottom:.6rem;border:1px solid var(--surface);}
-.gicon{font-size:1.4rem;flex-shrink:0;}
+.gicon{flex-shrink:0;color:var(--accent);display:flex;align-items:center;}
+.gicon .ico{width:1.5rem;height:1.5rem;margin:0;stroke-width:1.7;}
 .gitem h4{font-size:.86rem;font-weight:700;margin-bottom:.15rem;color:#fff;}
 .gitem p{font-size:.78rem;color:var(--muted);}
 .gtag{display:inline-block;background:#e8f5e9;color:#2e7d32;font-size:.65rem;font-weight:700;padding:.1rem .45rem;border-radius:3px;margin-top:.3rem;}
@@ -219,7 +226,7 @@ footer strong{color:var(--accent);}
 <body>
 
 <div id="blocked-screen">
-  <div class="lock">🔒</div>
+  <div class="lock"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10.8" width="16" height="10.2" rx="2.2"/><path d="M8 10.8V8a4 4 0 0 1 8 0v2.8"/></svg></div>
   <h2>Accès non autorisé</h2>
   <p>Ce lien n'est plus actif ou n'est pas valide.<br>Contactez votre agent pour obtenir le bon lien.</p>
 </div>
@@ -228,17 +235,17 @@ footer strong{color:var(--accent);}
 
 <div class="ticker">
   <div class="ticker-track">
-    <span>🎁 Code promo exclusif — Bonus jusqu'à 200%</span>
-    <span>⚡ Retrait en moins de 5 minutes via Mobile Money</span>
-    <span>✅ Agent officiel 1xBet — Disponible 7j/7</span>
-    <span>🏆 Plus de 50 sports — Football, Basketball, Tennis</span>
-    <span id="ticker-moyens">📱 Orange Money · MTN · Moov · Wave — Instantané</span>
-    <span>🔒 0% de commission — Votre argent sécurisé</span>
+    <span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8.5" width="18" height="4" rx="1"/><path d="M4.8 12.5V21h14.4v-8.5M12 8.5V21"/><path d="M12 8.5H8.2a2.1 2.1 0 1 1 0-4.2c2.4 0 3.8 4.2 3.8 4.2zM12 8.5h3.8a2.1 2.1 0 1 0 0-4.2C13.4 4.3 12 8.5 12 8.5z"/></svg>Code promo exclusif — Bonus jusqu'à 200%</span>
+    <span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.2 2.5 4.5 14h6l-1.2 7.5L19.5 10h-6.3z"/></svg>Retrait en moins de 5 minutes via Mobile Money</span>
+    <span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.8"/><path d="m8.2 12.4 2.6 2.6 5-5.4"/></svg>Agent officiel 1xBet — Disponible 7j/7</span>
+    <span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 5.5H4.5V8a3 3 0 0 0 3 3M17 5.5h2.5V8a3 3 0 0 1-3 3"/><path d="M12 14v3.5M8.5 20.5h7"/></svg>Plus de 50 sports — Football, Basketball, Tennis</span>
+    <span id="ticker-moyens"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>Orange Money · MTN · Moov · Wave — Instantané</span>
+    <span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10.8" width="16" height="10.2" rx="2.2"/><path d="M8 10.8V8a4 4 0 0 1 8 0v2.8"/></svg>0% de commission — Votre argent sécurisé</span>
   </div>
 </div>
 
 <div class="topbar">
-  <a class="topbar-logo" href="#">🎯 Guide <span class="red">1xBet</span></a>
+  <a class="topbar-logo" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>Guide <span class="red">1xBet</span></a>
   <div class="topbar-right">
     <a class="btn-login" href="https://1xbet.com/fr" target="_blank">Se connecter</a>
     <a class="btn-signup" href="https://1xbet.com/fr" target="_blank">S'inscrire</a>
@@ -246,13 +253,13 @@ footer strong{color:var(--accent);}
 </div>
 
 <div class="navtabs" id="navtabs">
-  <div class="navtab active" onclick="showPanel('accueil',this)">🏠 Accueil</div>
-  <div class="navtab" onclick="showPanel('inscription',this)">📝 Inscription</div>
-  <div class="navtab" onclick="showPanel('depot',this)">💳 Dépôt</div>
-  <div class="navtab" onclick="showPanel('retrait',this)">💰 Retrait</div>
-  <div class="navtab" onclick="showPanel('bonus',this)">🎁 Bonus</div>
-  <div class="navtab" onclick="showPanel('avis',this)">⭐ Avis</div>
-  <div class="navtab" onclick="showPanel('garanties',this)">🛡️ Garanties</div>
+  <div class="navtab active" onclick="showPanel('accueil',this)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9.8 12 3l9 6.8V20a1 1 0 0 1-1 1h-4.5v-6.5h-7V21H4a1 1 0 0 1-1-1z"/></svg>Accueil</div>
+  <div class="navtab" onclick="showPanel('inscription',this)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7.5" r="3.5"/><path d="M2.5 21v-1.8A4.2 4.2 0 0 1 6.7 15h4.6a4.2 4.2 0 0 1 4.2 4.2V21"/><path d="M19 7.5v6M22 10.5h-6"/></svg>Inscription</div>
+  <div class="navtab" onclick="showPanel('depot',this)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 9.8h19M6 15h4"/></svg>Dépôt</div>
+  <div class="navtab" onclick="showPanel('retrait',this)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 20.5h16"/></svg>Retrait</div>
+  <div class="navtab" onclick="showPanel('bonus',this)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8.5" width="18" height="4" rx="1"/><path d="M4.8 12.5V21h14.4v-8.5M12 8.5V21"/><path d="M12 8.5H8.2a2.1 2.1 0 1 1 0-4.2c2.4 0 3.8 4.2 3.8 4.2zM12 8.5h3.8a2.1 2.1 0 1 0 0-4.2C13.4 4.3 12 8.5 12 8.5z"/></svg>Bonus</div>
+  <div class="navtab" onclick="showPanel('avis',this)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.2 2.8 5.7 6.3.9-4.6 4.4 1.1 6.3L12 17.6l-5.6 2.9 1.1-6.3-4.6-4.4 6.3-.9z"/></svg>Avis</div>
+  <div class="navtab" onclick="showPanel('garanties',this)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2 20 6v6c0 4.4-3.2 8.2-8 9.8C7.2 20.2 4 16.4 4 12V6z"/></svg>Garanties</div>
 </div>
 
 <div class="hero">
@@ -266,7 +273,7 @@ footer strong{color:var(--accent);}
   </div>
   <div class="hero-overlay"></div>
   <div class="agent-avatar-wrap" id="agent-avatar-wrap"></div>
-  <div class="agent-badge">✅ Agent officiel 1xBet vérifié</div>
+  <div class="agent-badge"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.8"/><path d="m8.2 12.4 2.6 2.6 5-5.4"/></svg>Agent officiel 1xBet vérifié</div>
   <div class="agent-name" id="agent-name">—</div>
   <div class="agent-country" id="agent-country">—</div>
   <div class="promo-block">
@@ -274,21 +281,21 @@ footer strong{color:var(--accent);}
       <div class="promo-lbl">Code promo exclusif</div>
       <div class="promo-val" id="display-promo">—</div>
     </div>
-    <button class="btn-copy" onclick="copyPromo()">📋 Copier</button>
+    <button class="btn-copy" onclick="copyPromo()"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>Copier</button>
   </div>
   <div class="hero-btns">
-    <a class="btn-red" href="https://1xbet.com/fr" target="_blank">➡️ S'inscrire</a>
-    <a class="btn-wa" id="hero-wa" href="#" target="_blank">💬 WhatsApp</a>
-    <a class="btn-ghost" id="hero-tel" href="#">📞 Appeler</a>
+    <a class="btn-red" href="https://1xbet.com/fr" target="_blank"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12h13"/><path d="m12.5 6.5 5.5 5.5-5.5 5.5"/></svg>S'inscrire</a>
+    <a class="btn-wa" id="hero-wa" href="#" target="_blank"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.6a8.3 8.3 0 0 1-12 7.4L3 21l2-5.6a8.3 8.3 0 1 1 16-3.8z"/></svg>WhatsApp</a>
+    <a class="btn-ghost" id="hero-tel" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.8h3.8l1.9 4.8-2.4 1.4a11.4 11.4 0 0 0 5.3 5.3l1.4-2.4 4.8 1.9V18a2.2 2.2 0 0 1-2.4 2.2A16.4 16.4 0 0 1 2.8 6.2 2.2 2.2 0 0 1 5 3.8z"/></svg>Appeler</a>
   </div>
 </div>
 
 <div class="trust-bar">
-  <span>✅ <b>Agent vérifié</b></span>
-  <span>⚡ Retrait <b>5 min</b></span>
-  <span>🔒 <b>100%</b> sécurisé</span>
-  <span>📞 Dispo <b>7j/7</b></span>
-  <span>💸 <b>0%</b> commission</span>
+  <span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.8"/><path d="m8.2 12.4 2.6 2.6 5-5.4"/></svg><b>Agent vérifié</b></span>
+  <span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.2 2.5 4.5 14h6l-1.2 7.5L19.5 10h-6.3z"/></svg>Retrait <b>5 min</b></span>
+  <span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10.8" width="16" height="10.2" rx="2.2"/><path d="M8 10.8V8a4 4 0 0 1 8 0v2.8"/></svg><b>100%</b> sécurisé</span>
+  <span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.8h3.8l1.9 4.8-2.4 1.4a11.4 11.4 0 0 0 5.3 5.3l1.4-2.4 4.8 1.9V18a2.2 2.2 0 0 1-2.4 2.2A16.4 16.4 0 0 1 2.8 6.2 2.2 2.2 0 0 1 5 3.8z"/></svg>Dispo <b>7j/7</b></span>
+  <span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 18.5 18.5 5.5"/><circle cx="7.6" cy="7.6" r="2.4"/><circle cx="16.4" cy="16.4" r="2.4"/></svg><b>0%</b> commission</span>
 </div>
 
 <div class="statsbar">
@@ -299,11 +306,11 @@ footer strong{color:var(--accent);}
 </div>
 
 <div class="payment-bar" id="payment-bar">
-  <span>🟠 Orange Money</span>
-  <span>🟡 MTN MoMo</span>
-  <span>🔵 Moov Money</span>
-  <span>🌊 Wave</span>
-  <span>💵 Cash</span>
+  <span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6" fill="#ff7900" stroke="none"/></svg>Orange Money</span>
+  <span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6" fill="#ffcc00" stroke="none"/></svg>MTN MoMo</span>
+  <span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6" fill="#0a84ff" stroke="none"/></svg>Moov Money</span>
+  <span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6" fill="#1dc4e9" stroke="none"/></svg>Wave</span>
+  <span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6" fill="#3ecf8e" stroke="none"/></svg>Cash</span>
 </div>
 
 <div class="content">
@@ -311,7 +318,7 @@ footer strong{color:var(--accent);}
   <!-- ACCUEIL -->
   <div class="panel active" id="panel-accueil">
     <div class="card">
-      <div class="card-title">⚡ Comment ça marche ?</div>
+      <div class="card-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.2 2.5 4.5 14h6l-1.2 7.5L19.5 10h-6.3z"/></svg>Comment ça marche ?</div>
       <div class="how-steps">
         <div class="how-step"><div class="how-num">1</div><h4>Inscription</h4><p>Créez votre compte 1xBet avec le code promo</p></div>
         <div class="how-step"><div class="how-num">2</div><h4>Dépôt</h4><p>Contactez l'agent pour recharger votre compte</p></div>
@@ -321,29 +328,29 @@ footer strong{color:var(--accent);}
     </div>
     <div class="grid4" style="margin-bottom:1rem;">
       <div class="qcard" onclick="showPanel('inscription',document.querySelectorAll('.navtab')[1])">
-        <div class="qcard-icon">📝</div><h3>Inscription</h3>
+        <div class="qcard-icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7.5" r="3.5"/><path d="M2.5 21v-1.8A4.2 4.2 0 0 1 6.7 15h4.6a4.2 4.2 0 0 1 4.2 4.2V21"/><path d="M19 7.5v6M22 10.5h-6"/></svg></div><h3>Inscription</h3>
         <p>Créez votre compte 1xBet en 5 minutes.</p>
         <span class="qcard-arrow">Guide →</span>
       </div>
       <div class="qcard" onclick="showPanel('depot',document.querySelectorAll('.navtab')[2])">
-        <div class="qcard-icon">💳</div><h3>Dépôt</h3>
+        <div class="qcard-icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 9.8h19M6 15h4"/></svg></div><h3>Dépôt</h3>
         <p>Rechargez votre compte instantanément.</p>
         <span class="qcard-arrow">Guide →</span>
       </div>
       <div class="qcard" onclick="showPanel('retrait',document.querySelectorAll('.navtab')[3])">
-        <div class="qcard-icon">💰</div><h3>Retrait</h3>
+        <div class="qcard-icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 20.5h16"/></svg></div><h3>Retrait</h3>
         <p>Retirez vos gains en moins de 5 minutes.</p>
         <span class="qcard-arrow">Guide →</span>
       </div>
       <div class="qcard" onclick="showPanel('bonus',document.querySelectorAll('.navtab')[4])">
-        <div class="qcard-icon">🎁</div><h3>Bonus</h3>
+        <div class="qcard-icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8.5" width="18" height="4" rx="1"/><path d="M4.8 12.5V21h14.4v-8.5M12 8.5V21"/><path d="M12 8.5H8.2a2.1 2.1 0 1 1 0-4.2c2.4 0 3.8 4.2 3.8 4.2zM12 8.5h3.8a2.1 2.1 0 1 0 0-4.2C13.4 4.3 12 8.5 12 8.5z"/></svg></div><h3>Bonus</h3>
         <p>Activez votre bonus de bienvenue.</p>
         <span class="qcard-arrow">Guide →</span>
       </div>
     </div>
     <!-- SLIDER D'IMAGES -->
     <div class="slider-section">
-      <div class="slider-title">🏆 Les meilleurs sports sur 1xBet</div>
+      <div class="slider-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 5.5H4.5V8a3 3 0 0 0 3 3M17 5.5h2.5V8a3 3 0 0 1-3 3"/><path d="M12 14v3.5M8.5 20.5h7"/></svg>Les meilleurs sports sur 1xBet</div>
       <div class="slider-wrap">
         <div class="slider-track" id="sliderTrack">
           <div class="slide">
@@ -411,11 +418,11 @@ footer strong{color:var(--accent);}
       </div>
     </div>
     <div class="ctaband">
-      <h2>🚀 Prêt à commencer ?</h2>
+      <h2><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></svg>Prêt à commencer ?</h2>
       <p>Inscription gratuite — retrait garanti en 5 minutes.</p>
       <div class="ctabtns">
-        <a class="btn-white" href="https://1xbet.com/fr" target="_blank">➡️ S'inscrire sur 1xBet</a>
-        <a class="btn-wa" id="cta-wa" href="#" target="_blank">💬 Contacter l'agent</a>
+        <a class="btn-white" href="https://1xbet.com/fr" target="_blank"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12h13"/><path d="m12.5 6.5 5.5 5.5-5.5 5.5"/></svg>S'inscrire sur 1xBet</a>
+        <a class="btn-wa" id="cta-wa" href="#" target="_blank"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.6a8.3 8.3 0 0 1-12 7.4L3 21l2-5.6a8.3 8.3 0 1 1 16-3.8z"/></svg>Contacter l'agent</a>
       </div>
     </div>
   </div>
@@ -423,11 +430,11 @@ footer strong{color:var(--accent);}
   <!-- INSCRIPTION -->
   <div class="panel" id="panel-inscription">
     <div class="card">
-      <div class="card-title">📝 Créer votre compte en 5 minutes</div>
+      <div class="card-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7.5" r="3.5"/><path d="M2.5 21v-1.8A4.2 4.2 0 0 1 6.7 15h4.6a4.2 4.2 0 0 1 4.2 4.2V21"/><path d="M19 7.5v6M22 10.5h-6"/></svg>Créer votre compte en 5 minutes</div>
       <div class="itabs">
-        <div class="itab active" onclick="switchI('insc','tel',this)">📱 Par téléphone</div>
-        <div class="itab" onclick="switchI('insc','email',this)">📧 Par e-mail</div>
-        <div class="itab" onclick="switchI('insc','clic',this)">⚡ En 1 clic</div>
+        <div class="itab active" onclick="switchI('insc','tel',this)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>Par téléphone</div>
+        <div class="itab" onclick="switchI('insc','email',this)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/></svg>Par e-mail</div>
+        <div class="itab" onclick="switchI('insc','clic',this)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.2 2.5 4.5 14h6l-1.2 7.5L19.5 10h-6.3z"/></svg>En 1 clic</div>
       </div>
       <div id="insc-tel" class="ipanel active">
         <ol class="steps">
@@ -457,8 +464,8 @@ footer strong{color:var(--accent);}
         </ol>
       </div>
       <div style="margin-top:1.1rem;display:flex;gap:.6rem;flex-wrap:wrap;">
-        <a class="btn-red" href="https://1xbet.com/fr" target="_blank">➡️ S'inscrire sur 1xBet</a>
-        <a class="btn-wa" id="insc-wa" href="#" target="_blank">💬 Aide WhatsApp</a>
+        <a class="btn-red" href="https://1xbet.com/fr" target="_blank"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12h13"/><path d="m12.5 6.5 5.5 5.5-5.5 5.5"/></svg>S'inscrire sur 1xBet</a>
+        <a class="btn-wa" id="insc-wa" href="#" target="_blank"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.6a8.3 8.3 0 0 1-12 7.4L3 21l2-5.6a8.3 8.3 0 1 1 16-3.8z"/></svg>Aide WhatsApp</a>
       </div>
     </div>
   </div>
@@ -467,24 +474,24 @@ footer strong{color:var(--accent);}
   <div class="panel" id="panel-depot">
     <div class="grid2">
       <div class="card">
-        <div class="card-title">💳 Comment déposer ?</div>
+        <div class="card-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 9.8h19M6 15h4"/></svg>Comment déposer ?</div>
         <ol class="steps">
           <li class="step"><div class="stepn">1</div><div><h4>Entrez votre ID 1xBet</h4><p>Affiché en haut à droite de votre profil.</p></div></li>
           <li class="step"><div class="stepn">2</div><div><h4>Choisissez le montant</h4><p>Et la méthode de paiement.</p></div></li>
           <li class="step"><div class="stepn">3</div><div><h4>Effectuez le paiement Mobile Money</h4><p>Envoyez le montant au numéro affiché.</p></div></li>
           <li class="step"><div class="stepn">4</div><div><h4>Entrez le ID de transaction</h4><p>Reçu automatiquement après votre paiement.</p></div></li>
-          <li class="step"><div class="stepn">5</div><div><h4>Compte crédité ✅</h4><p>Votre demande est traitée automatiquement.</p></div></li>
+          <li class="step"><div class="stepn">5</div><div><h4>Compte crédité</h4><p>Votre demande est traitée automatiquement.</p></div></li>
         </ol>
       </div>
       <div class="card">
-        <div class="card-title">💳 Effectuer un dépôt</div>
+        <div class="card-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 9.8h19M6 15h4"/></svg>Effectuer un dépôt</div>
         <!-- PHASE 1 : Infos de base -->
         <div id="dep-phase1">
-          <div class="fg"><label>👤 Prénom et nom</label><input type="text" id="dep-nom" placeholder="Ex: Mamadou Diallo"></div>
-          <div class="fg"><label>📱 Votre numéro WhatsApp</label><input type="tel" id="dep-wa" placeholder="Ex: +224 620 000 000"></div>
-          <div class="fg"><label>🔢 ID de votre compte 1xBet</label><input type="text" id="dep-id" placeholder="Ex: 123456789"></div>
-          <div class="fg"><label>💰 Montant à déposer (GNF)</label><input type="number" id="dep-montant" placeholder="Ex: 50000"></div>
-          <div class="fg"><label>📲 Méthode de paiement</label>
+          <div class="fg"><label><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.8"/><path d="M4.8 20.5v-1.4a4.6 4.6 0 0 1 4.6-4.6h5.2a4.6 4.6 0 0 1 4.6 4.6v1.4"/></svg>Prénom et nom</label><input type="text" id="dep-nom" placeholder="Ex: Mamadou Diallo"></div>
+          <div class="fg"><label><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>Votre numéro WhatsApp</label><input type="tel" id="dep-wa" placeholder="Ex: +224 620 000 000"></div>
+          <div class="fg"><label><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9.5h14M5 15h14M10 4l-1.5 16M16 4l-1.5 16"/></svg>ID de votre compte 1xBet</label><input type="text" id="dep-id" placeholder="Ex: 123456789"></div>
+          <div class="fg"><label><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 20.5h16"/></svg>Montant à déposer (GNF)</label><input type="number" id="dep-montant" placeholder="Ex: 50000"></div>
+          <div class="fg"><label><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>Méthode de paiement</label>
             <select id="dep-methode">
               <option value="">-- Choisissez --</option>
               <option>Orange Money</option><option>MTN Mobile Money</option>
@@ -503,19 +510,19 @@ footer strong{color:var(--accent);}
             <div style="font-size:1.3rem;font-weight:900;color:#222;" id="dep-numero-agent"></div>
             <div style="font-size:.75rem;color:#888;margin-top:.5rem;">Agent : <strong id="dep-nom-agent"></strong></div>
           </div>
-          <div class="fg"><label>🔑 ID de transaction</label>
+          <div class="fg"><label><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="12" r="4.2"/><path d="M12.2 12H21M18 12v3.5M15 12v2.5"/></svg>ID de transaction</label>
             <input type="text" id="dep-code" placeholder="Ex: TXN-MTN-20250715-98765" style="font-family:monospace;">
             <small style="color:#888;font-size:.75rem;">Reçu par SMS après votre paiement Mobile Money Orange Money / MTN</small>
           </div>
           <button class="btn-red" style="width:100%;justify-content:center;margin-bottom:.5rem;" onclick="confirmerDepot()">
-            <span id="dep-btn-txt">⚡ Confirmer le dépôt</span>
+            <span id="dep-btn-txt"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.2 2.5 4.5 14h6l-1.2 7.5L19.5 10h-6.3z"/></svg>Confirmer le dépôt</span>
           </button>
           <button onclick="resetDep()" style="background:none;border:none;color:#888;font-size:.8rem;cursor:pointer;width:100%;text-align:center;">← Recommencer</button>
           <div id="dep-err2" style="display:none;color:var(--accent);font-size:.82rem;margin-top:.5rem;"></div>
         </div>
         <!-- PHASE 3 : Succès -->
         <div id="dep-phase3" style="display:none;text-align:center;padding:1.5rem 0;">
-          <div style="font-size:3rem;">✅</div>
+          <div style="margin-bottom:.5rem"><svg class="ico-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.8"/><path d="m8.2 12.4 2.6 2.6 5-5.4"/></svg></div>
           <h3 style="color:#25a244;margin:.5rem 0;">Dépôt enregistré !</h3>
           <p style="font-size:.85rem;color:#555;">Votre demande a été transmise. L'agent va créditer votre compte 1xBet sous quelques minutes.</p>
           <p style="font-size:.75rem;color:#888;margin-top:.5rem;">Référence : <span id="dep-ref" style="font-family:monospace;"></span></p>
@@ -529,25 +536,25 @@ footer strong{color:var(--accent);}
   <div class="panel" id="panel-retrait">
     <div class="grid2">
       <div class="card">
-        <div class="card-title">💰 Comment retirer ?</div>
+        <div class="card-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 20.5h16"/></svg>Comment retirer ?</div>
         <ol class="steps">
           <li class="step"><div class="stepn">1</div><div><h4>Vérifiez votre solde 1xBet</h4><p>Solde réel uniquement (pas bonus).</p></div></li>
           <li class="step"><div class="stepn">2</div><div><h4>Générez le code de retrait</h4><p>Dans 1xBet → Retrait → Code de paiement.</p></div></li>
           <li class="step"><div class="stepn">3</div><div><h4>Remplissez le formulaire</h4><p>ID, montant, code et numéro Mobile Money.</p></div></li>
-          <li class="step"><div class="stepn">4</div><div><h4>Fonds reçus 🎉</h4><p>Vos gains arrivent sur votre Mobile Money.</p></div></li>
+          <li class="step"><div class="stepn">4</div><div><h4>Fonds reçus</h4><p>Vos gains arrivent sur votre Mobile Money.</p></div></li>
         </ol>
       </div>
       <div class="card">
-        <div class="card-title">💰 Effectuer un retrait</div>
+        <div class="card-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 20.5h16"/></svg>Effectuer un retrait</div>
         <!-- PHASE 1 -->
         <div id="ret-phase1">
-          <div class="fg"><label>👤 Prénom et nom</label><input type="text" id="ret-nom" placeholder="Ex: Mamadou Diallo"></div>
-          <div class="fg"><label>📱 Votre numéro WhatsApp</label><input type="tel" id="ret-wa" placeholder="Ex: +224 620 000 000"></div>
-          <div class="fg"><label>🔢 ID de votre compte 1xBet</label><input type="text" id="ret-id" placeholder="Ex: 123456789"></div>
-          <div class="fg"><label>💰 Montant à retirer (GNF)</label><input type="number" id="ret-montant" placeholder="Ex: 100000"></div>
-          <div class="fg"><label>🔑 Code de retrait 1xBet</label><input type="text" id="ret-code" placeholder="Code généré sur 1xBet" style="font-family:monospace;"></div>
-          <div class="fg"><label>📲 Numéro de réception Mobile Money</label><input type="tel" id="ret-num" placeholder="Ex: +224 620 000 000"></div>
-          <div class="fg"><label>💳 Méthode de retrait</label>
+          <div class="fg"><label><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.8"/><path d="M4.8 20.5v-1.4a4.6 4.6 0 0 1 4.6-4.6h5.2a4.6 4.6 0 0 1 4.6 4.6v1.4"/></svg>Prénom et nom</label><input type="text" id="ret-nom" placeholder="Ex: Mamadou Diallo"></div>
+          <div class="fg"><label><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>Votre numéro WhatsApp</label><input type="tel" id="ret-wa" placeholder="Ex: +224 620 000 000"></div>
+          <div class="fg"><label><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9.5h14M5 15h14M10 4l-1.5 16M16 4l-1.5 16"/></svg>ID de votre compte 1xBet</label><input type="text" id="ret-id" placeholder="Ex: 123456789"></div>
+          <div class="fg"><label><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 20.5h16"/></svg>Montant à retirer (GNF)</label><input type="number" id="ret-montant" placeholder="Ex: 100000"></div>
+          <div class="fg"><label><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="12" r="4.2"/><path d="M12.2 12H21M18 12v3.5M15 12v2.5"/></svg>Code de retrait 1xBet</label><input type="text" id="ret-code" placeholder="Code généré sur 1xBet" style="font-family:monospace;"></div>
+          <div class="fg"><label><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>Numéro de réception Mobile Money</label><input type="tel" id="ret-num" placeholder="Ex: +224 620 000 000"></div>
+          <div class="fg"><label><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 9.8h19M6 15h4"/></svg>Méthode de retrait</label>
             <select id="ret-methode">
               <option value="">-- Choisissez --</option>
               <option>Orange Money</option><option>MTN Mobile Money</option>
@@ -555,13 +562,13 @@ footer strong{color:var(--accent);}
             </select>
           </div>
           <button class="btn-red" style="width:100%;justify-content:center;" onclick="initRetrait()">
-            <span id="ret-btn-txt">⚡ Soumettre ma demande</span>
+            <span id="ret-btn-txt"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.2 2.5 4.5 14h6l-1.2 7.5L19.5 10h-6.3z"/></svg>Soumettre ma demande</span>
           </button>
           <div id="ret-err1" style="display:none;color:var(--accent);font-size:.82rem;margin-top:.5rem;"></div>
         </div>
         <!-- PHASE 2 : Succès -->
         <div id="ret-phase2" style="display:none;text-align:center;padding:1.5rem 0;">
-          <div style="font-size:3rem;">✅</div>
+          <div style="margin-bottom:.5rem"><svg class="ico-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.8"/><path d="m8.2 12.4 2.6 2.6 5-5.4"/></svg></div>
           <h3 style="color:#25a244;margin:.5rem 0;">Demande envoyée !</h3>
           <p style="font-size:.85rem;color:#555;">Votre demande de retrait a été transmise à l'agent. Vos fonds arrivent sous quelques minutes.</p>
           <p style="font-size:.75rem;color:#888;margin-top:.5rem;">Référence : <span id="ret-ref" style="font-family:monospace;"></span></p>
@@ -574,8 +581,8 @@ footer strong{color:var(--accent);}
   <!-- BONUS -->
   <div class="panel" id="panel-bonus">
     <div class="card">
-      <div class="card-title">🎁 Votre bonus de bienvenue</div>
-      <div class="bcard" style="background:linear-gradient(135deg,var(--accent-dark),var(--accent))"><h4 style="font-size:1rem;font-weight:800;margin-bottom:.3rem;">🏆 Bonus Paris Sportifs</h4><p style="font-size:.82rem;opacity:.85;">200% sur votre premier dépôt sportif avec le code promo de l'agent.</p></div>
+      <div class="card-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8.5" width="18" height="4" rx="1"/><path d="M4.8 12.5V21h14.4v-8.5M12 8.5V21"/><path d="M12 8.5H8.2a2.1 2.1 0 1 1 0-4.2c2.4 0 3.8 4.2 3.8 4.2zM12 8.5h3.8a2.1 2.1 0 1 0 0-4.2C13.4 4.3 12 8.5 12 8.5z"/></svg>Votre bonus de bienvenue</div>
+      <div class="bcard" style="background:linear-gradient(135deg,var(--accent-dark),var(--accent))"><h4 style="font-size:1rem;font-weight:800;margin-bottom:.3rem;"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 5.5H4.5V8a3 3 0 0 0 3 3M17 5.5h2.5V8a3 3 0 0 1-3 3"/><path d="M12 14v3.5M8.5 20.5h7"/></svg>Bonus Paris Sportifs</h4><p style="font-size:.82rem;opacity:.85;">200% sur votre premier dépôt sportif avec le code promo de l'agent.</p></div>
       <div class="bcard" style="background:linear-gradient(135deg,#4a0080,#7b1fa2)"><h4 style="font-size:1rem;font-weight:800;margin-bottom:.3rem;">🎰 Bonus Casino</h4><p style="font-size:.82rem;opacity:.85;">Sur vos 4 premiers dépôts : jusqu'à 1 500€ + 150 tours gratuits.</p></div>
       <div class="bcard" style="background:linear-gradient(135deg,#e65100,#f57c00)"><h4 style="font-size:1rem;font-weight:800;margin-bottom:.3rem;">🔥 Offres Spéciales</h4><p style="font-size:.82rem;opacity:.85;">Votre agent vous prévient en premier des promotions exclusives.</p></div>
       <div class="card-title" style="margin-top:1.1rem;">Comment activer</div>
@@ -583,11 +590,11 @@ footer strong{color:var(--accent);}
         <li class="step"><div class="stepn">1</div><div><h4>S'inscrire</h4><p><a href="https://1xbet.com/fr" target="_blank">1xbet.com</a></p></div></li>
         <li class="step"><div class="stepn">2</div><div><h4>Entrer le code promo</h4><p>Code : <strong id="bonus-promo">—</strong></p></div></li>
         <li class="step"><div class="stepn">3</div><div><h4>Recharger via l'agent</h4><p>Le bonus s'active après votre premier dépôt.</p></div></li>
-        <li class="step"><div class="stepn">4</div><div><h4>Bonus activé 🎉</h4><p>Pariez et gagnez !</p></div></li>
+        <li class="step"><div class="stepn">4</div><div><h4>Bonus activé</h4><p>Pariez et gagnez !</p></div></li>
       </ol>
       <div style="margin-top:1.1rem;display:flex;gap:.6rem;flex-wrap:wrap;">
-        <a class="btn-red" href="https://1xbet.com/fr" target="_blank">➡️ S'inscrire avec le bonus</a>
-        <a class="btn-wa" id="bonus-wa" href="#" target="_blank">💬 Contacter l'agent</a>
+        <a class="btn-red" href="https://1xbet.com/fr" target="_blank"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12h13"/><path d="m12.5 6.5 5.5 5.5-5.5 5.5"/></svg>S'inscrire avec le bonus</a>
+        <a class="btn-wa" id="bonus-wa" href="#" target="_blank"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.6a8.3 8.3 0 0 1-12 7.4L3 21l2-5.6a8.3 8.3 0 1 1 16-3.8z"/></svg>Contacter l'agent</a>
       </div>
     </div>
   </div>
@@ -595,17 +602,17 @@ footer strong{color:var(--accent);}
   <!-- AVIS -->
   <div class="panel" id="panel-avis">
     <div class="card">
-      <div class="card-title">⭐ Ce que disent nos clients</div>
+      <div class="card-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.2 2.8 5.7 6.3.9-4.6 4.4 1.1 6.3L12 17.6l-5.6 2.9 1.1-6.3-4.6-4.4 6.3-.9z"/></svg>Ce que disent nos clients</div>
       <div class="testi-grid" id="testi-list"></div>
     </div>
     <div class="card">
-      <div class="card-title">✍️ Laisser votre avis</div>
+      <div class="card-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 .9-3.7L16.1 5.1a2 2 0 0 1 2.8 2.8L7.7 19.1z"/><path d="M4 20h16"/></svg>Laisser votre avis</div>
       <div class="review-form">
         <h4>Partagez votre expérience</h4>
-        <div class="fg"><label>👤 Votre prénom</label><input type="text" id="rev-nom" placeholder="Ex: Mamadou"></div>
-        <div class="fg"><label>🌍 Votre pays</label><input type="text" id="rev-pays" placeholder="Ex: Guinée Conakry" value="Guinée Conakry"></div>
+        <div class="fg"><label><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.8"/><path d="M4.8 20.5v-1.4a4.6 4.6 0 0 1 4.6-4.6h5.2a4.6 4.6 0 0 1 4.6 4.6v1.4"/></svg>Votre prénom</label><input type="text" id="rev-nom" placeholder="Ex: Mamadou"></div>
+        <div class="fg"><label><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.8"/><path d="M3.2 12h17.6M12 3.2a14 14 0 0 1 0 17.6 14 14 0 0 1 0-17.6z"/></svg>Votre pays</label><input type="text" id="rev-pays" placeholder="Ex: Guinée Conakry" value="Guinée Conakry"></div>
         <div class="fg">
-          <label>⭐ Note</label>
+          <label><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.2 2.8 5.7 6.3.9-4.6 4.4 1.1 6.3L12 17.6l-5.6 2.9 1.1-6.3-4.6-4.4 6.3-.9z"/></svg>Note</label>
           <div class="star-select" id="stars">
             <button class="star-btn" onclick="setStar(1)">★</button>
             <button class="star-btn" onclick="setStar(2)">★</button>
@@ -614,9 +621,9 @@ footer strong{color:var(--accent);}
             <button class="star-btn" onclick="setStar(5)">★</button>
           </div>
         </div>
-        <div class="fg"><label>💬 Votre avis</label><input type="text" id="rev-text" placeholder="Décrivez votre expérience..."></div>
-        <button class="btn-wa" style="width:100%;justify-content:center;" onclick="sendReview()">💬 Envoyer mon avis sur WhatsApp</button>
-        <div class="review-success" id="rev-success">✅ Merci pour votre avis ! Il a été transmis à l'agent.</div>
+        <div class="fg"><label><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.6a8.3 8.3 0 0 1-12 7.4L3 21l2-5.6a8.3 8.3 0 1 1 16-3.8z"/></svg>Votre avis</label><input type="text" id="rev-text" placeholder="Décrivez votre expérience..."></div>
+        <button class="btn-wa" style="width:100%;justify-content:center;" onclick="sendReview()"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.6a8.3 8.3 0 0 1-12 7.4L3 21l2-5.6a8.3 8.3 0 1 1 16-3.8z"/></svg>Envoyer mon avis sur WhatsApp</button>
+        <div class="review-success" id="rev-success"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.8"/><path d="m8.2 12.4 2.6 2.6 5-5.4"/></svg>Merci pour votre avis ! Il a été transmis à l'agent.</div>
       </div>
     </div>
   </div>
@@ -624,13 +631,13 @@ footer strong{color:var(--accent);}
   <!-- GARANTIES -->
   <div class="panel" id="panel-garanties">
     <div class="card">
-      <div class="card-title">🛡️ Ce que l'agent vous promet</div>
-      <div class="gitem"><div class="gicon">⚡</div><div><h4>Retrait en 5 minutes</h4><p>Chaque retrait est traité en moins de 5 minutes après votre demande.</p><span class="gtag">Garanti</span></div></div>
-      <div class="gitem"><div class="gicon">📱</div><div><h4>Mobile Money local</h4><p id="garantie-moyens">Orange Money, MTN, MoneyGo — la méthode que vous utilisez déjà.</p><span class="gtag">0% frais cachés</span></div></div>
-      <div class="gitem"><div class="gicon">🔒</div><div><h4>Votre argent sécurisé</h4><p>Votre solde est sur votre compte 1xBet. L'agent ne peut pas y accéder sans vous.</p><span class="gtag">100% sécurisé</span></div></div>
-      <div class="gitem"><div class="gicon">🤝</div><div><h4>Agent humain</h4><p>Vous parlez à une vraie personne qui connaît votre dossier.</p><span class="gtag">Service personnalisé</span></div></div>
-      <div class="gitem"><div class="gicon">🧾</div><div><h4>Confirmation écrite</h4><p>Chaque dépôt/retrait confirmé par WhatsApp avec heure et montant.</p><span class="gtag">Traçabilité totale</span></div></div>
-      <div class="gitem"><div class="gicon">📞</div><div><h4>Disponible 7j/7</h4><p>L'agent répond 7 jours sur 7, même le soir avant un grand match.</p><span class="gtag">Réponse &lt; 2 min</span></div></div>
+      <div class="card-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2 20 6v6c0 4.4-3.2 8.2-8 9.8C7.2 20.2 4 16.4 4 12V6z"/></svg>Ce que l'agent vous promet</div>
+      <div class="gitem"><div class="gicon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.2 2.5 4.5 14h6l-1.2 7.5L19.5 10h-6.3z"/></svg></div><div><h4>Retrait en 5 minutes</h4><p>Chaque retrait est traité en moins de 5 minutes après votre demande.</p><span class="gtag">Garanti</span></div></div>
+      <div class="gitem"><div class="gicon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg></div><div><h4>Mobile Money local</h4><p id="garantie-moyens">Orange Money, MTN, MoneyGo — la méthode que vous utilisez déjà.</p><span class="gtag">0% frais cachés</span></div></div>
+      <div class="gitem"><div class="gicon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10.8" width="16" height="10.2" rx="2.2"/><path d="M8 10.8V8a4 4 0 0 1 8 0v2.8"/></svg></div><div><h4>Votre argent sécurisé</h4><p>Votre solde est sur votre compte 1xBet. L'agent ne peut pas y accéder sans vous.</p><span class="gtag">100% sécurisé</span></div></div>
+      <div class="gitem"><div class="gicon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 6.5 8.5 9a2.1 2.1 0 0 0 3 3l2-2 4.5 4.5a2.1 2.1 0 0 1-3 3l-1-1"/><path d="M2.5 8.5 6 5h5l3 3M14 17.5l1.5 1.5a2.1 2.1 0 0 0 3-3M21.5 8.5 18 5"/></svg></div><div><h4>Agent humain</h4><p>Vous parlez à une vraie personne qui connaît votre dossier.</p><span class="gtag">Service personnalisé</span></div></div>
+      <div class="gitem"><div class="gicon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2.5h12v19l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg></div><div><h4>Confirmation écrite</h4><p>Chaque dépôt/retrait confirmé par WhatsApp avec heure et montant.</p><span class="gtag">Traçabilité totale</span></div></div>
+      <div class="gitem"><div class="gicon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.8h3.8l1.9 4.8-2.4 1.4a11.4 11.4 0 0 0 5.3 5.3l1.4-2.4 4.8 1.9V18a2.2 2.2 0 0 1-2.4 2.2A16.4 16.4 0 0 1 2.8 6.2 2.2 2.2 0 0 1 5 3.8z"/></svg></div><div><h4>Disponible 7j/7</h4><p>L'agent répond 7 jours sur 7, même le soir avant un grand match.</p><span class="gtag">Réponse &lt; 2 min</span></div></div>
     </div>
   </div>
 
@@ -641,7 +648,7 @@ footer strong{color:var(--accent);}
   Les paris en ligne peuvent présenter des risques. Jouez de façon responsable. +18 uniquement.
 </footer>
 
-<a class="wa-float" id="float-wa" href="#" target="_blank">💬</a>
+<a class="wa-float" id="float-wa" href="#" target="_blank"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.6a8.3 8.3 0 0 1-12 7.4L3 21l2-5.6a8.3 8.3 0 1 1 16-3.8z"/></svg></a>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -663,6 +670,15 @@ async function loadAgent(ref){
   }
 }
 
+
+// textContent efface les enfants : l'icône SVG disparaîtrait au premier
+// changement de libellé. On ne remplace donc que le texte.
+function setLabel(el, texte){
+  if(!el) return;
+  var svg = el.querySelector('svg');
+  el.textContent = texte;
+  if(svg) el.insertBefore(svg, el.firstChild);
+}
 
 function applyTheme(t){
   if(!t) return;
@@ -747,8 +763,9 @@ function afficheDerniereActivite(date){
   var bar=document.querySelector('.trust-bar')||document.querySelector('.stats-row');
   if(!bar) return;
   var el=document.getElementById('derniere-activite');
-  if(!el){ el=document.createElement('span'); el.id='derniere-activite'; el.style.cssText='color:var(--muted);font-size:.8rem;'; bar.appendChild(el); }
-  el.textContent='🕒 Dernière opération '+txt;
+  if(!el){ el=document.createElement('span'); el.id='derniere-activite'; el.style.cssText='color:var(--muted);font-size:.8rem;display:inline-flex;align-items:center;margin-left:.4rem;'; bar.appendChild(el); }
+  el.innerHTML='<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.8"/><path d="M12 7v5.3l3.4 2"/></svg>';
+  el.appendChild(document.createTextNode('Dernière opération '+txt));
 }
 
 // Comptage des visites : sans mesure, impossible de savoir si un flyer fonctionne.
@@ -811,7 +828,11 @@ function applyAgent(a){
 
   /* Ticker */
   var tk=document.getElementById('ticker-moyens');
-  if(tk){tk.textContent='📱 '+moyensDepot.filter(function(m){return m!=='Cash';}).join(' · ')+' — Instantané';}
+  if(tk){
+    var svgTk=tk.querySelector('svg');
+    tk.textContent=moyensDepot.filter(function(m){return m!=='Cash';}).join(' · ')+' — Instantané';
+    if(svgTk) tk.insertBefore(svgTk, tk.firstChild);
+  }
 
   /* Garanties */
   var gm=document.getElementById('garantie-moyens');
@@ -878,7 +899,7 @@ function initDepot(){
   var err = document.getElementById('dep-err1');
 
   if(!nom||!wa||!id||!montant||!methode){
-    err.textContent = '⚠️ Veuillez remplir tous les champs.';
+    err.textContent = 'Veuillez remplir tous les champs.';
     err.style.display='block'; return;
   }
   err.style.display='none';
@@ -901,7 +922,7 @@ function confirmerDepot(){
   var btn = document.getElementById('dep-btn-txt');
 
   if(!code || code.length < 5){
-    err.textContent = '⚠️ Veuillez entrer le code de confirmation reçu par SMS.';
+    err.textContent = 'Veuillez entrer le code de confirmation reçu par SMS.';
     err.style.display='block'; return;
   }
   err.style.display='none';
@@ -944,13 +965,13 @@ function confirmerDepot(){
     document.getElementById('dep-phase2').style.display='none';
     document.getElementById('dep-phase3').style.display='block';
     document.getElementById('dep-ref').textContent = ref;
-    document.getElementById('dep-btn-txt').textContent='⚡ Confirmer le dépôt';
+    setLabel(document.getElementById('dep-btn-txt'), 'Confirmer le dépôt');
   })
   .catch(function(){
     document.getElementById('dep-phase2').style.display='none';
     document.getElementById('dep-phase3').style.display='block';
     document.getElementById('dep-ref').textContent = ref;
-    document.getElementById('dep-btn-txt').textContent='⚡ Confirmer le dépôt';
+    setLabel(document.getElementById('dep-btn-txt'), 'Confirmer le dépôt');
   });
 }
 
@@ -969,7 +990,7 @@ function initRetrait(){
   var btn = document.getElementById('ret-btn-txt');
 
   if(!nom||!wa||!id||!montant||!code||!num||!methode){
-    err.textContent = '⚠️ Veuillez remplir tous les champs.';
+    err.textContent = 'Veuillez remplir tous les champs.';
     err.style.display='block'; return;
   }
   err.style.display='none';
@@ -1070,7 +1091,7 @@ function resetDep(){
   var p3=document.getElementById('dep-phase3'); if(p3) p3.style.display='none';
   var e1=document.getElementById('dep-err1'); if(e1) e1.style.display='none';
   var e2=document.getElementById('dep-err2'); if(e2) e2.style.display='none';
-  var btn=document.getElementById('dep-btn-txt'); if(btn) btn.textContent='⚡ Confirmer le dépôt';
+  setLabel(document.getElementById('dep-btn-txt'), 'Confirmer le dépôt');
 }
 
 function resetRet(){
@@ -1081,7 +1102,7 @@ function resetRet(){
   var p1=document.getElementById('ret-phase1'); if(p1) p1.style.display='block';
   var p2=document.getElementById('ret-phase2'); if(p2) p2.style.display='none';
   var e1=document.getElementById('ret-err1'); if(e1) e1.style.display='none';
-  var btn=document.getElementById('ret-btn-txt'); if(btn) btn.textContent='⚡ Soumettre ma demande';
+  setLabel(document.getElementById('ret-btn-txt'), 'Soumettre ma demande');
 }
 
 function sendReview(){
@@ -1092,7 +1113,7 @@ function sendReview(){
   document.getElementById('rev-success').style.display='block';
 }
 
-function copyPromo(){if(!currentAgent)return;navigator.clipboard.writeText(currentAgent.promo).then(function(){showToast('Code copié ! ✅');});}
+function copyPromo(){if(!currentAgent)return;navigator.clipboard.writeText(currentAgent.promo).then(function(){showToast('Code copié');});}
 function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
 
 // ============================================
@@ -1126,7 +1147,7 @@ function setStar(n){
 function copyPromo(){
   if(!currentAgent) return;
   navigator.clipboard.writeText(currentAgent.promo).then(function(){
-    showToast('Code '+currentAgent.promo+' copié ! ✅');
+    showToast('Code '+currentAgent.promo+' copié');
   });
 }
 
