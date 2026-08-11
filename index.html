@@ -680,6 +680,28 @@ function setLabel(el, texte){
   if(svg) el.insertBefore(svg, el.firstChild);
 }
 
+// switchI etait appele par les onglets « Par e-mail » et « En 1 clic » mais n'a
+// jamais ete defini : le clic levait une ReferenceError et rien ne s'affichait.
+// Ecrit de facon generique pour que tout groupe d'onglets futur fonctionne.
+function switchI(groupe, cle, el){
+  var cible = document.getElementById(groupe + '-' + cle);
+  if(!cible) return;
+
+  // On ne bascule que les onglets du meme groupe, pas ceux d'un autre bloc.
+  if(el && el.parentNode){
+    var freres = el.parentNode.querySelectorAll('.itab');
+    for(var i = 0; i < freres.length; i++) freres[i].classList.remove('active');
+    el.classList.add('active');
+  }
+
+  // Meme logique cote panneaux : on ne masque que ceux du groupe concerne.
+  var tous = document.querySelectorAll('.ipanel');
+  for(var j = 0; j < tous.length; j++){
+    if(tous[j].id && tous[j].id.indexOf(groupe + '-') === 0) tous[j].classList.remove('active');
+  }
+  cible.classList.add('active');
+}
+
 function applyTheme(t){
   if(!t) return;
   var r=document.documentElement.style;
