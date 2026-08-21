@@ -199,10 +199,9 @@ canvas{display:block;max-width:460px;width:100%;height:auto;}
 </div>
 
 <script>
-var AGENTS={
-  joseph:{nom:'Joseph Henry',phone:'+224 620 611 648',promo:'JHL224',pays:'Guinée Conakry',flag:'🇬🇳',key:'joseph2025'},
-  nouhou:{nom:'Nouhou Zanguina',phone:'+227 81 06 06 36',promo:'Niamey8',pays:'Niger',flag:'🇳🇪',key:'nouhou2025'}
-};
+// Aucune fiche ni aucune clé dans ce fichier : il est public, et tout ce qui y figure
+// est lisible par n'importe quel agent. Le serveur valide la clé et ne renvoie que
+// l'agent demandé — un agent ne peut plus ouvrir le générateur d'un autre.
 var AG=null,TPL='football',FMT='carre';
 var PALETTES={
   red:{bg1:'#0d0002',bg2:'#1a0005',acc:'#e53935',acc2:'#ff8f00',glow:'rgba(229,57,53,0.4)'},
@@ -214,14 +213,25 @@ var PALETTES={
 };
 var PAL=PALETTES.red;
 
+function bloquer(){ document.getElementById('blocked').style.display='flex'; }
+
 function init(){
-  var p=new URLSearchParams(location.search),ref=p.get('ref'),key=p.get('key'),ag=AGENTS[ref];
-  if(!ag||key!==ag.key){document.getElementById('blocked').style.display='flex';return;}
-  // AGENTS est indexé par ref, mais l'objet ne la porte pas : on l'y ajoute, le QR
-  // en a besoin pour construire le lien de l'agent.
-  AG=Object.assign({ref:ref}, ag);
-  document.getElementById('agent-tag').textContent=ag.flag+' '+ag.nom;
-  draw();
+  var p=new URLSearchParams(location.search);
+  var ref=(p.get('ref')||'').toLowerCase(), key=p.get('key')||'';
+  if(!ref||!key){ bloquer(); return; }
+  fetch(SERVEUR_QR+'/flyer-auth',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ ref:ref, key:key })
+  })
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(d){
+    if(!d||!d.success||!d.agent){ bloquer(); return; }
+    // Le serveur renvoie la ref : le QR en a besoin pour construire le lien de l'agent.
+    AG=d.agent;
+    document.getElementById('agent-tag').textContent=AG.flag+' '+AG.nom;
+    draw();
+  })
+  .catch(function(){ bloquer(); });
 }
 
 function setTpl(t,el){
@@ -288,6 +298,9 @@ function dessineQR(ctx, img, W, H, s){
 }
 
 function draw(){
+  // L'interface repond avant la validation de la cle : sans agent, il n'y a rien a
+  // dessiner et lire AG.nom leverait une exception a chaque clic.
+  if(!AG) return;
   if(!AG)return;
   var sz=getSz(),W=sz.w,H=sz.h,s=W/1080;
   var cv=document.getElementById('c');

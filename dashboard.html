@@ -98,6 +98,7 @@ tr:last-child td{border-bottom:none;}
 .badge-yellow{background:rgba(210,153,34,.12);color:var(--yellow);border:1px solid rgba(210,153,34,.3);}
 .badge-red{background:rgba(248,81,73,.12);color:var(--red);border:1px solid rgba(248,81,73,.3);}
 .badge-blue{background:rgba(88,166,255,.12);color:var(--blue);border:1px solid rgba(88,166,255,.3);}
+.badge-navy{background:rgba(43,76,155,.16);color:#7fa0e8;border:1px solid rgba(43,76,155,.45);}
 .badge-purple{background:rgba(188,140,255,.12);color:var(--purple);border:1px solid rgba(188,140,255,.3);}
 .amount{font-family:monospace;font-weight:700;}
 .amount-pos{color:var(--green);}
@@ -286,6 +287,7 @@ tr:last-child td{border-bottom:none;}
             <option value="">Tous les agents</option>
             <option value="joseph">Joseph</option>
             <option value="nouhou">Nouhou Zanguina</option>
+            <option value="fabienne">Ndri Nguessan Ange Fabienne</option>
           </select>
           <select class="filter-select" id="f-type" onchange="filterTransactions()">
             <option value="">Tous les types</option>
@@ -350,6 +352,7 @@ tr:last-child td{border-bottom:none;}
             <option value="">Tous les agents</option>
             <option value="joseph">Joseph</option>
             <option value="nouhou">Nouhou Zanguina</option>
+            <option value="fabienne">Ndri Nguessan Ange Fabienne</option>
           </select>
           <select class="filter-select" id="fd-statut" onchange="filterDepots()">
             <option value="">Tous les statuts</option>
@@ -392,6 +395,7 @@ tr:last-child td{border-bottom:none;}
             <option value="">Tous les agents</option>
             <option value="joseph">Joseph</option>
             <option value="nouhou">Nouhou Zanguina</option>
+            <option value="fabienne">Ndri Nguessan Ange Fabienne</option>
           </select>
           <select class="filter-select" id="fr-statut" onchange="filterRetraits()">
             <option value="">Tous les statuts</option>
@@ -504,7 +508,7 @@ function getTypeBadge(type){
 }
 
 function getAgentBadge(agent){
-  const colors = { joseph: 'badge-green', nouhou: 'badge-blue' };
+  const colors = { joseph: 'badge-green', nouhou: 'badge-blue', fabienne: 'badge-navy' };
   return '<span class="badge '+(colors[agent]||'badge-purple')+'">'+agent+'</span>';
 }
 
@@ -755,7 +759,7 @@ function filterRetraits(){
 // AGENTS
 // ============================================
 function renderAgents(){
-  const agents = ['joseph', 'nouhou'];
+  const agents = ['joseph', 'nouhou', 'fabienne'];
   const grid = document.getElementById('agents-grid');
   grid.innerHTML = agents.map(agent => {
     const txs = allTransactions.filter(t => t.agent === agent);
