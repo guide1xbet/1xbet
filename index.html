@@ -55,15 +55,27 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#0a0e1a;color:#222;}
    essai l'effacait : `contain` au lieu de `cover` (l'affiche est carree, le hero large :
    `cover` lui coupait le haut et le bas), un voile bien plus leger, et des plaques
    sombres uniquement derriere les textes plutot qu'un assombrissement general. */
-/* L'affiche occupe le haut du hero et RIEN ne se pose dessus : superposer le nom et
-   les boutons rendait les deux illisibles. Sa hauteur suit son propre ratio (94vw) tant
-   que l'ecran est etroit, puis se plafonne a 70vh pour ne pas devorer l'ecran en large.
-   Le contenu du hero est simplement decale sous elle par le padding-top. */
-.hero-affiche{padding-top:calc(min(70vh, 94vw) + 1.25rem);}
-.hero-affiche .hero-slide-fixe{bottom:auto;height:min(70vh, 94vw);
-  background-size:contain;background-repeat:no-repeat;background-position:center top;
-  animation:none;}
-.hero-affiche .hero-overlay{display:none;}
+/* Hero d'un agent qui a sa propre affiche : une vraie composition en deux colonnes,
+   pas une image posee au-dessus du texte. Ses infos restent en haut a gauche, l'affiche
+   nette occupe la droite, et la meme image sert de decor floute derriere le tout — c'est
+   le flou qui l'empeche de concurrencer le texte, la ou un simple voile echouait. */
+.hero-affiche{display:flex;align-items:center;justify-content:center;gap:clamp(1.5rem,4vw,3.5rem);
+  flex-wrap:wrap;padding:clamp(1.75rem,4vw,3rem) 1.25rem;text-align:left;}
+.hero-affiche .hero-infos{position:relative;z-index:2;flex:1 1 340px;max-width:480px;text-align:center;}
+.hero-affiche .hero-visuel{position:relative;z-index:2;flex:0 1 440px;max-width:100%;}
+.hero-affiche .hero-visuel img{display:block;width:100%;height:auto;border-radius:18px;
+  box-shadow:0 24px 64px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.12);}
+.hero-affiche .hero-slide-fixe{background-size:cover;background-position:center;
+  filter:blur(16px) saturate(1.15);transform:scale(1.12);animation:none;}
+.hero-affiche .hero-overlay{background:linear-gradient(180deg,
+  rgba(6,10,22,.74) 0%,rgba(6,10,22,.80) 60%,rgba(6,10,22,.90) 100%);}
+.hero-affiche .agent-avatar-wrap{display:none;}
+.hero-affiche .agent-name{margin-top:.35rem;}
+@media(max-width:820px){
+  /* Une seule colonne : les infos passent AVANT l'affiche, jamais releguees en bas. */
+  .hero-affiche{flex-direction:column;}
+  .hero-affiche .hero-visuel{flex:1 1 auto;max-width:420px;}
+}
 /* Le logo de l'agence figure deja, en grand, dans l'affiche : le repeter en avatar
    rond ferait doublon et mangerait la place. */
 .hero-affiche .agent-avatar-wrap{display:none;}
@@ -837,8 +849,9 @@ function applyAgent(a){
   var sc=document.getElementById('stat-clients');if(sc&&a.clients)sc.textContent=a.clients+'+';
   // Le client lit ses montants dans la monnaie qu'il manipule : afficher des GNF a
   // un joueur nigerien ou ivoirien fausse tout ce qu'il compare.
-  // L'affiche devient le fond du hero. On vide le diaporama plutot que d'y ajouter une
-  // slide : sinon la premiere photo sport resterait visible une seconde avant elle.
+  // Hero en deux colonnes pour un agent qui a son affiche : ses infos a gauche, l'affiche
+  // nette a droite, la meme image floutee en decor. On regroupe les blocs existants dans
+  // une colonne plutot que de les recreer, pour qu'ils gardent leurs styles et leurs id.
   if(a.fond){
     var hero = document.querySelector('.hero');
     var ds = document.getElementById('heroSlideshow');
@@ -849,6 +862,22 @@ function applyAgent(a){
       slide.className = 'hero-slide active hero-slide-fixe';
       slide.style.backgroundImage = "url('" + a.fond + "')";
       ds.appendChild(slide);
+
+      var infos = document.createElement('div');
+      infos.className = 'hero-infos';
+      ['.agent-badge','.agent-name','.agent-country','.promo-block','.hero-btns']
+        .forEach(function(sel){
+          var el = hero.querySelector(sel);
+          if(el) infos.appendChild(el);
+        });
+      var visuel = document.createElement('div');
+      visuel.className = 'hero-visuel';
+      var img = document.createElement('img');
+      img.src = a.fond;
+      img.alt = 'Moyens de paiement acceptés par ' + a.nom;
+      visuel.appendChild(img);
+      hero.appendChild(infos);
+      hero.appendChild(visuel);
     }
     var fond = document.getElementById('fond-agent');
     if(fond){
