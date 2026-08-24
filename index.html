@@ -51,6 +51,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#0a0e1a;color:#222;}
 .hero-slideshow{position:absolute;inset:0;z-index:0;}
 .hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.5s ease-in-out;}
 .hero-slide.active{opacity:1;animation:hero-zoom 8s ease-out forwards;}
+.hero-slide-fixe{animation:none;background-size:cover;background-position:center;}
 @keyframes hero-zoom{0%{transform:scale(1);}100%{transform:scale(1.08);}}
 .hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(26,26,46,.6) 0%,rgba(22,33,62,.7) 50%,rgba(15,52,96,.85) 100%);z-index:1;}
 .hero .agent-avatar-wrap,.hero .agent-badge,.hero .agent-name,.hero .agent-country,.hero .promo-block,.hero .hero-btns{position:relative;z-index:2;}
@@ -814,6 +815,19 @@ function applyAgent(a){
   var sc=document.getElementById('stat-clients');if(sc&&a.clients)sc.textContent=a.clients+'+';
   // Le client lit ses montants dans la monnaie qu'il manipule : afficher des GNF a
   // un joueur nigerien ou ivoirien fausse tout ce qu'il compare.
+  // Un agent peut remplacer le diaporama sport par sa propre affiche. On vide le
+  // conteneur plutôt que d'ajouter une slide : sinon l'ancienne première image
+  // resterait visible une seconde avant la sienne.
+  if(a.fond){
+    var ds = document.getElementById('heroSlideshow');
+    if(ds){
+      ds.innerHTML = '';
+      var slide = document.createElement('div');
+      slide.className = 'hero-slide active hero-slide-fixe';
+      slide.style.backgroundImage = "url('" + a.fond + "')";
+      ds.appendChild(slide);
+    }
+  }
   var devise = a.devise || 'GNF';
   Array.prototype.forEach.call(document.querySelectorAll('.devise-label'), function(el){ el.textContent = devise; });
   var n=document.getElementById('agent-name');if(n)n.textContent=a.nom;
