@@ -51,7 +51,14 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#0a0e1a;color:#222;}
 .hero-slideshow{position:absolute;inset:0;z-index:0;}
 .hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.5s ease-in-out;}
 .hero-slide.active{opacity:1;animation:hero-zoom 8s ease-out forwards;}
-.hero-slide-fixe{animation:none;background-size:cover;background-position:center;}
+/* L'affiche d'un agent est un document a lire : elle s'affiche entiere, sans rognage
+   ni voile. En fond d'ecran elle sert d'ambiance, tres assombrie pour que le texte de
+   la page reste lisible par-dessus. */
+.affiche-agent{padding:1.5rem 1rem 0;text-align:center;}
+.affiche-agent img{width:100%;max-width:560px;height:auto;border-radius:14px;
+  box-shadow:0 10px 32px rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.10);}
+#fond-agent{position:fixed;inset:0;z-index:-1;background-size:cover;background-position:center;
+  background-attachment:fixed;}
 @keyframes hero-zoom{0%{transform:scale(1);}100%{transform:scale(1.08);}}
 .hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(26,26,46,.6) 0%,rgba(22,33,62,.7) 50%,rgba(15,52,96,.85) 100%);z-index:1;}
 .hero .agent-avatar-wrap,.hero .agent-badge,.hero .agent-name,.hero .agent-country,.hero .promo-block,.hero .hero-btns{position:relative;z-index:2;}
@@ -263,6 +270,8 @@ footer strong{color:var(--accent);}
   <div class="navtab" onclick="showPanel('garanties',this)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2 20 6v6c0 4.4-3.2 8.2-8 9.8C7.2 20.2 4 16.4 4 12V6z"/></svg>Garanties</div>
 </div>
 
+<div id="fond-agent"></div>
+
 <div class="hero">
   <!-- BACKGROUND SLIDESHOW -->
   <div class="hero-slideshow" id="heroSlideshow">
@@ -289,6 +298,10 @@ footer strong{color:var(--accent);}
     <a class="btn-wa" id="hero-wa" href="#" target="_blank"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.6a8.3 8.3 0 0 1-12 7.4L3 21l2-5.6a8.3 8.3 0 1 1 16-3.8z"/></svg>WhatsApp</a>
     <a class="btn-ghost" id="hero-tel" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.8h3.8l1.9 4.8-2.4 1.4a11.4 11.4 0 0 0 5.3 5.3l1.4-2.4 4.8 1.9V18a2.2 2.2 0 0 1-2.4 2.2A16.4 16.4 0 0 1 2.8 6.2 2.2 2.2 0 0 1 5 3.8z"/></svg>Appeler</a>
   </div>
+</div>
+
+<div class="affiche-agent" id="affiche-agent" style="display:none;">
+  <img id="affiche-agent-img" src="" alt="">
 </div>
 
 <div class="trust-bar">
@@ -815,17 +828,22 @@ function applyAgent(a){
   var sc=document.getElementById('stat-clients');if(sc&&a.clients)sc.textContent=a.clients+'+';
   // Le client lit ses montants dans la monnaie qu'il manipule : afficher des GNF a
   // un joueur nigerien ou ivoirien fausse tout ce qu'il compare.
-  // Un agent peut remplacer le diaporama sport par sa propre affiche. On vide le
-  // conteneur plutôt que d'ajouter une slide : sinon l'ancienne première image
-  // resterait visible une seconde avant la sienne.
+  // L'affiche d'un agent apparait a deux endroits, pour deux raisons differentes :
+  // en fond d'ecran pour l'ambiance de sa marque, et surtout en pleine largeur sous
+  // le hero, ou elle est enfin lisible. En fond du hero elle etait rognee par le
+  // cadrage large et noyee sous le voile : on n'y voyait ni les logos ni le texte.
   if(a.fond){
-    var ds = document.getElementById('heroSlideshow');
-    if(ds){
-      ds.innerHTML = '';
-      var slide = document.createElement('div');
-      slide.className = 'hero-slide active hero-slide-fixe';
-      slide.style.backgroundImage = "url('" + a.fond + "')";
-      ds.appendChild(slide);
+    var fond = document.getElementById('fond-agent');
+    if(fond){
+      fond.style.backgroundImage =
+        'linear-gradient(rgba(6,10,22,.93),rgba(6,10,22,.93)), url("' + a.fond + '")';
+    }
+    var sect = document.getElementById('affiche-agent');
+    var img = document.getElementById('affiche-agent-img');
+    if(sect && img){
+      img.src = a.fond;
+      img.alt = 'Moyens de paiement acceptés par ' + a.nom;
+      sect.style.display = 'block';
     }
   }
   var devise = a.devise || 'GNF';
