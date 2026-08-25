@@ -554,7 +554,8 @@ footer strong{color:var(--accent);}
           <button class="btn-red" style="width:100%;justify-content:center;margin-bottom:.5rem;" onclick="confirmerDepot()">
             <span id="dep-btn-txt"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.2 2.5 4.5 14h6l-1.2 7.5L19.5 10h-6.3z"/></svg>Confirmer le dépôt</span>
           </button>
-          <button onclick="resetDep()" style="background:none;border:none;color:#888;font-size:.8rem;cursor:pointer;width:100%;text-align:center;">← Recommencer</button>
+          <button onclick="modifierDepot()" style="background:none;border:none;color:var(--accent);font-size:.85rem;font-weight:700;cursor:pointer;width:100%;text-align:center;padding:.5rem 0;">← Modifier mes informations</button>
+          <button onclick="resetDep()" style="background:none;border:none;color:#888;font-size:.8rem;cursor:pointer;width:100%;text-align:center;">Tout recommencer</button>
           <div id="dep-err2" style="display:none;color:var(--accent);font-size:.82rem;margin-top:.5rem;"></div>
         </div>
         <!-- PHASE 3 : Succès -->
@@ -987,6 +988,39 @@ function genRef(){
 }
 
 // ============================================
+// RETOUR ARRIERE
+// ============================================
+// Rien n'etait ajoute a l'historique du navigateur : ni les onglets, ni l'etape 2 des
+// formulaires. Le bouton Retour du telephone faisait donc sortir du site, et un client
+// qui voulait corriger une information deja saisie perdait tout.
+var panneauCourant = 'accueil';
+var pileNav = [];
+
+function empilerEtat(etat){
+  pileNav.push(etat);
+  try { history.pushState({ n: pileNav.length }, '', location.href); } catch(e){}
+}
+
+function boutonDuPanneau(id){
+  return document.querySelector('.navtab[onclick*="\'' + id + '\'"]');
+}
+
+// Revient a la saisie SANS vider les champs — toute la difference avec resetDep(),
+// qui efface tout et oblige le client a retaper son nom, son numero et son ID 1xBet.
+function modifierDepot(){
+  var p2 = document.getElementById('dep-phase2'); if(p2) p2.style.display='none';
+  var p1 = document.getElementById('dep-phase1'); if(p1) p1.style.display='block';
+}
+
+window.addEventListener('popstate', function(){
+  var etat = pileNav.pop();
+  // Pile vide : plus rien a annuler dans la page, le navigateur peut sortir normalement.
+  if(!etat) return;
+  if(etat.type === 'depot2'){ modifierDepot(); }
+  else if(etat.type === 'panneau'){ showPanel(etat.id, boutonDuPanneau(etat.id), true); }
+});
+
+// ============================================
 // DEPOT — Phase 1 : valider les champs
 // ============================================
 function initDepot(){
@@ -1005,6 +1039,7 @@ function initDepot(){
 
   // Afficher la phase 2
   document.getElementById('dep-phase1').style.display='none';
+  empilerEtat({ type:'depot2' });
   document.getElementById('dep-phase2').style.display='block';
   document.getElementById('dep-montant-affiche').textContent = parseInt(montant).toLocaleString('fr-FR') + ' ' + ((currentAgent && currentAgent.devise) || 'GNF');
   document.getElementById('dep-methode-affiche').textContent = methode;
@@ -1237,7 +1272,11 @@ function showToast(msg){var t=document.getElementById('toast');t.textContent=msg
 // ============================================
 // NAVIGATION
 // ============================================
-function showPanel(id, btn){
+function showPanel(id, btn, sansHistorique){
+  // Sans cette pile, le bouton Retour du telephone quittait le site des le premier
+  // changement d'onglet, au lieu de revenir a l'onglet precedent.
+  if(!sansHistorique && id !== panneauCourant){ empilerEtat({ type:'panneau', id: panneauCourant }); }
+  panneauCourant = id;
   document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
   var panel = document.getElementById('panel-'+id);
   if(panel) panel.classList.add('active');
