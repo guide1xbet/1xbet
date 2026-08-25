@@ -17,6 +17,17 @@ window.AGENT_FICHE = {
       actif:true,
       pays_code:'+225',
       telegramChatId:'FABIENNE_CHAT_ID',
+      // Un numero par reseau. Afficher le numero principal quel que soit le moyen choisi
+      // envoyait les clients Moov et MTN vers un compte Orange, ou l'argent n'arrive
+      // jamais. Les cles doivent correspondre mot pour mot aux moyens ci-dessous.
+      // Une valeur peut etre un numero, ou {numero, lien} quand le reseau a une page
+      // de paiement (Wave).
+      numeros:{
+        'Orange Money':'07 48 27 46 54',
+        'Moov Money':'01 72 97 73 36',
+        'MTN MoMo':'05 84 77 63 36',
+        'Wave':{ numero:'07 48 27 46 54', lien:'' }
+      },
       moyens_depot:['Orange Money','Moov Money','MTN MoMo','Wave'],
       moyens_retrait:['Orange Money','Moov Money','MTN MoMo','Wave'],
       avis_pays:'C\u00f4te d\'Ivoire',

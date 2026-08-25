@@ -543,6 +543,8 @@ footer strong{color:var(--accent);}
             <div style="font-size:1.8rem;font-weight:900;color:var(--accent);" id="dep-montant-affiche"></div>
             <div style="font-size:.8rem;color:#888;margin:.25rem 0;">via <span id="dep-methode-affiche" style="font-weight:700;color:#222;"></span> au numéro</div>
             <div style="font-size:1.3rem;font-weight:900;color:#222;" id="dep-numero-agent"></div>
+            <a id="dep-lien-paiement" href="#" target="_blank" rel="noopener" class="btn-red"
+               style="display:none;justify-content:center;width:100%;margin-top:.6rem;">Ouvrir le lien de paiement</a>
             <div style="font-size:.75rem;color:#888;margin-top:.5rem;">Agent : <strong id="dep-nom-agent"></strong></div>
           </div>
           <div class="fg"><label><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="12" r="4.2"/><path d="M12.2 12H21M18 12v3.5M15 12v2.5"/></svg>ID de transaction</label>
@@ -1006,7 +1008,26 @@ function initDepot(){
   document.getElementById('dep-phase2').style.display='block';
   document.getElementById('dep-montant-affiche').textContent = parseInt(montant).toLocaleString('fr-FR') + ' ' + ((currentAgent && currentAgent.devise) || 'GNF');
   document.getElementById('dep-methode-affiche').textContent = methode;
-  document.getElementById('dep-numero-agent').textContent = currentAgent ? currentAgent.phone : '';
+  // Destinataire du reseau choisi. Sans cette table, tous les reseaux affichaient le
+  // meme numero et le client Moov envoyait son argent sur un compte Orange.
+  var dest = (currentAgent && currentAgent.numeros && currentAgent.numeros[methode]) || null;
+  var numeroDest = '', lienDest = '';
+  if(dest && typeof dest === 'object'){ numeroDest = dest.numero || ''; lienDest = dest.lien || ''; }
+  else if(typeof dest === 'string'){ numeroDest = dest; }
+  // Repli sur le numero principal : un agent dont la table est incomplete doit encore
+  // pouvoir encaisser, quitte a ce que le client demande confirmation.
+  if(!numeroDest) numeroDest = currentAgent ? currentAgent.phone : '';
+  document.getElementById('dep-numero-agent').textContent = numeroDest;
+  var lienPaiement = document.getElementById('dep-lien-paiement');
+  if(lienPaiement){
+    if(lienDest){
+      lienPaiement.href = lienDest;
+      lienPaiement.textContent = 'Payer via ' + methode;
+      lienPaiement.style.display = 'inline-flex';
+    } else {
+      lienPaiement.style.display = 'none';
+    }
+  }
   document.getElementById('dep-nom-agent').textContent = currentAgent ? currentAgent.nom : '';
 }
 
