@@ -541,8 +541,9 @@ footer strong{color:var(--accent);}
           <div style="background:#fff8e1;border:2px solid #f59e0b;border-radius:10px;padding:1rem;margin-bottom:1rem;text-align:center;">
             <div style="font-size:.8rem;color:#888;margin-bottom:.25rem;">Envoyez exactement</div>
             <div style="font-size:1.8rem;font-weight:900;color:var(--accent);" id="dep-montant-affiche"></div>
-            <div style="font-size:.8rem;color:#888;margin:.25rem 0;">via <span id="dep-methode-affiche" style="font-weight:700;color:#222;"></span> au numéro</div>
+            <div style="font-size:.8rem;color:#888;margin:.25rem 0;">via <span id="dep-methode-affiche" style="font-weight:700;color:#222;"></span><span id="dep-mention-numero"> au numéro</span></div>
             <div style="font-size:1.3rem;font-weight:900;color:#222;" id="dep-numero-agent"></div>
+            <div id="dep-consigne-lien" style="display:none;font-size:.9rem;font-weight:700;color:#222;margin-top:.25rem;"></div>
             <a id="dep-lien-paiement" href="#" target="_blank" rel="noopener" class="btn-red"
                style="display:none;justify-content:center;width:100%;margin-top:.6rem;">Ouvrir le lien de paiement</a>
             <div style="font-size:.75rem;color:#888;margin-top:.5rem;">Agent : <strong id="dep-nom-agent"></strong></div>
@@ -1051,9 +1052,20 @@ function initDepot(){
   else if(typeof dest === 'string'){ numeroDest = dest; }
   // Repli sur le numero principal : un agent dont la table est incomplete doit encore
   // pouvoir encaisser, quitte a ce que le client demande confirmation.
-  if(!numeroDest) numeroDest = currentAgent ? currentAgent.phone : '';
-  document.getElementById('dep-numero-agent').textContent = numeroDest;
+  // Repli seulement quand le moyen n'a NI numero NI lien : un moyen qui se regle
+  // uniquement par lien (Wave) ne doit pas afficher un numero de repli, sinon le
+  // client hesite entre deux facons de payer, ou envoie l'argent au mauvais endroit.
+  if(!numeroDest && !lienDest) numeroDest = currentAgent ? currentAgent.phone : '';
+
+  var champNumero  = document.getElementById('dep-numero-agent');
+  var mention      = document.getElementById('dep-mention-numero');
+  var consigne     = document.getElementById('dep-consigne-lien');
   var lienPaiement = document.getElementById('dep-lien-paiement');
+
+  champNumero.textContent = numeroDest;
+  champNumero.style.display = numeroDest ? '' : 'none';
+  if(mention) mention.style.display = numeroDest ? '' : 'none';
+
   if(lienPaiement){
     if(lienDest){
       lienPaiement.href = lienDest;
@@ -1061,6 +1073,14 @@ function initDepot(){
       lienPaiement.style.display = 'inline-flex';
     } else {
       lienPaiement.style.display = 'none';
+    }
+  }
+  if(consigne){
+    if(lienDest && !numeroDest){
+      consigne.textContent = 'Cliquez sur le lien ' + methode + ' pour effectuer votre dépôt';
+      consigne.style.display = 'block';
+    } else {
+      consigne.style.display = 'none';
     }
   }
   document.getElementById('dep-nom-agent').textContent = currentAgent ? currentAgent.nom : '';

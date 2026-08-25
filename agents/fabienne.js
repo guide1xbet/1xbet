@@ -26,7 +26,7 @@ window.AGENT_FICHE = {
         'Orange Money':'07 48 27 46 54',
         'Moov Money':'01 72 97 73 36',
         'MTN MoMo':'05 84 77 63 36',
-        'Wave':{ numero:'07 48 27 46 54', lien:'https://pay.wave.com/m/M_Q7A49i1ZHDn1/c/ci/' }
+        'Wave':{ lien:'https://pay.wave.com/m/M_Q7A49i1ZHDn1/c/ci/' }
       },
       moyens_depot:['Orange Money','Moov Money','MTN MoMo','Wave'],
       moyens_retrait:['Orange Money','Moov Money','MTN MoMo','Wave'],
