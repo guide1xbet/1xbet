@@ -128,10 +128,10 @@ canvas{display:block;max-width:460px;width:100%;height:auto;}
     <div class="sec">
       <div class="sec-title">Contenu</div>
       <div id="form-football">
-        <div class="fg"><label>Équipe 1</label><input id="f-eq1" value="Guinée" oninput="draw()"></div>
-        <div class="fg"><label>Drapeau équipe 1</label><input id="f-flag1" value="🇬🇳" oninput="draw()"></div>
-        <div class="fg"><label>Équipe 2</label><input id="f-eq2" value="Sénégal" oninput="draw()"></div>
-        <div class="fg"><label>Drapeau équipe 2</label><input id="f-flag2" value="🇸🇳" oninput="draw()"></div>
+        <div class="fg"><label>Écusson équipe 1</label><select id="f-sel1" onchange="majEquipe(1)"></select></div>
+        <div class="fg"><label>Nom affiché 1</label><input id="f-eq1" value="Guinée" oninput="draw()"></div>
+        <div class="fg"><label>Écusson équipe 2</label><select id="f-sel2" onchange="majEquipe(2)"></select></div>
+        <div class="fg"><label>Nom affiché 2</label><input id="f-eq2" value="Sénégal" oninput="draw()"></div>
         <div class="fg"><label>Compétition</label><input id="f-comp" value="CAN 2025 — Quart de finale" oninput="draw()"></div>
         <div class="fg"><label>Date & Heure</label><input id="f-date" value="Samedi 19 Juillet à 20:00" oninput="draw()"></div>
       </div>
@@ -215,7 +215,41 @@ var PAL=PALETTES.red;
 
 function bloquer(){ document.getElementById('blocked').style.display='flex'; }
 
+/* Remplit les deux listes d'equipes. Deux groupes separes : un agent cherche
+   soit une selection nationale, soit un club, jamais les deux melanges. */
+function remplirEquipes(){
+  ['f-sel1','f-sel2'].forEach(function(id,idx){
+    var sel=document.getElementById(id);
+    if(!sel) return;
+    var grp={nation:'Sélections nationales', club:'Clubs'};
+    ['nation','club'].forEach(function(g){
+      var og=document.createElement('optgroup');
+      og.label=grp[g];
+      Object.keys(EQUIPES).forEach(function(cle){
+        if(EQUIPES[cle].grp!==g) return;
+        var o=document.createElement('option');
+        o.value=cle; o.textContent=EQUIPES[cle].nom;
+        og.appendChild(o);
+      });
+      sel.appendChild(og);
+    });
+    sel.value=idx===0?'gn':'sn';
+  });
+}
+
+/* Choisir un ecusson reecrit le nom affiche — sauf si l'agent l'a personnalise :
+   ecraser « Les Elephants » par « Cote d'Ivoire » a chaque clic serait penible. */
+function majEquipe(n){
+  var sel=document.getElementById('f-sel'+n), champ=document.getElementById('f-eq'+n);
+  if(sel&&champ){
+    var connu=Object.keys(EQUIPES).some(function(c){ return EQUIPES[c].nom===champ.value; });
+    if(connu||!champ.value) champ.value=EQUIPES[sel.value].nom;
+  }
+  draw();
+}
+
 function init(){
+  remplirEquipes();
   var p=new URLSearchParams(location.search);
   var ref=(p.get('ref')||'').toLowerCase(), key=p.get('key')||'';
   if(!ref||!key){ bloquer(); return; }
@@ -431,114 +465,639 @@ function drawHeader(ctx,W,H,s){
   ctx.fillRect(W/2-280*s,92*s,560*s,2*s);
 }
 
-function tplFootball(ctx,W,H,s){
-  var eq1=v('f-eq1')||'Guinée',eq2=v('f-eq2')||'Sénégal';
-  var fl1=v('f-flag1')||'🇬🇳',fl2=v('f-flag2')||'🇸🇳';
-  var comp=v('f-comp')||'Champions League',date=v('f-date')||'Ce soir à 21:00';
-  var isStory=FMT==='story';
-  var baseY=isStory?1.7:1;
+/* =====================================================================
+   ÉQUIPES — écussons et drapeaux tracés en vectoriel
+   ---------------------------------------------------------------------
+   Les emoji drapeaux (🇬🇳) ne sont pas rendus par Windows : l'agent y
+   obtenait « GN » a la place du drapeau, et le flyer partait ainsi.
+   Tout est donc trace au canvas : net a 1080 px, identique sur tous les
+   appareils, aucune image a charger.
 
-  // Badge compétition
+   Les clubs sont representes par les COULEURS de leur maillot, jamais
+   par leur ecusson officiel : celui-ci est une marque deposee que ce
+   generateur n'a pas le droit de reproduire.
+   ===================================================================== */
+
+var EQUIPES = {
+  // ---- Sélections nationales ----
+  ci:{nom:"Côte d'Ivoire",  grp:'nation', d:{t:'vbands', c:['#f77f00','#ffffff','#009e60']}},
+  gn:{nom:'Guinée',         grp:'nation', d:{t:'vbands', c:['#ce1126','#fcd116','#009460']}},
+  ne:{nom:'Niger',          grp:'nation', d:{t:'hbands', c:['#e05206','#ffffff','#0db02b'], ov:'disc', ovc:'#e05206'}},
+  sn:{nom:'Sénégal',        grp:'nation', d:{t:'vbands', c:['#00853f','#fdef42','#e31b23'], ov:'star', ovc:'#00853f'}},
+  ml:{nom:'Mali',           grp:'nation', d:{t:'vbands', c:['#14b53a','#fcd116','#ce1126']}},
+  bf:{nom:'Burkina Faso',   grp:'nation', d:{t:'hbands', c:['#ef2b2d','#009e49'], ov:'star', ovc:'#fcd116'}},
+  gh:{nom:'Ghana',          grp:'nation', d:{t:'hbands', c:['#ce1126','#fcd116','#006b3f'], ov:'star', ovc:'#000000'}},
+  ng:{nom:'Nigeria',        grp:'nation', d:{t:'vbands', c:['#008751','#ffffff','#008751']}},
+  cm:{nom:'Cameroun',       grp:'nation', d:{t:'vbands', c:['#007a5e','#ce1126','#fcd116'], ov:'star', ovc:'#fcd116'}},
+  ma:{nom:'Maroc',          grp:'nation', d:{t:'solid',  c:['#c1272d'], ov:'star', ovc:'#006233'}},
+  dz:{nom:'Algérie',        grp:'nation', d:{t:'vbands', c:['#006233','#ffffff'], ov:'crescent', ovc:'#d21034'}},
+  tn:{nom:'Tunisie',        grp:'nation', d:{t:'solid',  c:['#e70013'], ov:'crescent', ovc:'#e70013', disc:'#ffffff'}},
+  eg:{nom:'Égypte',         grp:'nation', d:{t:'hbands', c:['#ce1126','#ffffff','#000000'], ov:'star', ovc:'#c09300'}},
+  cd:{nom:'RD Congo',       grp:'nation', d:{t:'solid',  c:['#007fff'], ov:'sash', ovc:'#f7d618', ov2:'star', ov2c:'#fcd116'}},
+  tg:{nom:'Togo',           grp:'nation', d:{t:'hbands', c:['#006a4e','#ffd100','#006a4e'], ov:'star', ovc:'#d21034'}},
+  bj:{nom:'Bénin',          grp:'nation', d:{t:'hbands', c:['#fcd20a','#e8112d'], ov:'lband', ovc:'#008751'}},
+  za:{nom:'Afrique du Sud', grp:'nation', d:{t:'hbands', c:['#e03c31','#ffffff','#001489'], ov:'lband', ovc:'#007a4d'}},
+  fr:{nom:'France',         grp:'nation', d:{t:'vbands', c:['#002395','#ffffff','#ed2939']}},
+  es:{nom:'Espagne',        grp:'nation', d:{t:'hbands', c:['#aa151b','#f1bf00','#aa151b'], mid:2}},
+  it:{nom:'Italie',         grp:'nation', d:{t:'vbands', c:['#009246','#ffffff','#ce2b37']}},
+  de:{nom:'Allemagne',      grp:'nation', d:{t:'hbands', c:['#000000','#dd0000','#ffce00']}},
+  pt:{nom:'Portugal',       grp:'nation', d:{t:'halves', c:['#006600','#ff0000'], ov:'disc', ovc:'#ffe900'}},
+  en:{nom:'Angleterre',     grp:'nation', d:{t:'solid',  c:['#ffffff'], ov:'cross', ovc:'#ce1124'}},
+  nl:{nom:'Pays-Bas',       grp:'nation', d:{t:'hbands', c:['#ae1c28','#ffffff','#21468b']}},
+  be:{nom:'Belgique',       grp:'nation', d:{t:'vbands', c:['#000000','#fdda24','#ef3340']}},
+  br:{nom:'Brésil',         grp:'nation', d:{t:'solid',  c:['#009c3b'], ov:'diamond', ovc:'#ffdf00', disc:'#002776'}},
+  ar:{nom:'Argentine',      grp:'nation', d:{t:'hbands', c:['#75aadb','#ffffff','#75aadb'], ov:'sun', ovc:'#f6b40e'}},
+
+  // ---- Clubs (couleurs de maillot) ----
+  rma:{nom:'Real Madrid',       grp:'club', d:{t:'solid',   c:['#ffffff'], acc:'#febe10'}},
+  fcb:{nom:'FC Barcelone',      grp:'club', d:{t:'stripes', c:['#a50044','#004d98'], acc:'#edbb00'}},
+  atm:{nom:'Atlético Madrid',   grp:'club', d:{t:'stripes', c:['#cb3524','#ffffff'], acc:'#262e62'}},
+  psg:{nom:'Paris SG',          grp:'club', d:{t:'vband',   c:['#004170','#da291c'], acc:'#ffffff'}},
+  om: {nom:'Marseille',         grp:'club', d:{t:'solid',   c:['#ffffff'], acc:'#2faee0'}},
+  liv:{nom:'Liverpool',         grp:'club', d:{t:'solid',   c:['#c8102e'], acc:'#f6eb61'}},
+  mun:{nom:'Manchester United', grp:'club', d:{t:'solid',   c:['#da291c'], acc:'#fbe122'}},
+  mci:{nom:'Manchester City',   grp:'club', d:{t:'solid',   c:['#6cabdd'], acc:'#1c2c5b'}},
+  che:{nom:'Chelsea',           grp:'club', d:{t:'solid',   c:['#034694'], acc:'#dba111'}},
+  ars:{nom:'Arsenal',           grp:'club', d:{t:'solid',   c:['#ef0107'], acc:'#ffffff'}},
+  juv:{nom:'Juventus',          grp:'club', d:{t:'stripes', c:['#000000','#ffffff'], acc:'#d4af37'}},
+  mil:{nom:'AC Milan',          grp:'club', d:{t:'stripes', c:['#fb090b','#000000'], acc:'#d4af37'}},
+  int:{nom:'Inter Milan',       grp:'club', d:{t:'stripes', c:['#010e80','#000000'], acc:'#d4af37'}},
+  bay:{nom:'Bayern Munich',     grp:'club', d:{t:'solid',   c:['#dc052d'], acc:'#ffffff'}},
+  bvb:{nom:'Dortmund',          grp:'club', d:{t:'solid',   c:['#fde100'], acc:'#000000'}},
+  ajx:{nom:'Ajax',              grp:'club', d:{t:'vband',   c:['#ffffff','#d2122e'], acc:'#d2122e'}},
+  por:{nom:'FC Porto',          grp:'club', d:{t:'stripes', c:['#00428c','#ffffff'], acc:'#00428c'}},
+  ben:{nom:'Benfica',           grp:'club', d:{t:'solid',   c:['#e2001a'], acc:'#ffffff'}},
+  alh:{nom:'Al Ahly',           grp:'club', d:{t:'solid',   c:['#d61a1f'], acc:'#ffffff'}},
+  zam:{nom:'Zamalek',           grp:'club', d:{t:'solid',   c:['#ffffff'], acc:'#d61a1f'}},
+  wac:{nom:'Wydad Casablanca',  grp:'club', d:{t:'solid',   c:['#c8102e'], acc:'#ffffff'}},
+  rca:{nom:'Raja Casablanca',   grp:'club', d:{t:'solid',   c:['#00964b'], acc:'#ffffff'}},
+  est:{nom:'Espérance Tunis',   grp:'club', d:{t:'stripes', c:['#d81e05','#f7d117'], acc:'#d81e05'}},
+  tpm:{nom:'TP Mazembe',        grp:'club', d:{t:'solid',   c:['#000000'], acc:'#ffffff'}},
+  hor:{nom:'Horoya AC',         grp:'club', d:{t:'stripes', c:['#e30613','#ffffff'], acc:'#e30613'}},
+  asec:{nom:'ASEC Mimosas',     grp:'club', d:{t:'solid',   c:['#f7d117'], acc:'#000000'}},
+  asfar:{nom:'AS FAR Rabat',    grp:'club', d:{t:'solid',   c:['#0a5c36'], acc:'#ffffff'}}
+};
+
+/* Le pays renvoye par le serveur est un libelle ; il faut le relier a un
+   drapeau de la table ci-dessus pour l'afficher dans le pied de page. */
+var PAYS_CODE={
+  "côte d'ivoire":'ci', "cote d'ivoire":'ci', 'guinée':'gn', 'guinee':'gn',
+  'guinée conakry':'gn', 'guinee conakry':'gn', 'niger':'ne', 'sénégal':'sn',
+  'senegal':'sn', 'mali':'ml', 'burkina faso':'bf', 'ghana':'gh', 'nigeria':'ng',
+  'cameroun':'cm', 'togo':'tg', 'bénin':'bj', 'benin':'bj', 'maroc':'ma',
+  'algérie':'dz', 'algerie':'dz', 'tunisie':'tn', 'égypte':'eg', 'egypte':'eg',
+  'rd congo':'cd', 'afrique du sud':'za', 'france':'fr'
+};
+
+/* Drapeau rectangulaire, pour le pied de page et partout ou l'ecusson
+   serait trop lourd. */
+function drapeauPetit(ctx,code,x,y,w,h,s){
+  var e=EQUIPES[code];
+  if(!e) return 0;
   ctx.save();
-  ctx.textAlign='center';
-  var compText=comp.toUpperCase();
-  ctx.font='700 '+(30*s)+'px "Segoe UI",Arial';
-  var compW=ctx.measureText(compText).width+70*s;
-  var compX=W/2-compW/2,compY=115*s;
-  roundRect(ctx,compX,compY,compW,44*s,22*s);
-  ctx.fillStyle='rgba(255,255,255,0.06)';
-  ctx.fill();
-  var bdG=ctx.createLinearGradient(compX,0,compX+compW,0);
-  bdG.addColorStop(0,PAL.acc);
-  bdG.addColorStop(1,'rgba(30,60,180,0.8)');
-  ctx.strokeStyle=bdG;
-  ctx.lineWidth=1.5*s;
-  ctx.stroke();
-  ctx.fillStyle='rgba(255,255,255,0.8)';
-  ctx.fillText('⚽ '+compText,W/2,145*s);
+  roundRect(ctx,x,y,w,h,3*s); ctx.clip();
+  peindreMotif(ctx,e.d,x,y,w,h);
   ctx.restore();
+  roundRect(ctx,x,y,w,h,3*s);
+  ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=1.2*s; ctx.stroke();
+  return w;
+}
 
-  var teamsY=(isStory?580:360)*s;
-
-  // Zone équipes avec fond glassmorphism
-  ctx.save();
-  roundRect(ctx,50*s,teamsY-80*s,W-100*s,180*s,20*s);
-  ctx.fillStyle='rgba(255,255,255,0.04)';
-  ctx.fill();
-  ctx.strokeStyle='rgba(255,255,255,0.08)';
-  ctx.lineWidth=1*s;
-  ctx.stroke();
-  ctx.restore();
-
-  // Drapeaux et noms équipes
-  ctx.save();
-  // Équipe 1 (gauche)
-  ctx.font=(90*s)+'px Arial';
-  ctx.textAlign='center';
-  ctx.fillText(fl1,160*s,teamsY-10*s);
-  ctx.font='800 '+(52*s)+'px "Segoe UI",Arial';
-  ctx.fillStyle='#fff';
-  ctx.shadowColor='rgba(0,0,0,0.8)';
-  ctx.shadowBlur=10*s;
-  ctx.fillText(eq1.toUpperCase(),160*s,teamsY+65*s);
-
-  // Équipe 2 (droite)
-  ctx.font=(90*s)+'px Arial';
-  ctx.textAlign='center';
-  ctx.fillText(fl2,W-160*s,teamsY-10*s);
-  ctx.font='800 '+(52*s)+'px "Segoe UI",Arial';
-  ctx.fillStyle='#fff';
-  ctx.fillText(eq2.toUpperCase(),W-160*s,teamsY+65*s);
-  ctx.restore();
-
-  // VS central avec effet premium
-  ctx.save();
-  // Cercle VS
+/* Forme d'ecusson de football : epaules droites, flancs qui se resserrent,
+   pointe basse. Tout le motif est clippe dedans, donc un seul chemin sert
+   a la fois de masque, de bordure et d'ombre portee. */
+function cheminEcusson(ctx,x,y,w,h){
+  var r=w*0.13;
   ctx.beginPath();
-  ctx.arc(W/2,teamsY+20*s,62*s,0,Math.PI*2);
-  var vsG=ctx.createRadialGradient(W/2,teamsY+20*s,0,W/2,teamsY+20*s,62*s);
-  vsG.addColorStop(0,PAL.acc);
-  vsG.addColorStop(1,lerpHex(PAL.acc,'#000000',0.5));
-  ctx.fillStyle=vsG;
-  ctx.fill();
-  ctx.strokeStyle=PAL.acc2;
-  ctx.lineWidth=2.5*s;
-  ctx.stroke();
-  ctx.shadowColor=PAL.acc;
-  ctx.shadowBlur=20*s;
-  ctx.font='900 '+(48*s)+'px "Segoe UI",Arial';
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h*0.50);
+  ctx.quadraticCurveTo(x+w,y+h*0.82,x+w/2,y+h);
+  ctx.quadraticCurveTo(x,y+h*0.82,x,y+h*0.50);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+function etoile(ctx,cx,cy,rExt,rInt,branches,rot){
+  ctx.beginPath();
+  var pas=Math.PI/branches, a=(rot||-Math.PI/2);
+  for(var i=0;i<branches*2;i++){
+    var r=(i%2===0)?rExt:rInt;
+    ctx[i===0?'moveTo':'lineTo'](cx+Math.cos(a)*r, cy+Math.sin(a)*r);
+    a+=pas;
+  }
+  ctx.closePath();
+}
+
+/* Peint le motif d'une equipe dans le rectangle (x,y,w,h), deja clippe par
+   l'appelant a la forme de l'ecusson. */
+function peindreMotif(ctx,d,x,y,w,h){
+  var c=d.c||['#888888'], t=d.t||'solid', i;
+
+  if(t==='solid'){
+    ctx.fillStyle=c[0]; ctx.fillRect(x,y,w,h);
+
+  } else if(t==='vbands'){
+    // La bande centrale peut etre double (Espagne) : mid porte son poids.
+    var poids=[], tot=0;
+    for(i=0;i<c.length;i++){ var p=(d.mid&&i===1)?d.mid:1; poids.push(p); tot+=p; }
+    var cx=x;
+    for(i=0;i<c.length;i++){
+      var lw=w*poids[i]/tot;
+      ctx.fillStyle=c[i]; ctx.fillRect(cx,y,lw+0.5,h); cx+=lw;
+    }
+
+  } else if(t==='hbands'){
+    var poidsH=[], totH=0;
+    for(i=0;i<c.length;i++){ var ph=(d.mid&&i===1)?d.mid:1; poidsH.push(ph); totH+=ph; }
+    var cy=y;
+    for(i=0;i<c.length;i++){
+      var lh=h*poidsH[i]/totH;
+      ctx.fillStyle=c[i]; ctx.fillRect(x,cy,w,lh+0.5); cy+=lh;
+    }
+
+  } else if(t==='halves'){
+    ctx.fillStyle=c[0]; ctx.fillRect(x,y,w*0.4,h);
+    ctx.fillStyle=c[1]; ctx.fillRect(x+w*0.4,y,w*0.6,h);
+
+  } else if(t==='stripes'){
+    // Rayures verticales facon maillot : nombre impair pour que le centre
+    // tombe sur une rayure, sinon l'ecusson parait coupe en deux.
+    var n=7, lwS=w/n;
+    for(i=0;i<n;i++){ ctx.fillStyle=c[i%2]; ctx.fillRect(x+i*lwS,y,lwS+0.5,h); }
+
+  } else if(t==='hoops'){
+    var nh=7, lhH=h/nh;
+    for(i=0;i<nh;i++){ ctx.fillStyle=c[i%2]; ctx.fillRect(x,y+i*lhH,w,lhH+0.5); }
+
+  } else if(t==='vband'){
+    ctx.fillStyle=c[0]; ctx.fillRect(x,y,w,h);
+    ctx.fillStyle=c[1]; ctx.fillRect(x+w*0.36,y,w*0.28,h);
+  }
+
+  // --- Surcharges ---
+  var cxm=x+w/2, cym=y+h*0.46, ref=Math.min(w,h);
+
+  if(d.ov==='lband'){ ctx.fillStyle=d.ovc; ctx.fillRect(x,y,w*0.30,h); }
+
+  if(d.ov==='sash'||d.ov2==='sash'){
+    ctx.save();
+    ctx.strokeStyle=(d.ov==='sash')?d.ovc:d.ov2c;
+    ctx.lineWidth=h*0.13;
+    ctx.beginPath(); ctx.moveTo(x-w*0.1,y+h*0.85); ctx.lineTo(x+w*1.1,y-h*0.05); ctx.stroke();
+    ctx.restore();
+  }
+
+  if(d.ov==='cross'){
+    ctx.fillStyle=d.ovc;
+    ctx.fillRect(cxm-w*0.09,y,w*0.18,h);
+    ctx.fillRect(x,cym-h*0.09,w,h*0.18);
+  }
+
+  if(d.ov==='diamond'){
+    ctx.save();
+    ctx.fillStyle=d.ovc;
+    ctx.beginPath();
+    ctx.moveTo(cxm,y+h*0.10); ctx.lineTo(x+w*0.90,cym);
+    ctx.lineTo(cxm,y+h*0.82); ctx.lineTo(x+w*0.10,cym);
+    ctx.closePath(); ctx.fill();
+    if(d.disc){ ctx.fillStyle=d.disc; ctx.beginPath(); ctx.arc(cxm,cym,ref*0.20,0,Math.PI*2); ctx.fill(); }
+    ctx.restore();
+  }
+
+  if(d.ov==='disc'){ ctx.fillStyle=d.ovc; ctx.beginPath(); ctx.arc(cxm,cym,ref*0.17,0,Math.PI*2); ctx.fill(); }
+
+  if(d.ov==='sun'){
+    ctx.save(); ctx.fillStyle=d.ovc;
+    for(i=0;i<16;i++){
+      ctx.save(); ctx.translate(cxm,cym); ctx.rotate(i*Math.PI/8);
+      ctx.fillRect(-ref*0.016,-ref*0.26,ref*0.032,ref*0.11); ctx.restore();
+    }
+    ctx.beginPath(); ctx.arc(cxm,cym,ref*0.13,0,Math.PI*2); ctx.fill(); ctx.restore();
+  }
+
+  if(d.ov==='crescent'){
+    // Croissant en soustrayant un disque decale : deux arcs suffisent et le
+    // rendu reste net a n'importe quelle taille.
+    if(d.disc){ ctx.fillStyle=d.disc; ctx.beginPath(); ctx.arc(cxm,cym,ref*0.26,0,Math.PI*2); ctx.fill(); }
+    ctx.save();
+    ctx.fillStyle=d.ovc;
+    ctx.beginPath(); ctx.arc(cxm-ref*0.02,cym,ref*0.19,0,Math.PI*2); ctx.fill();
+    ctx.globalCompositeOperation='destination-out';
+    ctx.beginPath(); ctx.arc(cxm+ref*0.06,cym,ref*0.155,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle=d.ovc;
+    etoile(ctx,cxm+ref*0.10,cym,ref*0.085,ref*0.036,5); ctx.fill();
+  }
+
+  if(d.ov==='star'||d.ov2==='star'){
+    ctx.fillStyle=(d.ov==='star')?d.ovc:d.ov2c;
+    etoile(ctx,cxm,cym,ref*0.20,ref*0.085,5); ctx.fill();
+  }
+}
+
+/* Ecusson complet : ombre portee, motif, reflet, liseré metallique. */
+function dessineEcusson(ctx,eq,x,y,w,h,s){
+  var d=eq.d;
+  ctx.save();
+
+  // Ombre portee — decolle l'ecusson du fond
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,0.65)';
+  ctx.shadowBlur=26*s; ctx.shadowOffsetY=10*s;
+  cheminEcusson(ctx,x,y,w,h);
+  ctx.fillStyle='#000'; ctx.fill();
+  ctx.restore();
+
+  // Motif, clippe a la forme
+  ctx.save();
+  cheminEcusson(ctx,x,y,w,h); ctx.clip();
+  peindreMotif(ctx,d,x,y,w,h);
+
+  // Reflet haut : donne le volume, sans quoi l'ecusson reste un aplat
+  var refl=ctx.createLinearGradient(0,y,0,y+h*0.55);
+  refl.addColorStop(0,'rgba(255,255,255,0.26)');
+  refl.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=refl; ctx.fillRect(x,y,w,h*0.55);
+
+  // Ombre interne basse
+  var omb=ctx.createLinearGradient(0,y+h*0.55,0,y+h);
+  omb.addColorStop(0,'rgba(0,0,0,0)');
+  omb.addColorStop(1,'rgba(0,0,0,0.35)');
+  ctx.fillStyle=omb; ctx.fillRect(x,y+h*0.55,w,h*0.45);
+  ctx.restore();
+
+  // Lisere metallique
+  var accent=d.acc||'#d9c187';
+  var bord=ctx.createLinearGradient(x,y,x+w,y+h);
+  bord.addColorStop(0,'#ffffff');
+  bord.addColorStop(0.35,accent);
+  bord.addColorStop(0.7,'rgba(255,255,255,0.85)');
+  bord.addColorStop(1,accent);
+  cheminEcusson(ctx,x,y,w,h);
+  ctx.strokeStyle=bord; ctx.lineWidth=5*s; ctx.stroke();
+
+  ctx.restore();
+}
+
+/* Texte a chasse elargie : ctx.letterSpacing n'existe pas partout, on place
+   donc les lettres une a une. */
+function texteEspace(ctx,txt,cx,y,esp){
+  var i, larg=0, ch=[];
+  for(i=0;i<txt.length;i++){ ch.push(txt[i]); larg+=ctx.measureText(txt[i]).width+esp; }
+  larg-=esp;
+  var x=cx-larg/2, ali=ctx.textAlign;
+  ctx.textAlign='left';
+  for(i=0;i<ch.length;i++){ ctx.fillText(ch[i],x,y); x+=ctx.measureText(ch[i]).width+esp; }
+  ctx.textAlign=ali;
+  return larg;
+}
+
+/* Ajuste la police pour qu'un nom d'equipe tienne dans la largeur donnee :
+   « Manchester United » debordait sur l'ecusson voisin. */
+function policeAjustee(ctx,txt,taille,maxW,s){
+  var t=taille;
+  while(t>18){
+    ctx.font='900 '+(t*s)+'px "Segoe UI",Arial Black,Arial';
+    if(ctx.measureText(txt).width<=maxW) break;
+    t-=2;
+  }
+  return t;
+}
+
+function equipeDe(id,nomLibre){
+  var e=EQUIPES[id];
+  if(!e) e={nom:nomLibre||'Équipe', d:{t:'solid', c:['#31384f'], acc:'#8b9bbd'}};
+  return e;
+}
+
+function tplFootball(ctx,W,H,s){
+  var id1=v('f-sel1')||'gn', id2=v('f-sel2')||'sn';
+  var eq1=equipeDe(id1), eq2=equipeDe(id2);
+  var nom1=(v('f-eq1')||eq1.nom).toUpperCase();
+  var nom2=(v('f-eq2')||eq2.nom).toUpperCase();
+  var comp=v('f-comp')||'Champions League', date=v('f-date')||'Ce soir à 21:00';
+  var isStory=FMT==='story', isPay=FMT==='paysage';
+  var k=1;
+  // 1200x630 : une fois le bandeau haut et le pied de page poses, il ne reste
+  // que 350 px de hauteur utile. Empiler badge, ecussons, date, accroche et
+  // code promo dedans les ecrasait tous. Le paysage a donc sa propre mise en
+  // page, en deux colonnes, qui se sert de la largeur au lieu de la subir.
+  if(isPay){ tplFootballPaysage(ctx,W,H,s); return; }
+
+  /* ---------------------------------------------------------------
+     Geometrie ancree, pas en cascade. Le bloc promo se posait
+     auparavant a une distance fixe du dernier element : sur un format
+     plus court il finissait sous le pied de page, code promo illisible.
+     On reserve donc sa place d'abord, puis on repartit ce qui reste.
+     --------------------------------------------------------------- */
+  var hPromo=130*s, hFooter=170*s;
+  var yPromo=H-hFooter-hPromo-(isPay?14:30)*s;
+  var yHaut=(isStory?170:isPay?104:126)*s;
+  var dispo=yPromo-yHaut;
+
+  var hBadge=46*s*k, hNom=(isPay?30:46)*s, hDate=(isPay?46:58)*s, hAcc=(isPay?30:42)*s;
+  var fixe=hBadge+hNom+hDate+hAcc;
+
+  // L'ecusson absorbe le surplus ou la penurie de hauteur : on part de la
+  // taille souhaitee et on la rabote tant que les respirations sont trop
+  // maigres, plutot que de laisser deux blocs se chevaucher.
+  var ecW=(isStory?332:265)*s, ecH, gap;
+  for(var essai=0; essai<40; essai++){
+    ecH=ecW*1.12;
+    gap=(dispo-fixe-ecH)/5;
+    // Sous ce plancher l'ecusson n'est plus lisible ; et une largeur negative
+    // faisait lever createRadialGradient (« r1 is less than 0 »), donc plus
+    // aucun apercu ni telechargement.
+    if(gap>=10*s || ecW<=90*s) break;
+    ecW-=6*s;
+  }
+  if(gap<0) gap=0;
+
+  // Un format tres haut (story) laissait cinq respirations enormes : les blocs
+  // se retrouvaient eparpilles sur toute l'affiche, sans rien pour tenir le
+  // regard. On plafonne l'ecart et on centre le bloc dans la place restante.
+  gap=Math.min(gap,(isStory?58:isPay?13:34)*s);
+  var yBloc=yHaut+Math.max(0,(dispo-(fixe+ecH+5*gap))/2);
+
+  /* ---- Badge competition ---- */
+  var yBadge=yBloc+gap;
+  ctx.save();
+  ctx.textAlign='center';
+  var compTxt=comp.toUpperCase();
+  ctx.font='700 '+(26*s*k)+'px "Segoe UI",Arial';
+  var espComp=2.5*s*k;
+  var compW=ctx.measureText(compTxt).width+compTxt.length*espComp+86*s*k;
+  var compX=W/2-compW/2;
+  roundRect(ctx,compX,yBadge,compW,hBadge,hBadge/2);
+  var gComp=ctx.createLinearGradient(compX,0,compX+compW,0);
+  gComp.addColorStop(0,'rgba(255,255,255,0.03)');
+  gComp.addColorStop(0.5,'rgba(255,255,255,0.10)');
+  gComp.addColorStop(1,'rgba(255,255,255,0.03)');
+  ctx.fillStyle=gComp; ctx.fill();
+  ctx.strokeStyle=PAL.acc2; ctx.lineWidth=1.5*s; ctx.globalAlpha=0.55; ctx.stroke(); ctx.globalAlpha=1;
+  // Ballon trace, pas l'emoji ⚽ : celui-ci a un dessin different sur chaque OS.
+  var bx=compX+30*s*k, by=yBadge+hBadge/2, br=9*s*k;
+  ctx.beginPath(); ctx.arc(bx,by,br,0,Math.PI*2);
+  ctx.fillStyle='#fff'; ctx.fill();
+  ctx.fillStyle='#111';
+  etoile(ctx,bx,by,br*0.52,br*0.24,5); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.92)';
+  ctx.font='700 '+(26*s*k)+'px "Segoe UI",Arial';
+  texteEspace(ctx,compTxt,W/2+14*s*k,yBadge+hBadge*0.66,espComp);
+  ctx.restore();
+
+  /* ---- Écussons ---- */
+  var ecY=yBadge+hBadge+gap;
+  var ecart=Math.min((isStory?330:isPay?205:305)*s, W/2-ecW/2-26*s);
+  var x1=W/2-ecart-ecW/2, x2=W/2+ecart-ecW/2;
+
+  // Halo teinte de la couleur dominante : l'ecusson se detache du fond
+  // sombre sans qu'on ait a poser un cadre autour.
+  [[x1,eq1],[x2,eq2]].forEach(function(p){
+    var cxh=p[0]+ecW/2, cyh=ecY+ecH*0.45;
+    var g=ctx.createRadialGradient(cxh,cyh,0,cxh,cyh,ecW*0.95);
+    g.addColorStop(0,'rgba(255,255,255,0.16)');
+    g.addColorStop(0.45,(p[1].d.c&&p[1].d.c[0]||'#ffffff')+'22');
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g;
+    ctx.fillRect(cxh-ecW,cyh-ecW,ecW*2,ecW*2);
+  });
+
+  dessineEcusson(ctx,eq1,x1,ecY,ecW,ecH,s);
+  dessineEcusson(ctx,eq2,x2,ecY,ecW,ecH,s);
+
+  /* ---- Noms d'équipes ---- */
+  var nomY=ecY+ecH+gap+hNom*0.72;
+  ctx.save();
+  ctx.textAlign='center';
   ctx.fillStyle='#fff';
-  ctx.textAlign='center';
-  ctx.fillText('VS',W/2,teamsY+35*s);
+  ctx.shadowColor='rgba(0,0,0,0.85)'; ctx.shadowBlur=12*s;
+  [[W/2-ecart,nom1],[W/2+ecart,nom2]].forEach(function(p){
+    var t=policeAjustee(ctx,p[1],isPay?24:38,ecart*1.8,s);
+    ctx.font='900 '+(t*s)+'px "Segoe UI",Arial Black,Arial';
+    ctx.fillText(p[1],p[0],nomY);
+  });
   ctx.restore();
 
-  // Date avec icône calendrier
-  var dateY=teamsY+130*s;
+  /* ---- VS central ---- */
+  var vsY=ecY+ecH*0.46, vsR=Math.min(ecW*0.26,(isStory?76:66)*s);
   ctx.save();
-  var dw=ctx.measureText(date).width*0.9+80*s;
-  ctx.font='700 '+(36*s)+'px "Segoe UI",Arial';
-  roundRect(ctx,W/2-dw/2,dateY,dw,52*s,26*s);
-  ctx.fillStyle='rgba(255,255,255,0.07)';
-  ctx.fill();
-  ctx.strokeStyle='rgba(255,255,255,0.15)';
-  ctx.lineWidth=1*s;
-  ctx.stroke();
-  ctx.fillStyle='rgba(255,255,255,0.85)';
-  ctx.textAlign='center';
-  ctx.fillText('📅 '+date,W/2,dateY+35*s);
+  // Trait de tension entre les deux ecussons : conduit le regard de l'un a l'autre
+  var lg=ctx.createLinearGradient(W/2-ecart,vsY,W/2+ecart,vsY);
+  lg.addColorStop(0,'rgba(255,255,255,0)');
+  lg.addColorStop(0.5,'rgba(255,255,255,0.30)');
+  lg.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.strokeStyle=lg; ctx.lineWidth=1.5*s;
+  ctx.beginPath(); ctx.moveTo(W/2-ecart*0.8,vsY); ctx.lineTo(W/2+ecart*0.8,vsY); ctx.stroke();
+
+  // Losange sur pointe : plus incisif qu'un cercle, et fait echo a l'ecusson
+  ctx.translate(W/2,vsY); ctx.rotate(Math.PI/4);
+  ctx.shadowColor='rgba(0,0,0,0.7)'; ctx.shadowBlur=22*s; ctx.shadowOffsetY=6*s;
+  roundRect(ctx,-vsR*0.72,-vsR*0.72,vsR*1.44,vsR*1.44,vsR*0.22);
+  var gVs=ctx.createLinearGradient(-vsR,-vsR,vsR,vsR);
+  gVs.addColorStop(0,lerpHex(PAL.acc,'#ffffff',0.25));
+  gVs.addColorStop(1,lerpHex(PAL.acc,'#000000',0.45));
+  ctx.fillStyle=gVs; ctx.fill();
+  ctx.shadowBlur=0; ctx.shadowOffsetY=0;
+  ctx.strokeStyle=PAL.acc2; ctx.lineWidth=2.5*s; ctx.stroke();
+  ctx.rotate(-Math.PI/4);
+  ctx.font='900 '+(vsR*0.72)+'px "Segoe UI",Arial Black,Arial';
+  ctx.fillStyle='#fff'; ctx.textAlign='center';
+  ctx.shadowColor='rgba(0,0,0,0.6)'; ctx.shadowBlur=8*s;
+  ctx.fillText('VS',0,vsR*0.26);
   ctx.restore();
 
-  // Texte paris
+  /* ---- Cartouche date ---- */
+  var dateY=nomY+gap+hNom*0.28;
   ctx.save();
-  ctx.textAlign='center';
-  ctx.font='700 '+(38*s)+'px "Segoe UI",Arial';
+  ctx.font='700 '+((isPay?24:33)*s)+'px "Segoe UI",Arial';
+  var dw=ctx.measureText(date).width+(isPay?76:104)*s;
+  var dx=W/2-dw/2;
+  roundRect(ctx,dx,dateY,dw,hDate,10*s);
+  ctx.fillStyle='rgba(255,255,255,0.055)'; ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.14)'; ctx.lineWidth=1*s; ctx.stroke();
+  // Chevron plein a la place de l'emoji 📅
   ctx.fillStyle=PAL.acc2;
-  ctx.shadowColor=PAL.acc2;
-  ctx.shadowBlur=12*s;
-  ctx.fillText('🔥 Pariez maintenant — Bonus 200% !',W/2,dateY+110*s);
+  ctx.beginPath();
+  var chx=dx+30*s, chy=dateY+hDate/2, chs=(isPay?9:12)*s;
+  ctx.moveTo(chx-chs*0.4,chy-chs); ctx.lineTo(chx+chs*0.7,chy); ctx.lineTo(chx-chs*0.4,chy+chs);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.92)'; ctx.textAlign='center';
+  ctx.fillText(date,W/2+14*s,dateY+hDate*0.68);
   ctx.restore();
 
-  drawPromoBlock(ctx,W,H,s,dateY+180*s);
+  /* ---- Accroche ---- */
+  var accY=dateY+hDate+gap+hAcc*0.70;
+  ctx.save();
+  ctx.textAlign='center';
+  ctx.font='800 '+((isPay?25:35)*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle=PAL.acc2;
+  ctx.shadowColor=PAL.acc2; ctx.shadowBlur=14*s;
+  texteEspace(ctx,'PARIEZ MAINTENANT — BONUS 200%',W/2,accY,1.5*s);
+  ctx.restore();
+
+  drawPromoBlock(ctx,W,H,s,yPromo);
+}
+
+
+/* Mise en page paysage (1200x630, Facebook) : le match a gauche, l'offre a
+   droite. Le bloc promo commun fait 130 px de haut et le pied de page 170 :
+   empiles, ils ne laissaient pas de quoi dessiner un ecusson lisible. */
+function tplFootballPaysage(ctx,W,H,s){
+  var eq1=equipeDe(v('f-sel1')||'gn'), eq2=equipeDe(v('f-sel2')||'sn');
+  var nom1=(v('f-eq1')||eq1.nom).toUpperCase();
+  var nom2=(v('f-eq2')||eq2.nom).toUpperCase();
+  var comp=v('f-comp')||'Champions League', date=v('f-date')||'Ce soir à 21:00';
+
+  var yTop=104*s, yBas=H-170*s-14*s;
+  var hUtile=yBas-yTop;
+  var xSep=W*0.60;                    // frontiere entre les deux colonnes
+
+  /* ---------- Colonne gauche : le match ---------- */
+  var cxG=xSep/2;
+
+  // Badge competition
+  ctx.save();
+  ctx.font='700 '+(21*s)+'px "Segoe UI",Arial';
+  var compTxt=comp.toUpperCase(), esp=2*s;
+  var cw=ctx.measureText(compTxt).width+compTxt.length*esp+62*s, chh=36*s;
+  var cx0=cxG-cw/2, cy0=yTop;
+  roundRect(ctx,cx0,cy0,cw,chh,chh/2);
+  ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fill();
+  ctx.strokeStyle=PAL.acc2; ctx.lineWidth=1.4*s; ctx.globalAlpha=0.55; ctx.stroke(); ctx.globalAlpha=1;
+  var bx=cx0+24*s, by=cy0+chh/2, br=7*s;
+  ctx.beginPath(); ctx.arc(bx,by,br,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+  ctx.fillStyle='#111'; etoile(ctx,bx,by,br*0.52,br*0.24,5); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.92)';
+  ctx.font='700 '+(21*s)+'px "Segoe UI",Arial';
+  texteEspace(ctx,compTxt,cxG+11*s,cy0+chh*0.66,esp);
+  ctx.restore();
+
+  // Ecussons
+  var ecY=cy0+chh+22*s;
+  var ecH=Math.min(hUtile-(chh+22*s)-46*s, 168*s);
+  var ecW=ecH/1.12;
+  var ecart=Math.min(xSep*0.29, ecW*0.5+72*s);
+  var x1=cxG-ecart-ecW/2, x2=cxG+ecart-ecW/2;
+
+  [[x1,eq1],[x2,eq2]].forEach(function(pp){
+    var hx=pp[0]+ecW/2, hy=ecY+ecH*0.45;
+    var g=ctx.createRadialGradient(hx,hy,0,hx,hy,ecW*0.95);
+    g.addColorStop(0,'rgba(255,255,255,0.16)');
+    g.addColorStop(0.45,(pp[1].d.c&&pp[1].d.c[0]||'#ffffff')+'22');
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g; ctx.fillRect(hx-ecW,hy-ecW,ecW*2,ecW*2);
+  });
+  dessineEcusson(ctx,eq1,x1,ecY,ecW,ecH,s);
+  dessineEcusson(ctx,eq2,x2,ecY,ecW,ecH,s);
+
+  // VS
+  var vsY=ecY+ecH*0.46, vsR=Math.min(ecW*0.30,44*s);
+  ctx.save();
+  ctx.translate(cxG,vsY); ctx.rotate(Math.PI/4);
+  ctx.shadowColor='rgba(0,0,0,0.7)'; ctx.shadowBlur=16*s; ctx.shadowOffsetY=5*s;
+  roundRect(ctx,-vsR*0.72,-vsR*0.72,vsR*1.44,vsR*1.44,vsR*0.22);
+  var gVs=ctx.createLinearGradient(-vsR,-vsR,vsR,vsR);
+  gVs.addColorStop(0,lerpHex(PAL.acc,'#ffffff',0.25));
+  gVs.addColorStop(1,lerpHex(PAL.acc,'#000000',0.45));
+  ctx.fillStyle=gVs; ctx.fill();
+  ctx.shadowBlur=0; ctx.shadowOffsetY=0;
+  ctx.strokeStyle=PAL.acc2; ctx.lineWidth=2*s; ctx.stroke();
+  ctx.rotate(-Math.PI/4);
+  ctx.font='900 '+(vsR*0.72)+'px "Segoe UI",Arial Black,Arial';
+  ctx.fillStyle='#fff'; ctx.textAlign='center';
+  ctx.fillText('VS',0,vsR*0.26);
+  ctx.restore();
+
+  // Noms
+  ctx.save();
+  ctx.textAlign='center'; ctx.fillStyle='#fff';
+  ctx.shadowColor='rgba(0,0,0,0.85)'; ctx.shadowBlur=10*s;
+  var yNom=ecY+ecH+32*s;
+  [[cxG-ecart,nom1],[cxG+ecart,nom2]].forEach(function(pp){
+    var t=policeAjustee(ctx,pp[1],25,ecart*1.85,s);
+    ctx.font='900 '+(t*s)+'px "Segoe UI",Arial Black,Arial';
+    ctx.fillText(pp[1],pp[0],yNom);
+  });
+  ctx.restore();
+
+  /* ---------- Séparateur ---------- */
+  var sg=ctx.createLinearGradient(0,yTop,0,yBas);
+  sg.addColorStop(0,'rgba(255,255,255,0)');
+  sg.addColorStop(0.5,'rgba(255,255,255,0.16)');
+  sg.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=sg; ctx.fillRect(xSep,yTop,1.4*s,hUtile);
+
+  /* ---------- Colonne droite : l'offre ---------- */
+  var cxD=xSep+(W-xSep)/2, larD=(W-xSep)-70*s;
+
+  // Date
+  ctx.save();
+  ctx.font='700 '+(23*s)+'px "Segoe UI",Arial';
+  var dh=48*s, dy=yTop+6*s, dx=cxD-larD/2;
+  roundRect(ctx,dx,dy,larD,dh,9*s);
+  ctx.fillStyle='rgba(255,255,255,0.055)'; ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.14)'; ctx.lineWidth=1*s; ctx.stroke();
+  ctx.fillStyle=PAL.acc2;
+  ctx.beginPath();
+  var chx=dx+24*s, chy=dy+dh/2, chs=9*s;
+  ctx.moveTo(chx-chs*0.4,chy-chs); ctx.lineTo(chx+chs*0.7,chy); ctx.lineTo(chx-chs*0.4,chy+chs);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.92)'; ctx.textAlign='center';
+  var tD=policeAjustee2(ctx,date,23,larD-72*s,s);
+  ctx.font='700 '+(tD*s)+'px "Segoe UI",Arial';
+  ctx.fillText(date,cxD+12*s,dy+dh*0.68);
+  ctx.restore();
+
+  // Accroche
+  ctx.save();
+  ctx.textAlign='center';
+  // La colonne droite est etroite : l'accroche en corps fixe depassait du
+  // cadre et se faisait couper au bord de l'image.
+  var accTxt='BONUS 200% SUR VOTRE 1ᵉʳ DÉPÔT', tAcc=25;
+  while(tAcc>13){
+    ctx.font='800 '+(tAcc*s)+'px "Segoe UI",Arial';
+    if(ctx.measureText(accTxt).width<=larD) break;
+    tAcc-=1;
+  }
+  ctx.fillStyle=PAL.acc2;
+  ctx.shadowColor=PAL.acc2; ctx.shadowBlur=12*s;
+  ctx.fillText(accTxt,cxD,dy+dh+42*s);
+  ctx.restore();
+
+  // Code promo — version compacte, le bloc commun est trop haut ici
+  var py=dy+dh+66*s, ph=Math.max(74*s, yBas-py);
+  ctx.save();
+  roundRect(ctx,cxD-larD/2,py,larD,ph,14*s);
+  var pg=ctx.createLinearGradient(cxD-larD/2,py,cxD+larD/2,py+ph);
+  pg.addColorStop(0,hexA(PAL.acc,0.16));
+  pg.addColorStop(1,hexA(PAL.acc2,0.09));
+  ctx.fillStyle=pg; ctx.fill();
+  ctx.strokeStyle=hexA(PAL.acc2,0.65); ctx.lineWidth=1.8*s; ctx.stroke();
+  ctx.textAlign='center';
+  ctx.font='700 '+(15*s)+'px "Segoe UI",Arial';
+  ctx.fillStyle='rgba(255,255,255,0.55)';
+  texteEspace(ctx,'CODE PROMO EXCLUSIF',cxD,py+27*s,2.6*s);
+  ctx.font='900 '+(40*s)+'px "Segoe UI",Arial Black,Arial';
+  ctx.fillStyle=PAL.acc2;
+  ctx.shadowColor=PAL.acc2; ctx.shadowBlur=16*s;
+  texteEspace(ctx,AG.promo||'',cxD,py+70*s,5*s);
+  ctx.restore();
+}
+
+/* Meme role que policeAjustee, sans la graisse 900 : la date est en 700 et
+   mesurer avec la mauvaise graisse la laissait deborder du cartouche. */
+function policeAjustee2(ctx,txt,taille,maxW,s){
+  var t=taille;
+  while(t>13){
+    ctx.font='700 '+(t*s)+'px "Segoe UI",Arial';
+    if(ctx.measureText(txt).width<=maxW) break;
+    t-=1;
+  }
+  return t;
 }
 
 function tplBonus(ctx,W,H,s){
@@ -906,18 +1465,53 @@ function drawFooter(ctx,W,H,s){
   ctx.fillStyle=lg;
   ctx.fillRect(0,fy+18*s,W,1.5*s);
 
-  ctx.textAlign='center';
+  // Nom de l'agent + son drapeau trace. AG.flag est un emoji regional : Windows
+  // ne le rend pas, l'agent y voyait « CI » colle a son nom sur chaque flyer.
+  var nomTxt='Agent officiel : '+AG.nom;
+  ctx.textAlign='left';
   ctx.font='700 '+(40*s)+'px "Segoe UI",Arial';
+  var dw=34*s, dh=23*s, ecartD=14*s;
+  var codeP=PAYS_CODE[(AG.pays||'').toLowerCase().trim()];
+  var aDrapeau=!!EQUIPES[codeP];
+  var largeur=ctx.measureText(nomTxt).width+(aDrapeau?ecartD+dw:0);
+  var nx=W/2-largeur/2, ny=fy+65*s;
   ctx.fillStyle='#fff';
-  ctx.fillText('Agent officiel : '+AG.nom+' '+AG.flag,W/2,fy+65*s);
+  ctx.fillText(nomTxt,nx,ny);
+  if(aDrapeau) drapeauPetit(ctx,codeP,nx+ctx.measureText(nomTxt).width+ecartD,ny-dh*0.78,dw,dh,s);
 
+  // Combine trace a la place de l'emoji telephone
   ctx.font='700 '+(36*s)+'px "Segoe UI",Arial';
+  var telTxt=AG.phone, icoW=22*s, gapT=14*s;
+  var telW=ctx.measureText(telTxt).width+icoW+gapT;
+  var tx=W/2-telW/2, ty=fy+112*s;
+  ctx.save();
   ctx.fillStyle=PAL.acc2;
-  ctx.fillText('📱 '+AG.phone,W/2,fy+112*s);
+  roundRect(ctx,tx,ty-25*s,icoW,32*s,5*s);
+  ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,0.55)';
+  ctx.fillRect(tx+icoW*0.18,ty-21*s,icoW*0.64,22*s);
+  ctx.restore();
+  ctx.fillStyle=PAL.acc2;
+  ctx.fillText(telTxt,tx+icoW+gapT,ty);
 
+  // Coche tracee a la place de l'emoji
   ctx.font='500 '+(26*s)+'px "Segoe UI",Arial';
+  var basTxt='Disponible 7j/7  ·  Dépôt & Retrait rapides  ·  1xBet Officiel';
+  var cW=20*s, gapC=11*s;
+  var bW=ctx.measureText(basTxt).width+cW+gapC;
+  var bx=W/2-bW/2, by=fy+152*s;
+  ctx.save();
+  ctx.strokeStyle='rgba(118,255,3,0.55)';
+  ctx.lineWidth=3*s; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath();
+  ctx.moveTo(bx+cW*0.12,by-8*s);
+  ctx.lineTo(bx+cW*0.42,by-2*s);
+  ctx.lineTo(bx+cW*0.92,by-16*s);
+  ctx.stroke();
+  ctx.restore();
   ctx.fillStyle='rgba(255,255,255,0.3)';
-  ctx.fillText('✅ Disponible 7j/7  ·  Dépôt & Retrait rapides  ·  1xBet Officiel',W/2,fy+152*s);
+  ctx.fillText(basTxt,bx+cW+gapC,by);
+  ctx.textAlign='center';
 
   // Bande bas
   var botG=ctx.createLinearGradient(0,0,W,0);
@@ -927,6 +1521,7 @@ function drawFooter(ctx,W,H,s){
   ctx.fillStyle=botG;
   ctx.fillRect(0,H-5*s,W,5*s);
 }
+
 
 function wrapText(ctx,text,x,y,maxW,lh){
   if(!text)return;
