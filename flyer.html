@@ -61,6 +61,16 @@ canvas{display:block;max-width:460px;width:100%;height:auto;}
 .fmt{flex:1;background:#12162a;border:1px solid #1a1f35;border-radius:6px;padding:.38rem .25rem;text-align:center;cursor:pointer;font-size:.63rem;color:#3a4265;line-height:1.4;transition:all .15s;}
 .fmt.active{border-color:#e53935;color:#e53935;background:rgba(229,57,53,.07);}
 
+/* PERSONNALISATION D'ÉCUSSON */
+.perso{margin:.35rem 0 .1rem;padding:.5rem;background:#0a0d18;border:1px solid #171c30;border-radius:7px;}
+.motifs{display:flex;gap:.3rem;margin-bottom:.45rem;}
+.motif{flex:1;height:30px;border-radius:5px;border:2px solid #1a1f35;cursor:pointer;overflow:hidden;position:relative;transition:border-color .15s;}
+.motif.active{border-color:#e53935;}
+.motif canvas{width:100%;height:100%;display:block;}
+.cols{display:flex;gap:.4rem;align-items:center;}
+.cols label{font-size:.58rem;color:#3a4265;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+.cols input[type=color]{width:30px;height:26px;padding:0;border:1px solid #1a1f35;border-radius:5px;background:#07090f;cursor:pointer;}
+
 #blocked{position:fixed;inset:0;background:#07090f;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.75rem;z-index:999;}
 @media(max-width:700px){.layout{grid-template-columns:1fr;height:auto;}.preview-area{padding:1rem;}.canvas-wrap canvas{max-width:100%;}}
 </style>
@@ -129,8 +139,26 @@ canvas{display:block;max-width:460px;width:100%;height:auto;}
       <div class="sec-title">Contenu</div>
       <div id="form-football">
         <div class="fg"><label>Écusson équipe 1</label><select id="f-sel1" onchange="majEquipe(1)"></select></div>
+        <div class="perso" id="perso1" style="display:none">
+          <div class="motifs" id="motifs1"></div>
+          <div class="cols">
+            <label>Couleurs</label>
+            <input type="color" id="c1a" value="#1565c0" oninput="draw()">
+            <input type="color" id="c1b" value="#ffffff" oninput="draw()">
+            <input type="color" id="c1c" value="#ffd700" oninput="draw()" title="Liseré">
+          </div>
+        </div>
         <div class="fg"><label>Nom affiché 1</label><input id="f-eq1" value="Guinée" oninput="draw()"></div>
         <div class="fg"><label>Écusson équipe 2</label><select id="f-sel2" onchange="majEquipe(2)"></select></div>
+        <div class="perso" id="perso2" style="display:none">
+          <div class="motifs" id="motifs2"></div>
+          <div class="cols">
+            <label>Couleurs</label>
+            <input type="color" id="c2a" value="#c8102e" oninput="draw()">
+            <input type="color" id="c2b" value="#000000" oninput="draw()">
+            <input type="color" id="c2c" value="#ffffff" oninput="draw()" title="Liseré">
+          </div>
+        </div>
         <div class="fg"><label>Nom affiché 2</label><input id="f-eq2" value="Sénégal" oninput="draw()"></div>
         <div class="fg"><label>Compétition</label><input id="f-comp" value="CAN 2025 — Quart de finale" oninput="draw()"></div>
         <div class="fg"><label>Date & Heure</label><input id="f-date" value="Samedi 19 Juillet à 20:00" oninput="draw()"></div>
@@ -215,6 +243,50 @@ var PAL=PALETTES.red;
 
 function bloquer(){ document.getElementById('blocked').style.display='flex'; }
 
+var MOTIF_PERSO={1:'solid',2:'stripes'};
+var MOTIFS_DISPO=[
+  {t:'solid',   nom:'Uni'},
+  {t:'stripes', nom:'Rayures'},
+  {t:'hoops',   nom:'Cerclé'},
+  {t:'halves',  nom:'Deux moitiés'},
+  {t:'vband',   nom:'Bande centrale'},
+  {t:'diag',    nom:'Diagonale'},
+  {t:'mono',    nom:'Initiales'}
+];
+
+/* Vignettes de motif : chacune est un mini-canvas peint par le meme moteur que
+   l'ecusson final, donc ce que l'agent voit est exactement ce qu'il obtient. */
+function remplirMotifs(n){
+  var hote=document.getElementById('motifs'+n);
+  if(!hote) return;
+  hote.innerHTML='';
+  MOTIFS_DISPO.forEach(function(m){
+    var d=document.createElement('div');
+    d.className='motif'+(MOTIF_PERSO[n]===m.t?' active':'');
+    d.title=m.nom;
+    d.setAttribute('data-t',m.t);
+    var cv=document.createElement('canvas');
+    cv.width=60; cv.height=34;
+    d.appendChild(cv);
+    d.onclick=function(){ MOTIF_PERSO[n]=m.t; remplirMotifs(n); draw(); };
+    hote.appendChild(d);
+  });
+  peindreVignettes(n);
+}
+
+function peindreVignettes(n){
+  var hote=document.getElementById('motifs'+n);
+  if(!hote) return;
+  var ca=v('c'+n+'a')||'#1565c0', cb=v('c'+n+'b')||'#ffffff';
+  Array.prototype.forEach.call(hote.children,function(d){
+    var cv=d.querySelector('canvas'); if(!cv) return;
+    var c2=cv.getContext('2d');
+    c2.clearRect(0,0,cv.width,cv.height);
+    peindreMotif(c2,{t:d.getAttribute('data-t'),c:[ca,cb],
+      ini:initiales(v('f-eq'+n))},0,0,cv.width,cv.height);
+  });
+}
+
 /* Remplit les deux listes d'equipes. Deux groupes separes : un agent cherche
    soit une selection nationale, soit un club, jamais les deux melanges. */
 function remplirEquipes(){
@@ -233,7 +305,21 @@ function remplirEquipes(){
       });
       sel.appendChild(og);
     });
+    // Toujours en tete : c'est le choix qui rend le generateur utilisable pour
+    // un club absent de la table, donc il ne doit pas se chercher.
+    var perso=document.createElement('option');
+    perso.value='perso'; perso.textContent='✎ Personnalisé (tout autre club)';
+    sel.insertBefore(perso, sel.firstChild);
     sel.value=idx===0?'gn':'sn';
+  });
+}
+
+/* Le panneau motif+couleurs ne s'affiche que pour « Personnalisé » : le laisser
+   visible en permanence laisserait croire qu'il agit sur un ecusson connu. */
+function majPanneaux(){
+  [1,2].forEach(function(n){
+    var sel=document.getElementById('f-sel'+n), pan=document.getElementById('perso'+n);
+    if(sel&&pan) pan.style.display=(sel.value==='perso')?'block':'none';
   });
 }
 
@@ -241,7 +327,8 @@ function remplirEquipes(){
    ecraser « Les Elephants » par « Cote d'Ivoire » a chaque clic serait penible. */
 function majEquipe(n){
   var sel=document.getElementById('f-sel'+n), champ=document.getElementById('f-eq'+n);
-  if(sel&&champ){
+  majPanneaux();
+  if(sel&&champ&&sel.value!=='perso'){
     var connu=Object.keys(EQUIPES).some(function(c){ return EQUIPES[c].nom===champ.value; });
     if(connu||!champ.value) champ.value=EQUIPES[sel.value].nom;
   }
@@ -250,6 +337,8 @@ function majEquipe(n){
 
 function init(){
   remplirEquipes();
+  remplirMotifs(1); remplirMotifs(2);
+  majPanneaux();
   var p=new URLSearchParams(location.search);
   var ref=(p.get('ref')||'').toLowerCase(), key=p.get('key')||'';
   if(!ref||!key){ bloquer(); return; }
@@ -340,6 +429,8 @@ function draw(){
   var cv=document.getElementById('c');
   cv.width=W;cv.height=H;
   var ctx=cv.getContext('2d');
+
+  if(TPL==='football'){ peindreVignettes(1); peindreVignettes(2); }
 
   drawBG(ctx,W,H,s);
   drawHeader(ctx,W,H,s);
@@ -635,6 +726,26 @@ function peindreMotif(ctx,d,x,y,w,h){
   } else if(t==='vband'){
     ctx.fillStyle=c[0]; ctx.fillRect(x,y,w,h);
     ctx.fillStyle=c[1]; ctx.fillRect(x+w*0.36,y,w*0.28,h);
+
+  } else if(t==='diag'){
+    ctx.fillStyle=c[0]; ctx.fillRect(x,y,w,h);
+    ctx.save();
+    ctx.strokeStyle=c[1]; ctx.lineWidth=h*0.30;
+    ctx.beginPath(); ctx.moveTo(x-w*0.2,y+h*0.95); ctx.lineTo(x+w*1.2,y-h*0.05); ctx.stroke();
+    ctx.restore();
+
+  } else if(t==='mono'){
+    // Repli quand l'agent n'a rien choisi : plutot que rien, les initiales du
+    // nom saisi. Un ecusson vide se remarque bien plus qu'un monogramme.
+    ctx.fillStyle=c[0]; ctx.fillRect(x,y,w,h);
+    var ini=d.ini||'?';
+    var tm=w*(ini.length>1?0.40:0.55);
+    ctx.save();
+    ctx.textAlign='center';
+    ctx.fillStyle=c[1]||'#ffffff';
+    ctx.font='900 '+tm+'px "Segoe UI",Arial Black,Arial';
+    ctx.fillText(ini,x+w/2,y+h*0.58);
+    ctx.restore();
   }
 
   // --- Surcharges ---
@@ -759,7 +870,7 @@ function texteEspace(ctx,txt,cx,y,esp){
    « Manchester United » debordait sur l'ecusson voisin. */
 function policeAjustee(ctx,txt,taille,maxW,s){
   var t=taille;
-  while(t>18){
+  while(t>15){
     ctx.font='900 '+(t*s)+'px "Segoe UI",Arial Black,Arial';
     if(ctx.measureText(txt).width<=maxW) break;
     t-=2;
@@ -767,15 +878,39 @@ function policeAjustee(ctx,txt,taille,maxW,s){
   return t;
 }
 
-function equipeDe(id,nomLibre){
+/* Initiales d'un nom d'equipe : « ASEC Abidjan » -> « AA », « Barcelone » -> « B ».
+   Les mots de liaison ne comptent pas, sinon « Union de Douala » donnerait « UDD ». */
+function initiales(nom){
+  var vides={de:1,du:1,des:1,la:1,le:1,les:1,d:1,el:1,al:1,fc:0,ac:0,as:0};
+  var mots=String(nom||'').split(/[\s'’-]+/).filter(function(m){
+    return m && vides[m.toLowerCase()]!==1;
+  });
+  if(!mots.length) return '?';
+  if(mots.length===1) return mots[0].charAt(0).toUpperCase();
+  return (mots[0].charAt(0)+mots[1].charAt(0)).toUpperCase();
+}
+
+/* Une equipe se resout dans cet ordre : personnalisee (motif + couleurs
+   choisis par l'agent), connue (table EQUIPES), sinon monogramme construit
+   depuis le nom saisi. Aucun club ne peut donc rester sans ecusson. */
+function equipeDe(id,nomLibre,n){
+  if(id==='perso' && n){
+    return {nom:nomLibre||'Équipe', d:{
+      t: MOTIF_PERSO[n]||'solid',
+      c: [v('c'+n+'a')||'#1565c0', v('c'+n+'b')||'#ffffff'],
+      acc: v('c'+n+'c')||'#ffd700',
+      ini: initiales(nomLibre)
+    }};
+  }
   var e=EQUIPES[id];
-  if(!e) e={nom:nomLibre||'Équipe', d:{t:'solid', c:['#31384f'], acc:'#8b9bbd'}};
-  return e;
+  if(e) return e;
+  var nom=nomLibre||'Équipe';
+  return {nom:nom, d:{t:'mono', c:['#232a42','#e8eaf2'], acc:'#8b9bbd', ini:initiales(nom)}};
 }
 
 function tplFootball(ctx,W,H,s){
   var id1=v('f-sel1')||'gn', id2=v('f-sel2')||'sn';
-  var eq1=equipeDe(id1), eq2=equipeDe(id2);
+  var eq1=equipeDe(id1,v('f-eq1'),1), eq2=equipeDe(id2,v('f-eq2'),2);
   var nom1=(v('f-eq1')||eq1.nom).toUpperCase();
   var nom2=(v('f-eq2')||eq2.nom).toUpperCase();
   var comp=v('f-comp')||'Champions League', date=v('f-date')||'Ce soir à 21:00';
@@ -875,8 +1010,11 @@ function tplFootball(ctx,W,H,s){
   ctx.textAlign='center';
   ctx.fillStyle='#fff';
   ctx.shadowColor='rgba(0,0,0,0.85)'; ctx.shadowBlur=12*s;
+  // Le texte est centre sous son ecusson : la place reelle est deux fois la
+  // marge qui reste jusqu'au bord, pas la distance entre les deux ecussons.
+  var maxNom=Math.min(ecart*1.8,(W/2-ecart-22*s)*2);
   [[W/2-ecart,nom1],[W/2+ecart,nom2]].forEach(function(p){
-    var t=policeAjustee(ctx,p[1],isPay?24:38,ecart*1.8,s);
+    var t=policeAjustee(ctx,p[1],38,maxNom,s);
     ctx.font='900 '+(t*s)+'px "Segoe UI",Arial Black,Arial';
     ctx.fillText(p[1],p[0],nomY);
   });
@@ -947,7 +1085,7 @@ function tplFootball(ctx,W,H,s){
    droite. Le bloc promo commun fait 130 px de haut et le pied de page 170 :
    empiles, ils ne laissaient pas de quoi dessiner un ecusson lisible. */
 function tplFootballPaysage(ctx,W,H,s){
-  var eq1=equipeDe(v('f-sel1')||'gn'), eq2=equipeDe(v('f-sel2')||'sn');
+  var eq1=equipeDe(v('f-sel1')||'gn',v('f-eq1'),1), eq2=equipeDe(v('f-sel2')||'sn',v('f-eq2'),2);
   var nom1=(v('f-eq1')||eq1.nom).toUpperCase();
   var nom2=(v('f-eq2')||eq2.nom).toUpperCase();
   var comp=v('f-comp')||'Champions League', date=v('f-date')||'Ce soir à 21:00';
@@ -1017,8 +1155,9 @@ function tplFootballPaysage(ctx,W,H,s){
   ctx.textAlign='center'; ctx.fillStyle='#fff';
   ctx.shadowColor='rgba(0,0,0,0.85)'; ctx.shadowBlur=10*s;
   var yNom=ecY+ecH+32*s;
+  var maxNomP=Math.min(ecart*1.85,(cxG-ecart-16*s)*2);
   [[cxG-ecart,nom1],[cxG+ecart,nom2]].forEach(function(pp){
-    var t=policeAjustee(ctx,pp[1],25,ecart*1.85,s);
+    var t=policeAjustee(ctx,pp[1],25,maxNomP,s);
     ctx.font='900 '+(t*s)+'px "Segoe UI",Arial Black,Arial';
     ctx.fillText(pp[1],pp[0],yNom);
   });
