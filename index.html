@@ -1117,34 +1117,29 @@ function confirmerDepot(){
     date: new Date().toISOString()
   };
 
-  // Envoyer au serveur Render
-  fetch(RENDER_SERVER + '/depot', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      ref: ref,
-      agentRef: currentAgent ? currentAgent.ref : '',
-      agentNom: currentAgent ? currentAgent.nom : '',
-      clientNom: data.clientNom,
-      clientWa: data.clientWa,
-      clientId1xbet: data.clientId1xbet,
-      montant: data.montant,
-      methode: data.methode,
-      idTransaction: data.idTransaction,
-      date: data.date
-    })
-  }).then(function(res){ return res.json(); })
-  .then(function(result){
+  // Envoyer au serveur Render. Tant que le serveur n'a pas confirme, le client ne
+  // doit RIEN voir qui ressemble a un succes : un depot annonce comme enregistre
+  // alors qu'il n'est jamais parti fait attendre un credit qui ne viendra pas, et
+  // l'agent ne sait meme pas qu'une demande a existe.
+  envoyerAuServeur('/depot', {
+    ref: ref,
+    agentRef: currentAgent ? currentAgent.ref : '',
+    agentNom: currentAgent ? currentAgent.nom : '',
+    clientNom: data.clientNom,
+    clientWa: data.clientWa,
+    clientId1xbet: data.clientId1xbet,
+    montant: data.montant,
+    methode: data.methode,
+    idTransaction: data.idTransaction,
+    date: data.date
+  }).then(function(result){
     document.getElementById('dep-phase2').style.display='none';
     document.getElementById('dep-phase3').style.display='block';
-    document.getElementById('dep-ref').textContent = ref;
+    document.getElementById('dep-ref').textContent = result.ref || ref;
     setLabel(document.getElementById('dep-btn-txt'), 'Confirmer le dépôt');
   })
-  .catch(function(){
-    document.getElementById('dep-phase2').style.display='none';
-    document.getElementById('dep-phase3').style.display='block';
-    document.getElementById('dep-ref').textContent = ref;
-    setLabel(document.getElementById('dep-btn-txt'), 'Confirmer le dépôt');
+  .catch(function(e){
+    echecEnvoi(err, 'dep-btn-txt', 'Confirmer le dépôt', e);
   });
 }
 
@@ -1186,33 +1181,29 @@ function initRetrait(){
     date: new Date().toISOString()
   };
 
-  // Envoyer au serveur Render
-  fetch(RENDER_SERVER + '/retrait', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      ref: ref,
-      agentRef: currentAgent ? currentAgent.ref : '',
-      agentNom: currentAgent ? currentAgent.nom : '',
-      clientNom: nom,
-      clientWa: wa,
-      clientId1xbet: id,
-      montant: parseInt(montant),
-      codeRetrait: code,
-      numeroReception: num,
-      methode: methode,
-      date: data.date
-    })
-  }).then(function(res){ return res.json(); })
-  .then(function(result){
+  // Meme regle que pour le depot : l'ecran « demande envoyee » n'apparait qu'apres
+  // confirmation du serveur. Un retrait cru transmis, jamais notifie a l'agent,
+  // laisse le client attendre des fonds que personne n'a vu partir.
+  envoyerAuServeur('/retrait', {
+    ref: ref,
+    agentRef: currentAgent ? currentAgent.ref : '',
+    agentNom: currentAgent ? currentAgent.nom : '',
+    clientNom: nom,
+    clientWa: wa,
+    clientId1xbet: id,
+    montant: parseInt(montant),
+    codeRetrait: code,
+    numeroReception: num,
+    methode: methode,
+    date: data.date
+  }).then(function(result){
     document.getElementById('ret-phase1').style.display='none';
     document.getElementById('ret-phase2').style.display='block';
-    document.getElementById('ret-ref').textContent = ref;
+    document.getElementById('ret-ref').textContent = result.ref || ref;
+    setLabel(document.getElementById('ret-btn-txt'), 'Soumettre ma demande');
   })
-  .catch(function(){
-    document.getElementById('ret-phase1').style.display='none';
-    document.getElementById('ret-phase2').style.display='block';
-    document.getElementById('ret-ref').textContent = ref;
+  .catch(function(e){
+    echecEnvoi(err, 'ret-btn-txt', 'Soumettre ma demande', e);
   });
 }
 
@@ -1220,6 +1211,77 @@ function initRetrait(){
 // SERVEUR RENDER — URL
 // ============================================
 var RENDER_SERVER = 'https://mobcash-server.onrender.com';
+
+// Un fetch sans delai maximal peut rester suspendu indefiniment. Render en plan
+// gratuit s'endort apres 15 min sans trafic et son reveil prend 30 a 60 s : 75 s
+// couvrent ce demarrage a froid sans laisser le client devant un bouton fige.
+var DELAI_SERVEUR_MS = 75000;
+
+// Reveil anticipe du serveur, des l'ouverture du portail. Sans ce ping, c'est la
+// demande du client qui payait les 30 a 60 s de demarrage — et c'est precisement
+// la qu'elle se perdait, la nuit, quand plus aucun trafic ne tenait Render eveille.
+function reveillerServeur(){
+  try { fetch(RENDER_SERVER + '/ping', { method:'GET', cache:'no-store' }).catch(function(){}); }
+  catch(e){}
+}
+
+// Envoi au serveur qui ne ment jamais sur son resultat. La promesse ne se resout
+// QUE si le serveur a confirme (success === true) ; tout le reste — reseau coupe,
+// serveur endormi, HTTP 4xx/5xx, refus applicatif — rejette avec un message lisible.
+function envoyerAuServeur(endpoint, payload){
+  var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  var minuteur = null;
+  var opts = {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  };
+  if(ctrl){
+    opts.signal = ctrl.signal;
+    minuteur = setTimeout(function(){ ctrl.abort(); }, DELAI_SERVEUR_MS);
+  }
+  var fini = function(){ if(minuteur){ clearTimeout(minuteur); minuteur = null; } };
+  return fetch(RENDER_SERVER + endpoint, opts)
+    .then(function(res){
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function(result){
+      // Le serveur refuse aussi en repondant 200 avec success:false (agent sans
+      // caisse, agent injoignable, montant sous le minimum, trop de requetes).
+      // Traiter cette reponse comme un succes affichait un ecran de confirmation
+      // pour une demande que personne n'allait jamais traiter.
+      if(!result || result.success !== true){
+        var e = new Error('refus serveur');
+        e.messageServeur = (result && (result.error || result.message)) || '';
+        throw e;
+      }
+      return result;
+    })
+    .then(function(r){ fini(); return r; }, function(e){ fini(); throw e; });
+}
+
+function escTexte(str){
+  return String(str == null ? '' : str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// Un envoi qui echoue doit se voir. Le client reste sur son formulaire, garde ses
+// saisies, et recoit le numero de l'agent : il peut reessayer ou le joindre
+// directement, au lieu de repartir en croyant sa demande enregistree.
+function echecEnvoi(elErr, btnId, libelle, e){
+  var tel = (currentAgent && currentAgent.phone) ? currentAgent.phone : '';
+  var msg = (e && e.messageServeur)
+    ? e.messageServeur
+    : 'Envoi impossible : le serveur n\'a pas répondu. Vérifiez votre connexion et réessayez.';
+  if(elErr){
+    elErr.innerHTML = '⚠️ ' + escTexte(msg) +
+      (tel ? '<br>Si le problème persiste, contactez votre agent au <b>' + escTexte(tel) + '</b>.' : '');
+    elErr.style.display = 'block';
+  }
+  setLabel(document.getElementById(btnId), libelle);
+}
 
 // ============================================
 // NOTIFICATION AGENT via Render
@@ -1357,6 +1419,9 @@ function chargerFicheAgent(ref, suite){
 }
 
 function init(){
+  // Des l'ouverture de la page : le serveur a le temps de se reveiller pendant que
+  // le client remplit son formulaire, au lieu de le faire attendre a l'envoi.
+  reveillerServeur();
   var ref = (new URLSearchParams(window.location.search).get('ref') || '').toLowerCase();
   chargerFicheAgent(ref, function(agent){
     // agent.ref est recontrole : un fichier qui ne correspond pas au lien demande
