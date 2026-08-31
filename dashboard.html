@@ -297,6 +297,7 @@ tr:last-child td{border-bottom:none;}
           <select class="filter-select" id="f-statut" onchange="filterTransactions()">
             <option value="">Tous les statuts</option>
             <option value="en_attente">En attente</option>
+            <option value="en_cours">En cours</option>
             <option value="credite">Crédité</option>
             <option value="traite">Traité</option>
             <option value="rejete">Rejeté</option>
@@ -357,6 +358,7 @@ tr:last-child td{border-bottom:none;}
           <select class="filter-select" id="fd-statut" onchange="filterDepots()">
             <option value="">Tous les statuts</option>
             <option value="en_attente">En attente</option>
+            <option value="en_cours">En cours</option>
             <option value="credite">Crédité</option>
             <option value="rejete">Rejeté</option>
           </select>
@@ -400,6 +402,7 @@ tr:last-child td{border-bottom:none;}
           <select class="filter-select" id="fr-statut" onchange="filterRetraits()">
             <option value="">Tous les statuts</option>
             <option value="en_attente">En attente</option>
+            <option value="en_cours">En cours</option>
             <option value="traite">Traité</option>
             <option value="rejete">Rejeté</option>
           </select>
@@ -495,6 +498,7 @@ function getBadge(statut){
     'credite': '<span class="badge badge-green">✅ Crédité</span>',
     'traite': '<span class="badge badge-green">✅ Traité</span>',
     'en_attente': '<span class="badge badge-yellow">⏳ En attente</span>',
+    'en_cours': '<span class="badge badge-yellow">🔄 En cours</span>',
     'rejete': '<span class="badge badge-red">❌ Rejeté</span>',
     'confirme_test': '<span class="badge badge-blue">🧪 Test</span>',
   };
