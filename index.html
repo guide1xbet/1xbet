@@ -1122,6 +1122,7 @@ function confirmerDepot(){
   // alors qu'il n'est jamais parti fait attendre un credit qui ne viendra pas, et
   // l'agent ne sait meme pas qu'une demande a existe.
   envoyerAuServeur('/depot', {
+    portalKey: PORTAL_KEY,
     ref: ref,
     agentRef: currentAgent ? currentAgent.ref : '',
     agentNom: currentAgent ? currentAgent.nom : '',
@@ -1185,6 +1186,7 @@ function initRetrait(){
   // confirmation du serveur. Un retrait cru transmis, jamais notifie a l'agent,
   // laisse le client attendre des fonds que personne n'a vu partir.
   envoyerAuServeur('/retrait', {
+    portalKey: PORTAL_KEY,
     ref: ref,
     agentRef: currentAgent ? currentAgent.ref : '',
     agentNom: currentAgent ? currentAgent.nom : '',
@@ -1211,6 +1213,13 @@ function initRetrait(){
 // SERVEUR RENDER — URL
 // ============================================
 var RENDER_SERVER = 'https://mobcash-server.onrender.com';
+
+// Cle de portail jointe a chaque demande de depot/retrait. Ce n'est PAS un secret :
+// cette page est publique, donc la valeur est lisible ici meme. Elle sert a ce que
+// /depot et /retrait cessent d'accepter n'importe quel appel a l'aveugle sur l'URL du
+// serveur — le bruit opportuniste, pas un attaquant determine. Doit correspondre a la
+// variable PORTAL_KEY posee sur Render.
+var PORTAL_KEY = 'hY2M8HBMNPtbvLsQYwVBbX39gLNYS5z7';
 
 // Un fetch sans delai maximal peut rester suspendu indefiniment. Render en plan
 // gratuit s'endort apres 15 min sans trafic et son reveil prend 30 a 60 s : 75 s
