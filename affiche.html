@@ -6,7 +6,7 @@
 <title>Affiches du jour — 1xBet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@1,900&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@1,900&family=Barlow+Condensed:ital,wght@0,700;0,800;1,700;1,800&family=Kaushan+Script&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:#030817;color:#e8eefc;min-height:100vh;}
@@ -35,7 +35,7 @@ input:focus,textarea:focus{outline:none;border-color:#2ea8ff;}
 .btn-share{background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.35);color:#25d366;}
 .btn:hover{opacity:.9;}
 .apercu canvas.large{max-width:900px;}
-.modes{display:flex;gap:6px;margin-bottom:18px;}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:18px;}
 .mode{flex:1;min-width:0;background:#0a1838;border:1px solid #1a2e63;border-radius:9px;padding:.6rem .3rem;cursor:pointer;font-family:inherit;font-size:.8rem;font-weight:800;color:#8fa6d8;}
 .mode small{display:block;font-size:.62rem;font-weight:600;color:#5c76b8;margin-top:2px;}
 .mode.actif{border-color:#2ea8ff;color:#fff;background:rgba(46,168,255,.14);}
@@ -47,6 +47,9 @@ input:focus,textarea:focus{outline:none;border-color:#2ea8ff;}
 .jour textarea{min-height:130px;}
 .btn-ajout{width:100%;padding:.6rem;border-radius:9px;border:1px dashed #2a4a90;background:none;color:#8fb4e8;font-size:.82rem;font-weight:700;cursor:pointer;font-family:inherit;}
 .btn-ajout:disabled{opacity:.4;cursor:default;}
+.jour select{width:100%;padding:.5rem .6rem;background:#030817;border:1px solid #1a2e63;border-radius:8px;font-size:.85rem;color:#e8eefc;font-family:inherit;margin-bottom:6px;}
+.deux{display:flex;gap:6px;}
+.deux>*{flex:1;min-width:0;}
 @media(max-width:820px){
   .layout{grid-template-columns:minmax(0,1fr);}
   .panel,.apercu{min-width:0;}
@@ -64,6 +67,8 @@ input:focus,textarea:focus{outline:none;border-color:#2ea8ff;}
     <div class="modes">
       <button class="mode actif" data-m="programme" onclick="choisirMode(this)">Programme du jour<small>une date, une liste</small></button>
       <button class="mode" data-m="evenements" onclick="choisirMode(this)">Événements<small>plusieurs journées</small></button>
+      <button class="mode" data-m="weekend" onclick="choisirMode(this)">Week-end<small>par championnat</small></button>
+      <button class="mode" data-m="competitions" onclick="choisirMode(this)">Compétitions<small>panneaux et drapeaux</small></button>
     </div>
 
     <div id="panneau-programme">
@@ -130,6 +135,42 @@ input:focus,textarea:focus{outline:none;border-color:#2ea8ff;}
           <button class="fmt fmt-e" data-f="portrait" onclick="choisirFormatE(this)">Portrait<small>Facebook · Insta</small></button>
           <button class="fmt fmt-e" data-f="story" onclick="choisirFormatE(this)">Story<small>WhatsApp</small></button>
         </div>
+      </div>
+    </div>
+
+    <div id="panneau-champ" style="display:none">
+      <div id="tete-weekend">
+        <div class="sec">
+          <div class="sec-title">Période</div>
+          <div class="deux"><input type="date" id="w-debut" oninput="dessiner()"><input type="date" id="w-fin" oninput="dessiner()"></div>
+        </div>
+        <div class="sec">
+          <div class="sec-title">Titre (3 lignes)</div>
+          <input type="text" id="w-l1" maxlength="20" oninput="dessiner()" style="margin-bottom:6px">
+          <input type="text" id="w-l2" maxlength="14" oninput="dessiner()" style="margin-bottom:6px">
+          <input type="text" id="w-l3" maxlength="12" oninput="dessiner()">
+        </div>
+      </div>
+      <div id="tete-competitions">
+        <div class="sec">
+          <div class="sec-title">Date</div>
+          <input type="date" id="c-date" oninput="dessiner()">
+        </div>
+        <div class="sec">
+          <div class="sec-title">Titre à gauche de la date</div>
+          <input type="text" id="c-titre" maxlength="30" oninput="dessiner()">
+        </div>
+      </div>
+      <div class="sec">
+        <div class="sec-title" id="titre-blocs">Championnats</div>
+        <div id="blocs"></div>
+        <button class="btn-ajout" id="btn-ajout-bloc" onclick="ajouterBloc()">+ Ajouter</button>
+        <div class="aide">Un match par ligne : <b>Arsenal - Lille</b>. Une ligne sans « - » devient un titre de journée : <b>Samedi 19 septembre</b>. Une mention entre parenthèses s'affiche en jaune : <b>Atlético (Choc madrilène) - Real Madrid</b>.</div>
+        <div class="alerte" id="c-alerte"></div>
+      </div>
+      <div class="sec">
+        <div class="sec-title">Format</div>
+        <div class="fmts" id="fmts-champ"></div>
       </div>
     </div>
 
@@ -862,14 +903,24 @@ function choisirMode(el){
   document.querySelectorAll('.mode').forEach(function(b){ b.classList.toggle('actif',b===el); });
   document.getElementById('panneau-programme').style.display=MODE==='programme'?'':'none';
   document.getElementById('panneau-evenements').style.display=MODE==='evenements'?'':'none';
+  var champ=MODE==='weekend'||MODE==='competitions';
+  document.getElementById('panneau-champ').style.display=champ?'':'none';
+  if(champ){
+    document.getElementById('tete-weekend').style.display=MODE==='weekend'?'':'none';
+    document.getElementById('tete-competitions').style.display=MODE==='competitions'?'':'none';
+    afficherBlocs(); afficherFormatsChamp();
+  }
   dessiner();
 }
 
 function dessiner(){
   var cv=document.getElementById('c');
-  var large=MODE==='evenements'&&FMT_E==='paysage';
+  var large=(MODE==='evenements'&&FMT_E==='paysage')||(MODE==='competitions'&&FMT_C.competitions==='paysage');
   cv.classList.toggle('large',large);
-  if(MODE==='evenements') dessinerEvenements(); else dessinerProgramme();
+  if(MODE==='evenements') dessinerEvenements();
+  else if(MODE==='weekend') dessinerWeekend();
+  else if(MODE==='competitions') dessinerCompetitions();
+  else dessinerProgramme();
 }
 
 function initEvenements(){
@@ -886,8 +937,568 @@ function initEvenements(){
   afficherJours();
 }
 
+/* =====================================================================
+   MODES WEEK-END ET COMPÉTITIONS — des blocs (championnat ou compétition),
+   chacun avec ses journées et ses matchs. Chaque mode garde ses propres blocs.
+   ===================================================================== */
+var JAUNE='#ffd21f';
+var JOURS_SEM=['DIMANCHE','LUNDI','MARDI','MERCREDI','JEUDI','VENDREDI','SAMEDI'];
+var MAX_BLOCS=6;
+var BLOCS={ weekend:[], competitions:[] };
+var FMT_C={ weekend:'portrait', competitions:'paysage' };
+var FORMATS_C={
+  weekend:{ portrait:{w:1080,h:1350,nom:'Portrait',sous:'Facebook · Insta'}, story:{w:1080,h:1920,nom:'Story',sous:'WhatsApp'} },
+  competitions:{ paysage:{w:1920,h:1280,nom:'Paysage',sous:'Facebook'}, portrait:{w:1080,h:1350,nom:'Portrait',sous:'Facebook · Insta'}, story:{w:1080,h:1920,nom:'Story',sous:'WhatsApp'} }
+};
+var TEINTES={
+  bleu:  {a:'#0b3fae',b:'#1e7bff',bord:'#2ea8ff',f1:'rgba(7,26,80,.92)', f2:'rgba(3,12,40,.94)'},
+  vert:  {a:'#0b6a33',b:'#1fa34a',bord:'#3ddc7a',f1:'rgba(5,46,26,.92)', f2:'rgba(2,20,12,.94)'},
+  rouge: {a:'#9e1020',b:'#e0283a',bord:'#ff5a68',f1:'rgba(60,8,16,.92)', f2:'rgba(26,3,8,.94)'},
+  violet:{a:'#4a1a9e',b:'#7b3fe0',bord:'#b48cff',f1:'rgba(30,12,70,.92)',f2:'rgba(12,5,32,.94)'}
+};
+
+// Pays supplémentaires fréquents en Ligue des nations et qualifications
+[['georgie','ge'],['armenie','am'],['montenegro','me'],['lettonie','lv'],['chypre','cy'],['turkiye','tr'],
+ ['irlande du nord','gb-nir'],['bosnie herzegovine','ba'],['bosnie','ba'],['slovaquie','sk'],['slovenie','si'],
+ ['albanie','al'],['macedoine du nord','mk'],['kosovo','xk'],['islande','is'],['finlande','fi'],['estonie','ee'],
+ ['lituanie','lt'],['luxembourg','lu'],['malte','mt'],['moldavie','md'],['bielorussie','by'],['azerbaidjan','az'],
+ ['kazakhstan','kz'],['israel','il'],['gibraltar','gi'],['andorre','ad'],['liechtenstein','li'],['saint marin','sm'],
+ ['iles feroe','fo'],['bulgarie','bg'],['republique d irlande','ie'],['equatoriale guinee','gq']
+].forEach(function(p){ PAYS[p[0]]=p[1]; });
+
+/* Lecture d'un bloc : une ligne avec séparateur = un match, une ligne sans = un
+   titre de journée. « Équipe (mention) » sépare la mention, affichée en jaune. */
+function lireBloc(b){
+  var jours=[], cur={jour:'',matchs:[]}, ign=0;
+  function equipe(t){
+    var m=t.match(/^(.*?)\s*\(([^)]*)\)\s*$/);
+    return m?{nom:m[1].trim(),note:m[2].trim()}:{nom:t.trim(),note:''};
+  }
+  b.texte.split('\n').forEach(function(l){
+    l=l.trim(); if(!l) return;
+    var p=l.split(SEPARATEUR);
+    if(p.length===2&&p[0].trim()&&p[1].trim()){ cur.matchs.push([equipe(p[0]),equipe(p[1])]); return; }
+    if(p.length>2){ ign++; return; }
+    if(cur.jour||cur.matchs.length) jours.push(cur);
+    cur={jour:l,matchs:[]};
+  });
+  if(cur.jour||cur.matchs.length) jours.push(cur);
+  return {jours:jours,ignorees:ign};
+}
+
+/* ---------- Formulaire des blocs ---------- */
+function afficherBlocs(){
+  var liste=BLOCS[MODE], box=document.getElementById('blocs');
+  box.innerHTML='';
+  liste.forEach(function(b,i){
+    var el=document.createElement('div');
+    el.className='jour';
+    el.innerHTML='<div class="jour-tete"><b>'+(MODE==='weekend'?'Championnat ':'Compétition ')+(i+1)+'</b>'
+      +(liste.length>1?'<button class="jour-suppr">Supprimer</button>':'')+'</div>'
+      +'<input type="text" maxlength="40" placeholder="Nom (ex. : Premier League)">'
+      +(MODE==='competitions'?'<input type="text" maxlength="40" placeholder="Sous-titre (ex. : Qualifications)">':'')
+      +'<select><option value="bleu">Bleu</option><option value="vert">Vert</option><option value="rouge">Rouge</option><option value="violet">Violet</option></select>'
+      +'<textarea spellcheck="false" placeholder="Samedi 19 septembre&#10;Tottenham - Aston Villa"></textarea>';
+    var ins=el.querySelectorAll('input'), sel=el.querySelector('select'), ta=el.querySelector('textarea');
+    ins[0].value=b.titre; ins[0].oninput=function(){ b.titre=this.value; dessiner(); };
+    if(ins[1]){ ins[1].value=b.sous; ins[1].oninput=function(){ b.sous=this.value; dessiner(); }; }
+    sel.value=b.couleur; sel.onchange=function(){ b.couleur=this.value; dessiner(); };
+    ta.value=b.texte; ta.oninput=function(){ b.texte=this.value; dessiner(); };
+    var sup=el.querySelector('.jour-suppr');
+    if(sup) sup.onclick=function(){ liste.splice(i,1); afficherBlocs(); dessiner(); };
+    box.appendChild(el);
+  });
+  document.getElementById('btn-ajout-bloc').disabled=liste.length>=MAX_BLOCS;
+  document.getElementById('btn-ajout-bloc').textContent=MODE==='weekend'?'+ Ajouter un championnat':'+ Ajouter une compétition';
+  document.getElementById('titre-blocs').textContent=MODE==='weekend'?'Championnats':'Compétitions';
+}
+function ajouterBloc(){
+  var liste=BLOCS[MODE]; if(liste.length>=MAX_BLOCS) return;
+  liste.push({titre:'',sous:'',couleur:'bleu',texte:''});
+  afficherBlocs(); dessiner();
+}
+function afficherFormatsChamp(){
+  var box=document.getElementById('fmts-champ'), fm=FORMATS_C[MODE];
+  box.innerHTML='';
+  Object.keys(fm).forEach(function(k){
+    var b=document.createElement('button');
+    b.className='fmt'+(FMT_C[MODE]===k?' actif':'');
+    b.innerHTML=fm[k].nom+'<small>'+fm[k].sous+'</small>';
+    b.onclick=function(){ FMT_C[MODE]=k; afficherFormatsChamp(); dessiner(); };
+    box.appendChild(b);
+  });
+}
+
+/* ---------- Outils de dessin ---------- */
+function texteEspace(ctx,txt,cx,y,esp){
+  var larg=-esp, i;
+  for(i=0;i<txt.length;i++) larg+=ctx.measureText(txt[i]).width+esp;
+  var x=cx-larg/2, ali=ctx.textAlign;
+  ctx.textAlign='left';
+  for(i=0;i<txt.length;i++){ ctx.fillText(txt[i],x,y); x+=ctx.measureText(txt[i]).width+esp; }
+  ctx.textAlign=ali;
+}
+
+function dessinerLogoGauche(ctx,x,y,taille){
+  ctx.save(); ctx.font='italic 900 '+taille+'px '+POLICE_LOGO;
+  var w=ctx.measureText('1XBET').width; ctx.restore();
+  dessinerLogo(ctx,2*(x+w/2),y,taille);
+  return w;
+}
+
+/* Découpe un nom en lignes et réduit la police jusqu'à tenir dans la boîte. */
+function lignesAjustees(ctx,txt,poids,taille,police,maxW,maxH,maxLignes){
+  for(var t=taille;t>=12;t--){
+    ctx.font=poids+' '+t+'px '+police;
+    var mots=txt.split(/\s+/), lignes=[], cur='';
+    mots.forEach(function(m){
+      var essai=cur?cur+' '+m:m;
+      if(!cur||ctx.measureText(essai).width<=maxW) cur=essai; else { lignes.push(cur); cur=m; }
+    });
+    if(cur) lignes.push(cur);
+    var ok=lignes.length<=maxLignes&&lignes.length*t*1.02<=maxH
+      &&lignes.every(function(l){ return ctx.measureText(l).width<=maxW; });
+    if(ok) return {t:t,lignes:lignes};
+  }
+  return {t:12,lignes:[txt]};
+}
+
+/* Titre en deux tons : les nombres (« 2027 ») passent en jaune, comme « CAN 2027 ». */
+function texteDeuxTons(ctx,txt,cx,y,maxW,taille,police,poids){
+  var t=taillePolice(ctx,txt,poids,taille,police,maxW);
+  ctx.font=poids+' '+t+'px '+police;
+  var mots=txt.split(' '), esp=ctx.measureText(' ').width;
+  var total=ctx.measureText(txt).width, x=cx-total/2;
+  ctx.textAlign='left';
+  mots.forEach(function(m){
+    ctx.fillStyle=/^\d{2,4}$/.test(m)?JAUNE:'#fff';
+    ctx.fillText(m,x,y); x+=ctx.measureText(m).width+esp;
+  });
+  return t;
+}
+
+function dessinerStade(ctx,W,H){
+  var g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#01040f'); g.addColorStop(.35,'#05123a'); g.addColorStop(.7,'#071a4a'); g.addColorStop(1,'#03122a');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  var rnd=hasard(11);
+  // Tribunes : un semis de points flous
+  ctx.save();
+  for(var i=0;i<900;i++){
+    var x=rnd()*W, y=H*(.12+rnd()*.6);
+    ctx.fillStyle='rgba('+(120+rnd()*120|0)+','+(150+rnd()*90|0)+',255,'+(rnd()*.18+.04)+')';
+    ctx.fillRect(x,y,2+rnd()*3,2+rnd()*3);
+  }
+  ctx.restore();
+  // Projecteurs
+  ctx.save(); ctx.globalCompositeOperation='lighter';
+  for(var j=0;j<14;j++){
+    var px=(j/13)*W+(rnd()-.5)*W*.04, py=H*(.03+Math.abs(j-6.5)/6.5*.12);
+    var rg=ctx.createRadialGradient(px,py,0,px,py,W*.09);
+    rg.addColorStop(0,'rgba(220,235,255,.9)'); rg.addColorStop(.08,'rgba(160,200,255,.45)'); rg.addColorStop(1,'rgba(60,120,255,0)');
+    ctx.fillStyle=rg; ctx.fillRect(px-W*.1,py-W*.1,W*.2,W*.2);
+  }
+  ctx.restore();
+  // Pelouse rayée en bas
+  var hy=H*.8;
+  var gz=ctx.createLinearGradient(0,hy,0,H);
+  gz.addColorStop(0,'#0b4a20'); gz.addColorStop(1,'#1c7a33');
+  ctx.fillStyle=gz; ctx.fillRect(0,hy,W,H-hy);
+  ctx.save(); ctx.globalAlpha=.12; ctx.fillStyle='#000';
+  for(var k=0;k<10;k+=2){ var y0=hy+(H-hy)*Math.pow(k/10,1.4), y1=hy+(H-hy)*Math.pow((k+1)/10,1.4); ctx.fillRect(0,y0,W,y1-y0); }
+  ctx.restore();
+  var vg=ctx.createLinearGradient(0,hy-H*.08,0,hy+H*.04);
+  vg.addColorStop(0,'rgba(5,18,58,0)'); vg.addColorStop(1,'rgba(5,18,58,.0)');
+  // Halo bleu central
+  var hb=ctx.createRadialGradient(W/2,H*.45,0,W/2,H*.45,W*.7);
+  hb.addColorStop(0,'rgba(30,100,255,.22)'); hb.addColorStop(1,'rgba(30,100,255,0)');
+  ctx.fillStyle=hb; ctx.fillRect(0,0,W,H);
+}
+
+/* Coup de pinceau : un polygone aux bords irréguliers, à graine fixe. */
+function coupDePinceau(ctx,cx,cy,w,h,couleur,graine){
+  var r=hasard(graine||3), pts=[], n=26, i;
+  for(i=0;i<=n;i++) pts.push([cx-w/2+w*i/n, cy-h/2+(r()-.5)*h*.12]);
+  for(i=n;i>=0;i--) pts.push([cx-w/2+w*i/n+(r()-.5)*w*.02, cy+h/2+(r()-.5)*h*.12]);
+  ctx.save();
+  ctx.beginPath(); ctx.moveTo(pts[0][0]-w*.04,pts[0][1]+h*.2);
+  pts.forEach(function(p){ ctx.lineTo(p[0],p[1]); });
+  ctx.closePath();
+  ctx.fillStyle=couleur; ctx.shadowColor='rgba(0,0,0,.4)'; ctx.shadowBlur=20; ctx.fill();
+  // Fibres plus claires
+  ctx.shadowBlur=0; ctx.globalAlpha=.25; ctx.strokeStyle='#fff'; ctx.lineWidth=2;
+  for(i=0;i<9;i++){ var yy=cy-h*.4+h*.8*r(); ctx.beginPath(); ctx.moveTo(cx-w*.45+r()*w*.2,yy); ctx.lineTo(cx+w*.2+r()*w*.25,yy+(r()-.5)*6); ctx.stroke(); }
+  ctx.restore();
+}
+
+function drapeauRect(ctx,nom,x,y,w,h){
+  var d=drapeau(codePays(nom));
+  ctx.save();
+  rectArrondi(ctx,x,y,w,h,h*.16);
+  ctx.shadowColor='rgba(0,0,0,.5)'; ctx.shadowBlur=8; ctx.fillStyle='#0d2f8a'; ctx.fill(); ctx.shadowBlur=0;
+  ctx.clip();
+  if(d&&d.pret){
+    var r=d.img.naturalWidth/d.img.naturalHeight, iw=w, ih=w/r;
+    if(ih<h){ ih=h; iw=h*r; }
+    ctx.drawImage(d.img,x+(w-iw)/2,y+(h-ih)/2,iw,ih);
+  } else {
+    var g=ctx.createLinearGradient(x,y,x,y+h); g.addColorStop(0,'#2ea8ff'); g.addColorStop(1,'#0b3fae');
+    ctx.fillStyle=g; ctx.fillRect(x,y,w,h);
+    var ini=nom.split(/\s+/).filter(Boolean).slice(0,2).map(function(m){return m[0];}).join('').toUpperCase();
+    ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font='800 '+Math.round(h*.5)+'px '+POLICE_TXT; ctx.fillText(ini,x+w/2,y+h/2+1);
+  }
+  ctx.restore();
+  ctx.save(); rectArrondi(ctx,x,y,w,h,h*.16); ctx.lineWidth=2; ctx.strokeStyle='rgba(255,255,255,.75)'; ctx.stroke(); ctx.restore();
+}
+
+function dateLongueJour(iso){
+  if(!iso) return '';
+  var d=new Date(iso+'T12:00:00');
+  return JOURS_SEM[d.getDay()]+' '+d.getDate()+' '+MOIS[d.getMonth()];
+}
+
+/* ---------- WEEK-END ---------- */
+function unitesBloc(b){
+  var r=lireBloc(b), u=1.75;
+  r.jours.forEach(function(j){
+    if(j.jour) u+=1.05;
+    j.matchs.forEach(function(m){ u+=(m[0].note||m[1].note)?1.45:1; });
+  });
+  return u+.35;
+}
+
+function dessinerBlocWeekend(ctx,x,y,w,h,b,u){
+  var r=lireBloc(b), T=TEINTES[b.couleur]||TEINTES.bleu;
+  ctx.save();
+  rectArrondi(ctx,x,y,w,h,16);
+  var f=ctx.createLinearGradient(0,y,0,y+h); f.addColorStop(0,T.f1); f.addColorStop(1,T.f2);
+  ctx.fillStyle=f; ctx.fill();
+  ctx.lineWidth=2.5; ctx.strokeStyle=T.bord; ctx.shadowColor=T.bord; ctx.shadowBlur=14; ctx.stroke(); ctx.shadowBlur=0;
+
+  var yy=y+u*.25;
+  ctx.textBaseline='middle'; ctx.textAlign='left'; ctx.fillStyle='#fff';
+  var tt=taillePolice(ctx,(b.titre||'').toUpperCase(),'800',Math.round(u*1.25),POLICE_TXT,w-40);
+  ctx.font='800 '+tt+'px '+POLICE_TXT;
+  ctx.fillText((b.titre||'').toUpperCase(),x+22,yy+u*.7);
+  yy+=u*1.5;
+
+  r.jours.forEach(function(j){
+    if(j.jour){
+      var bh=u*.82;
+      rectArrondi(ctx,x+12,yy+u*.1,w-24,bh,bh/2);
+      var gb=ctx.createLinearGradient(x,0,x+w,0); gb.addColorStop(0,T.b); gb.addColorStop(.75,T.a); gb.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=gb; ctx.fill();
+      ctx.fillStyle='#fff'; ctx.textAlign='left';
+      var tj=taillePolice(ctx,j.jour.toUpperCase(),'800',Math.round(u*.55),POLICE_TXT,w-60);
+      ctx.font='800 '+tj+'px '+POLICE_TXT;
+      ctx.fillText(j.jour.toUpperCase(),x+30,yy+u*.1+bh/2+1);
+      yy+=u*1.05;
+    }
+    j.matchs.forEach(function(m){
+      var avecNote=m[0].note||m[1].note, hr=avecNote?u*1.45:u, cy=yy+u/2;
+      var cx=x+w/2, vw=u*.95, vh=u*.68;
+      rectArrondi(ctx,cx-vw/2,cy-vh/2,vw,vh,6);
+      ctx.fillStyle=T.b; ctx.fill();
+      ctx.fillStyle='#fff'; ctx.textAlign='center';
+      ctx.font='800 '+Math.round(u*.46)+'px '+POLICE_TXT; ctx.fillText('VS',cx,cy+1);
+      var demi=w/2-vw/2-30;
+      [[m[0],x+15+demi/2],[m[1],cx+vw/2+15+demi/2]].forEach(function(e){
+        var tn=taillePolice(ctx,e[0].nom,'700',Math.round(u*.56),POLICE_TXT,demi);
+        ctx.font='700 '+tn+'px '+POLICE_TXT; ctx.fillStyle='#fff'; ctx.textAlign='center';
+        ctx.fillText(e[0].nom,e[1],cy+1);
+        if(e[0].note){
+          var tno=taillePolice(ctx,'('+e[0].note+')','italic 700',Math.round(u*.42),POLICE_TXT,demi);
+          ctx.font='italic 700 '+tno+'px '+POLICE_TXT; ctx.fillStyle=JAUNE;
+          ctx.fillText('('+e[0].note+')',e[1],cy+u*.55);
+        }
+      });
+      // filet sous la ligne
+      ctx.fillStyle='rgba(255,255,255,.12)'; ctx.fillRect(x+16,yy+hr-1,w-32,1.5);
+      yy+=hr;
+    });
+  });
+  ctx.restore();
+}
+
+function dessinerWeekend(){
+  var sz=FORMATS_C.weekend[FMT_C.weekend], W=sz.w, H=sz.h, story=FMT_C.weekend==='story';
+  var cv=document.getElementById('c'); cv.width=W; cv.height=H;
+  var ctx=cv.getContext('2d');
+  dessinerStade(ctx,W,H);
+
+  var y0=story?70:20;
+  // Logo en haut à gauche + mention
+  dessinerLogoGauche(ctx,48,y0+80,70);
+  ctx.save();
+  ctx.font='italic 700 22px '+POLICE_TXT; ctx.fillStyle='#fff'; ctx.textAlign='left'; ctx.textBaseline='top';
+  ctx.fillText('PARIS SPORTIFS',52,y0+94); ctx.fillText('EN LIGNE',52,y0+118);
+  ctx.restore();
+
+  var l1=document.getElementById('w-l1').value.trim().toUpperCase();
+  var l2=document.getElementById('w-l2').value.trim().toUpperCase();
+  var l3=document.getElementById('w-l3').value.trim().toUpperCase();
+  var cx=W*.47;
+  ctx.save();
+  ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+  // Ligne 1 sur bandeau jaune incliné
+  var y=y0+(story?230:200);
+  if(l1){
+    ctx.save(); ctx.translate(cx,y-30); ctx.rotate(-.06);
+    ctx.font='italic 900 66px '+POLICE_LOGO;
+    var w1=Math.min(ctx.measureText(l1).width,W*.55)+60;
+    coupDePinceau(ctx,0,-4,w1,84,JAUNE,5);
+    var t1=taillePolice(ctx,l1,'italic 900',66,POLICE_LOGO,W*.55);
+    ctx.font='italic 900 '+t1+'px '+POLICE_LOGO; ctx.fillStyle='#0a0f2a'; ctx.textBaseline='middle';
+    ctx.fillText(l1,0,0);
+    ctx.restore();
+    y+=40;
+  }
+  if(l2){
+    var t2=taillePolice(ctx,l2,'italic 900',112,POLICE_LOGO,W*.62);
+    ctx.font='italic 900 '+t2+'px '+POLICE_LOGO; ctx.fillStyle='#fff';
+    ctx.shadowColor='rgba(0,0,0,.6)'; ctx.shadowBlur=14;
+    y+=t2*.95; ctx.fillText(l2,cx,y);
+  }
+  if(l3){
+    var t3=taillePolice(ctx,l3,'italic 900',150,POLICE_LOGO,W*.66);
+    ctx.font='italic 900 '+t3+'px '+POLICE_LOGO;
+    var g3=ctx.createLinearGradient(0,y,0,y+t3); g3.addColorStop(0,'#7fd0ff'); g3.addColorStop(1,'#1677ff');
+    ctx.fillStyle=g3; ctx.shadowColor='rgba(30,144,255,.7)'; ctx.shadowBlur=26;
+    y+=t3*.92; ctx.fillText(l3,cx,y);
+    // trait jaune sous le titre
+    ctx.shadowBlur=0; ctx.fillStyle=JAUNE; ctx.save(); ctx.translate(cx,y+14); ctx.rotate(-.03);
+    ctx.fillRect(-W*.3,0,W*.6,6); ctx.restore();
+  }
+  ctx.shadowBlur=0;
+  ctx.font='700 22px '+POLICE_TXT; ctx.fillStyle='#fff';
+  texteEspace(ctx,'FOOTBALL  ·  PARIS SPORTIFS  ·  ÉMOTIONS GARANTIES',cx,y+52,3);
+  ctx.restore();
+
+  // Slogan manuscrit à droite
+  ctx.save();
+  ctx.translate(W*.875,y0+(story?330:290)); ctx.rotate(-.16);
+  ctx.textAlign='center'; ctx.font='44px "Kaushan Script",cursive';
+  ctx.fillStyle='#fff'; ctx.shadowColor='rgba(0,0,0,.6)'; ctx.shadowBlur=8;
+  ctx.fillText('Pariez',0,-50); ctx.fillText('et vivez',0,0);
+  ctx.fillStyle=JAUNE; ctx.fillText('la passion !',0,50);
+  ctx.restore();
+
+  // Période dans un cartouche jaune
+  y+=86;
+  var deb=document.getElementById('w-debut').value, fin=document.getElementById('w-fin').value;
+  var segs=[];
+  if(deb&&fin&&deb!==fin){
+    var dd=new Date(deb+'T12:00:00'), df=new Date(fin+'T12:00:00');
+    segs=[['DU '+JOURS_SEM[dd.getDay()]+' ','#fff'],[dd.getDate()+' '+MOIS[dd.getMonth()]+(dd.getFullYear()!==df.getFullYear()?' '+dd.getFullYear():''),JAUNE],
+          [' AU '+JOURS_SEM[df.getDay()]+' ','#fff'],[df.getDate()+' '+MOIS[df.getMonth()]+' '+df.getFullYear(),JAUNE]];
+  } else if(deb||fin){
+    var d1=new Date((deb||fin)+'T12:00:00');
+    segs=[['LE '+JOURS_SEM[d1.getDay()]+' ','#fff'],[d1.getDate()+' '+MOIS[d1.getMonth()]+' '+d1.getFullYear(),JAUNE]];
+  }
+  if(segs.length){
+    ctx.save();
+    var plein=segs.map(function(s){return s[0];}).join('');
+    var tp=taillePolice(ctx,plein,'800',36,POLICE_TXT,W*.72);
+    ctx.font='800 '+tp+'px '+POLICE_TXT;
+    var tw=ctx.measureText(plein).width, ic=tp*1.05, pw=tw+ic+80, ph=tp+34, px=W/2-pw/2;
+    rectArrondi(ctx,px,y,pw,ph,ph/2);
+    ctx.fillStyle='rgba(4,14,46,.88)'; ctx.fill();
+    ctx.lineWidth=3.5; ctx.strokeStyle=JAUNE; ctx.shadowColor=JAUNE; ctx.shadowBlur=10; ctx.stroke(); ctx.shadowBlur=0;
+    dessinerCalendrier(ctx,px+30,y+ph/2-ic/2,ic);
+    var xx=px+30+ic+20; ctx.textAlign='left'; ctx.textBaseline='middle';
+    segs.forEach(function(s){ ctx.fillStyle=s[1]; ctx.fillText(s[0],xx,y+ph/2+1); xx+=ctx.measureText(s[0]).width; });
+    ctx.restore();
+    y+=ph+24;
+  }
+
+  // Blocs sur deux colonnes, chacun dans la colonne la plus courte
+  var blocs=BLOCS.weekend.filter(function(b){ return b.titre||b.texte.trim(); });
+  var marge=34, gap=20, colW=(W-2*marge-gap)/2, bas=H-(story?90:26);
+  var cols=[[],[]], hauteurs=[0,0];
+  blocs.forEach(function(b){
+    var c=hauteurs[0]<=hauteurs[1]?0:1;
+    cols[c].push(b); hauteurs[c]+=unitesBloc(b);
+  });
+  var maxU=Math.max(hauteurs[0],hauteurs[1],1), gapsMax=Math.max(cols[0].length,cols[1].length)-1;
+  var u=Math.min(story?66:44,(bas-y-gapsMax*gap)/maxU);
+  // Peu de matchs : le bloc est centré dans la place restante plutôt que collé en haut.
+  y+=Math.max(0,(bas-y-(maxU*u+gapsMax*gap))/2);
+  var alertes=[];
+  if(u<26) alertes.push('Beaucoup de matchs : passez au format Story ou retirez un championnat.');
+  cols.forEach(function(col,c){
+    var yy=y, x=marge+c*(colW+gap);
+    col.forEach(function(b){
+      var h=unitesBloc(b)*u;
+      dessinerBlocWeekend(ctx,x,yy,colW,h,b,u);
+      yy+=h+gap;
+    });
+  });
+  BLOCS.weekend.forEach(function(b,i){ var r=lireBloc(b); if(r.ignorees) alertes.push('Championnat '+(i+1)+' : '+r.ignorees+' ligne(s) ignorée(s).'); });
+  document.getElementById('c-alerte').textContent=alertes.join(' ');
+}
+
+/* ---------- COMPÉTITIONS ---------- */
+function unitesComp(b){
+  var r=lireBloc(b), u=(b.sous?2.3:1.6)+.3;
+  r.jours.forEach(function(j){ if(j.jour) u+=.9; u+=j.matchs.length*1.0; });
+  return u+.25;
+}
+
+function dessinerBlocComp(ctx,x,y,w,h,b,u){
+  var r=lireBloc(b), T=TEINTES[b.couleur]||TEINTES.bleu;
+  ctx.save();
+  rectArrondi(ctx,x,y,w,h,18);
+  var f=ctx.createLinearGradient(0,y,0,y+h); f.addColorStop(0,T.f1); f.addColorStop(1,T.f2);
+  ctx.fillStyle=f; ctx.fill();
+  ctx.lineWidth=3; ctx.strokeStyle=T.bord; ctx.shadowColor=T.bord; ctx.shadowBlur=18; ctx.stroke(); ctx.shadowBlur=0;
+  // Reflet diagonal dans l'en-tête
+  ctx.save(); rectArrondi(ctx,x,y,w,h,18); ctx.clip();
+  var rf=ctx.createLinearGradient(x,y,x+w*.6,y+u*2.4);
+  rf.addColorStop(0,'rgba(255,255,255,.10)'); rf.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=rf; ctx.fillRect(x,y,w,u*2.6); ctx.restore();
+
+  var yy=y+u*.35;
+  ctx.textBaseline='middle';
+  var tt=texteDeuxTons(ctx,(b.titre||'').toUpperCase(),x+w/2,yy+u*.62,w-60,Math.round(u*1.05),POLICE_TXT,'800');
+  yy+=u*1.3;
+  if(b.sous){
+    ctx.textAlign='center'; ctx.fillStyle='#fff';
+    var ts=taillePolice(ctx,b.sous.toUpperCase(),'800',Math.round(u*.62),POLICE_TXT,w-60);
+    ctx.font='800 '+ts+'px '+POLICE_TXT; ctx.fillText(b.sous.toUpperCase(),x+w/2,yy+u*.3);
+    yy+=u*.75;
+  }
+  yy+=u*.3;
+  r.jours.forEach(function(j){
+    if(j.jour){
+      ctx.textAlign='center'; ctx.fillStyle=T.bord;
+      var tj=taillePolice(ctx,j.jour.toUpperCase(),'800',Math.round(u*.48),POLICE_TXT,w-60);
+      ctx.font='800 '+tj+'px '+POLICE_TXT; ctx.fillText(j.jour.toUpperCase(),x+w/2,yy+u*.45);
+      yy+=u*.9;
+    }
+    j.matchs.forEach(function(m){
+      var rh=u*.9, cy=yy+rh/2;
+      rectArrondi(ctx,x+18,yy,w-36,rh,10);
+      ctx.fillStyle='rgba(0,0,0,.32)'; ctx.fill();
+      ctx.lineWidth=1.5; ctx.strokeStyle='rgba(255,255,255,.10)'; ctx.stroke();
+      var fh=rh*.68, fw=fh*1.45;
+      drapeauRect(ctx,m[0].nom,x+32,cy-fh/2,fw,fh);
+      drapeauRect(ctx,m[1].nom,x+w-32-fw,cy-fh/2,fw,fh);
+      ctx.fillStyle=T.bord; ctx.textAlign='center';
+      ctx.font='italic 800 '+Math.round(rh*.42)+'px '+POLICE_TXT; ctx.fillText('VS',x+w/2,cy+1);
+      var zone=w/2-32-fw-18-rh*.5;
+      [[m[0],x+32+fw+16,'left'],[m[1],x+w-32-fw-16,'right']].forEach(function(e){
+        var txt=e[0].nom.toUpperCase();
+        var la=lignesAjustees(ctx,txt,'800',Math.round(rh*.36),POLICE_TXT,zone,rh*(e[0].note?.62:.86),3);
+        ctx.font='800 '+la.t+'px '+POLICE_TXT; ctx.fillStyle='#fff'; ctx.textAlign=e[2];
+        var hT=la.lignes.length*la.t*1.02+(e[0].note?la.t*.9:0), y1=cy-hT/2+la.t*.52;
+        la.lignes.forEach(function(l,i){ ctx.fillText(l,e[1],y1+i*la.t*1.02); });
+        if(e[0].note){
+          ctx.font='italic 700 '+Math.round(la.t*.8)+'px '+POLICE_TXT; ctx.fillStyle=JAUNE;
+          ctx.fillText('('+e[0].note+')',e[1],y1+la.lignes.length*la.t*1.02);
+        }
+      });
+      yy+=u;
+    });
+  });
+  ctx.restore();
+}
+
+function dessinerCompetitions(){
+  var fmt=FMT_C.competitions, sz=FORMATS_C.competitions[fmt], W=sz.w, H=sz.h, pays=fmt==='paysage';
+  var cv=document.getElementById('c'); cv.width=W; cv.height=H;
+  var ctx=cv.getContext('2d');
+  dessinerStade(ctx,W,H);
+
+  var iso=document.getElementById('c-date').value, date='';
+  if(iso){ var p=iso.split('-'); date=p[2]+'.'+p[1]; }
+  var titre=document.getElementById('c-titre').value.trim().toUpperCase();
+  var y;
+  if(pays){
+    // Titre | date au pinceau | logo
+    if(date){
+      coupDePinceau(ctx,W/2,200,560,210,'#1556e0',9);
+      ctx.save(); ctx.font='italic 900 190px '+POLICE_LOGO; ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.shadowColor='rgba(0,0,0,.5)'; ctx.shadowBlur=16; ctx.fillText(date,W/2,206); ctx.restore();
+    }
+    dessinerLogoGauche(ctx,W-430,150,110);
+    if(titre){
+      ctx.save(); ctx.textBaseline='middle';
+      var la=lignesAjustees(ctx,titre,'800',96,POLICE_TXT,W/2-340-70,240,2);
+      la.lignes.forEach(function(l,i){
+        texteDeuxTons(ctx,l,70+(W/2-340-70)/2,200-(la.lignes.length-1)*la.t*.52+i*la.t*1.04,W/2-410,la.t,POLICE_TXT,'800');
+      });
+      ctx.restore();
+    }
+    y=350;
+  } else {
+    var st=fmt==='story';
+    dessinerLogo(ctx,W,st?190:120,st?120:96);
+    y=st?240:150;
+    if(date){
+      coupDePinceau(ctx,W/2,y+70,420,150,'#1556e0',9);
+      ctx.save(); ctx.font='italic 900 130px '+POLICE_LOGO; ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(date,W/2,y+76); ctx.restore();
+      y+=160;
+    }
+    if(titre){
+      ctx.save(); ctx.textBaseline='middle';
+      var tt=texteDeuxTons(ctx,titre,W/2,y+30,W*.86,64,POLICE_TXT,'800');
+      ctx.restore(); y+=tt+30;
+    }
+    y+=10;
+  }
+
+  var blocs=BLOCS.competitions.filter(function(b){ return b.titre||b.texte.trim(); });
+  var marge=pays?60:36, gap=pays?40:22, bas=H-(pays?50:(fmt==='story'?90:30));
+  var alertes=[];
+  if(pays){
+    var n=Math.max(1,blocs.length), cw=(W-2*marge-(n-1)*gap)/n;
+    var maxU=Math.max.apply(null,blocs.map(unitesComp).concat([1]));
+    var u=Math.min(92,(bas-y)/maxU);
+    blocs.forEach(function(b,i){ dessinerBlocComp(ctx,marge+i*(cw+gap),y,cw,unitesComp(b)*u,b,u); });
+    if(u<44) alertes.push('Beaucoup de matchs pour ce format.');
+  } else {
+    var tot=blocs.reduce(function(a,b){ return a+unitesComp(b); },0);
+    var u2=Math.min(82,(bas-y-(blocs.length-1)*gap)/Math.max(tot,1));
+    var yy=y;
+    blocs.forEach(function(b){ var h=unitesComp(b)*u2; dessinerBlocComp(ctx,marge,yy,W-2*marge,h,b,u2); yy+=h+gap; });
+    if(u2<44) alertes.push('Beaucoup de matchs : le format Paysage ou Story sera plus lisible.');
+  }
+  BLOCS.competitions.forEach(function(b,i){ var r=lireBloc(b); if(r.ignorees) alertes.push('Compétition '+(i+1)+' : '+r.ignorees+' ligne(s) ignorée(s).'); });
+  document.getElementById('c-alerte').textContent=alertes.join(' ');
+}
+
+function initChampionnats(){
+  var sam=new Date(); sam.setDate(sam.getDate()+((6-sam.getDay()+7)%7));
+  var dim=new Date(sam); dim.setDate(dim.getDate()+1);
+  function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function libelle(d){ return JOURS_SEM[d.getDay()].charAt(0)+JOURS_SEM[d.getDay()].slice(1).toLowerCase()+' '+d.getDate()+' '+MOIS[d.getMonth()].toLowerCase()+' '+d.getFullYear(); }
+  document.getElementById('w-debut').value=iso(sam);
+  document.getElementById('w-fin').value=iso(dim);
+  document.getElementById('w-l1').value='Les meilleurs';
+  document.getElementById('w-l2').value='Matchs du';
+  document.getElementById('w-l3').value='Week-end';
+  var S=libelle(sam), D=libelle(dim);
+  BLOCS.weekend=[
+    {titre:'Premier League',sous:'',couleur:'bleu',texte:[S,'Tottenham - Aston Villa','Brighton - Arsenal','Newcastle - Everton',D,'Bournemouth - Liverpool','Manchester City - Leeds United','Fulham - Manchester United'].join('\n')},
+    {titre:'La Liga',sous:'',couleur:'bleu',texte:[S,'Osasuna - Rayo Vallecano','Celta Vigo - Valence',D,'Atlético de Madrid (Choc madrilène) - Real Madrid','Villarreal - Real Betis'].join('\n')},
+    {titre:'Serie A',sous:'',couleur:'bleu',texte:[S,'Bologne - Torino','AS Rome - Inter Milan','Naples - Juventus'].join('\n')},
+    {titre:'Ligue 1',sous:'',couleur:'bleu',texte:[D,'Olympique de Marseille - Paris Saint-Germain (Le Classique)'].join('\n')}
+  ];
+  document.getElementById('c-date').value=iso(new Date());
+  document.getElementById('c-titre').value='Matchs du jour';
+  BLOCS.competitions=[
+    {titre:'CAN 2027',sous:'Qualifications',couleur:'vert',texte:['Guinée équatoriale - Sierra Leone','Zimbabwe - République démocratique du Congo','République centrafricaine - Burkina Faso','Botswana - Tunisie'].join('\n')},
+    {titre:'UEFA Nations League',sous:'',couleur:'bleu',texte:['Géorgie - Ukraine','Arménie - Monténégro','Lettonie - Chypre','Belgique - France','Türkiye - Italie','Irlande du Nord - Hongrie','Roumanie - Bosnie-Herzégovine','Suède - Pologne'].join('\n')}
+  ];
+}
+
 function nomFichier(){
-  var d=MODE==='evenements'?((JOURS[0]&&JOURS[0].date)||'evenements'):(document.getElementById('date').value||'programme');
+  var d=MODE==='evenements'?((JOURS[0]&&JOURS[0].date)||'evenements')
+    :MODE==='weekend'?('weekend_'+(document.getElementById('w-debut').value||''))
+    :MODE==='competitions'?('competitions_'+(document.getElementById('c-date').value||''))
+    :(document.getElementById('date').value||'programme');
   return 'affiche_1xbet_'+d+'.png';
 }
 
@@ -916,6 +1527,7 @@ function init(){
   document.getElementById('date').value=iso;
   document.getElementById('matchs').value=EXEMPLE;
   initEvenements();
+  initChampionnats();
   try{
     var test=new File([new Blob(['x'])],'t.png',{type:'image/png'});
     if(navigator.canShare&&navigator.canShare({files:[test]}))
@@ -927,7 +1539,9 @@ function init(){
   if(document.fonts&&document.fonts.load){
     Promise.all([
       document.fonts.load('italic 900 100px Barlow'),
-      document.fonts.load('800 50px "Barlow Condensed"')
+      document.fonts.load('800 50px "Barlow Condensed"'),
+      document.fonts.load('italic 800 50px "Barlow Condensed"'),
+      document.fonts.load('44px "Kaushan Script"')
     ]).then(dessiner,function(){});
   }
 }
