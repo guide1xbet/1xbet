@@ -9,10 +9,9 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:#07090f;color:#e8eaf2;min-height:100vh;}
 .topbar{background:#0c0f1c;border-bottom:1px solid #1a1f35;padding:0 1.5rem;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
-.logo{font-size:1.05rem;font-weight:800;color:#fff;letter-spacing:-.01em;}
-.logo em{color:#e53935;font-style:normal;}
-.badge{background:#e53935;color:#fff;font-size:.56rem;font-weight:800;padding:.12rem .45rem;border-radius:4px;margin-left:.35rem;letter-spacing:.05em;}
-.agent-tag{font-size:.72rem;color:#5a6490;background:#12162a;padding:.3rem .85rem;border-radius:20px;border:1px solid #1a1f35;}
+.logo{font-size:1.15rem;font-weight:900;color:#fff;letter-spacing:-.01em;font-style:italic;}
+.logo em{color:#2ea8ff;font-style:italic;}
+#blocked{position:fixed;inset:0;background:#07090f;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.75rem;z-index:999;}
 .layout{display:grid;grid-template-columns:310px 1fr;height:calc(100vh - 54px);}
 .sidebar{background:#0c0f1c;border-right:1px solid #1a1f35;overflow-y:auto;padding:1.1rem;}
 .preview-area{background:#05070d;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:1.5rem;overflow-y:auto;gap:1rem;}
@@ -22,18 +21,18 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#07090f;color:#e8eaf
 /* TEMPLATES GRID */
 .templates-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
 .tpl-btn{background:#12162a;border:1.5px solid #1a1f35;border-radius:8px;padding:.65rem .4rem;text-align:center;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;}
-.tpl-btn:hover{border-color:#e53935;transform:translateY(-1px);}
-.tpl-btn.active{border-color:#e53935;background:rgba(229,57,53,.1);}
+.tpl-btn:hover{border-color:#1e90ff;transform:translateY(-1px);}
+.tpl-btn.active{border-color:#1e90ff;background:rgba(30,144,255,.1);}
 .tpl-btn .tpl-ico{font-size:1.3rem;display:block;margin-bottom:.25rem;}
 .tpl-btn .tpl-name{font-size:.68rem;font-weight:700;color:#8892b0;line-height:1.3;}
-.tpl-btn.active .tpl-name{color:#e53935;}
-.tpl-hot{position:absolute;top:4px;right:4px;background:#e53935;color:#fff;font-size:.5rem;font-weight:800;padding:.1rem .3rem;border-radius:3px;}
+.tpl-btn.active .tpl-name{color:#1e90ff;}
+.tpl-hot{position:absolute;top:4px;right:4px;background:#1e90ff;color:#fff;font-size:.5rem;font-weight:800;padding:.1rem .3rem;border-radius:3px;}
 
 /* FORM */
 .fg{margin-bottom:.7rem;}
 .fg label{display:block;font-size:.63rem;font-weight:700;color:#3a4265;margin-bottom:.28rem;letter-spacing:.05em;text-transform:uppercase;}
 .fg input,.fg textarea,.fg select{width:100%;padding:.48rem .7rem;background:#07090f;border:1px solid #1a1f35;border-radius:6px;font-size:.78rem;color:#e8eaf2;font-family:inherit;transition:border-color .15s;}
-.fg input:focus,.fg textarea:focus,.fg select:focus{outline:none;border-color:#e53935;}
+.fg input:focus,.fg textarea:focus,.fg select:focus{outline:none;border-color:#1e90ff;}
 .fg input::placeholder,.fg textarea::placeholder{color:#1e2440;}
 .fg select option{background:#0c0f1c;}
 .fg textarea{resize:vertical;min-height:55px;line-height:1.5;}
@@ -44,11 +43,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#07090f;color:#e8eaf
 .sw.active{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.2);}
 
 /* BTNS */
-.btn-gen{width:100%;background:linear-gradient(135deg,#e53935,#b71c1c);color:#fff;border:none;padding:.68rem;border-radius:8px;font-size:.83rem;font-weight:700;cursor:pointer;margin-top:.2rem;letter-spacing:.02em;transition:opacity .15s;}
+.btn-gen{width:100%;background:linear-gradient(135deg,#1e90ff,#0b5ed7);color:#fff;border:none;padding:.68rem;border-radius:8px;font-size:.83rem;font-weight:700;cursor:pointer;margin-top:.2rem;letter-spacing:.02em;transition:opacity .15s;}
 .btn-gen:hover{opacity:.88;}
 .btn-dl,.btn-wa{width:100%;padding:.58rem;border-radius:8px;font-size:.78rem;font-weight:600;cursor:pointer;margin-top:.4rem;display:none;transition:all .15s;}
 .btn-dl{background:#12162a;border:1px solid #1a1f35;color:#e8eaf2;}
-.btn-dl:hover{border-color:#e53935;}
+.btn-dl:hover{border-color:#1e90ff;}
 .btn-wa{background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);color:#25d366;}
 
 /* PREVIEW */
@@ -59,19 +58,18 @@ canvas{display:block;max-width:460px;width:100%;height:auto;}
 /* FORMAT */
 .fmt-row{display:flex;gap:.35rem;margin-bottom:.7rem;}
 .fmt{flex:1;background:#12162a;border:1px solid #1a1f35;border-radius:6px;padding:.38rem .25rem;text-align:center;cursor:pointer;font-size:.63rem;color:#3a4265;line-height:1.4;transition:all .15s;}
-.fmt.active{border-color:#e53935;color:#e53935;background:rgba(229,57,53,.07);}
+.fmt.active{border-color:#1e90ff;color:#1e90ff;background:rgba(30,144,255,.07);}
 
 /* PERSONNALISATION D'ÉCUSSON */
 .perso{margin:.35rem 0 .1rem;padding:.5rem;background:#0a0d18;border:1px solid #171c30;border-radius:7px;}
 .motifs{display:flex;gap:.3rem;margin-bottom:.45rem;}
 .motif{flex:1;height:30px;border-radius:5px;border:2px solid #1a1f35;cursor:pointer;overflow:hidden;position:relative;transition:border-color .15s;}
-.motif.active{border-color:#e53935;}
+.motif.active{border-color:#1e90ff;}
 .motif canvas{width:100%;height:100%;display:block;}
 .cols{display:flex;gap:.4rem;align-items:center;}
 .cols label{font-size:.58rem;color:#3a4265;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
 .cols input[type=color]{width:30px;height:26px;padding:0;border:1px solid #1a1f35;border-radius:5px;background:#07090f;cursor:pointer;}
 
-#blocked{position:fixed;inset:0;background:#07090f;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.75rem;z-index:999;}
 @media(max-width:700px){.layout{grid-template-columns:1fr;height:auto;}.preview-area{padding:1rem;}.canvas-wrap canvas{max-width:100%;}}
 </style>
 </head>
@@ -84,7 +82,7 @@ canvas{display:block;max-width:460px;width:100%;height:auto;}
 </div>
 
 <div class="topbar">
-  <div><span class="logo">1<em>X</em>BET<span class="badge">FLYERS PRO</span></span></div>
+  <div><span class="logo">1X<em>BET</em><span class="badge">FLYERS PRO</span></span></div>
   <div class="agent-tag" id="agent-tag">—</div>
 </div>
 
@@ -132,6 +130,9 @@ canvas{display:block;max-width:460px;width:100%;height:auto;}
       </div>
       <label style="display:flex;align-items:center;gap:.5rem;margin-top:.7rem;font-size:.8rem;cursor:pointer;">
         <input type="checkbox" id="opt-qr" onchange="draw()"> QR code du lien agent
+      </label>
+      <label style="display:flex;align-items:center;gap:.5rem;margin-top:.45rem;font-size:.8rem;cursor:pointer;">
+        <input type="checkbox" id="opt-promo" onchange="draw()"> Afficher le code promo
       </label>
     </div>
 
@@ -205,7 +206,8 @@ canvas{display:block;max-width:460px;width:100%;height:auto;}
     <div class="sec">
       <div class="sec-title">Palette</div>
       <div class="color-row">
-        <div class="sw active" style="background:linear-gradient(135deg,#c62828,#e65100)" onclick="setPalette('red',this)" title="Rouge/Or"></div>
+        <div class="sw active" style="background:linear-gradient(135deg,#06215a,#2ea8ff)" onclick="setPalette('xbet',this)" title="1xBet officiel"></div>
+        <div class="sw" style="background:linear-gradient(135deg,#c62828,#e65100)" onclick="setPalette('red',this)" title="Rouge/Or"></div>
         <div class="sw" style="background:linear-gradient(135deg,#0d47a1,#1565c0)" onclick="setPalette('blue',this)" title="Bleu/Or"></div>
         <div class="sw" style="background:linear-gradient(135deg,#1b5e20,#2e7d32)" onclick="setPalette('green',this)" title="Vert"></div>
         <div class="sw" style="background:linear-gradient(135deg,#4a148c,#6a1b9a)" onclick="setPalette('purple',this)" title="Violet"></div>
@@ -232,6 +234,7 @@ canvas{display:block;max-width:460px;width:100%;height:auto;}
 // l'agent demandé — un agent ne peut plus ouvrir le générateur d'un autre.
 var AG=null,TPL='football',FMT='carre';
 var PALETTES={
+  xbet:{bg1:'#020a1f',bg2:'#06215a',acc:'#1e90ff',acc2:'#2ea8ff',glow:'rgba(30,144,255,0.45)'},
   red:{bg1:'#0d0002',bg2:'#1a0005',acc:'#e53935',acc2:'#ff8f00',glow:'rgba(229,57,53,0.4)'},
   blue:{bg1:'#000d1a',bg2:'#001529',acc:'#1565c0',acc2:'#ffd700',glow:'rgba(21,101,192,0.4)'},
   green:{bg1:'#001a05',bg2:'#00260a',acc:'#2e7d32',acc2:'#76ff03',glow:'rgba(46,125,50,0.4)'},
@@ -239,7 +242,9 @@ var PALETTES={
   dark:{bg1:'#05050f',bg2:'#0d0d1f',acc:'#e94560',acc2:'#0f3460',glow:'rgba(233,69,96,0.4)'},
   orange:{bg1:'#1a0500',bg2:'#2d0a00',acc:'#e64a19',acc2:'#ffd740',glow:'rgba(230,74,25,0.4)'}
 };
-var PAL=PALETTES.red;
+var PAL=PALETTES.xbet;
+// Couleur du « BET » du logo : c'est la marque, elle ne suit pas la palette choisie.
+var BLEU_MARQUE='#2ea8ff';
 
 function bloquer(){ document.getElementById('blocked').style.display='flex'; }
 
@@ -522,28 +527,23 @@ function drawHeader(ctx,W,H,s){
   ctx.save();
   ctx.textAlign='center';
 
-  // Logo 1XBET avec style premium
-  var logoY=80*s;
-  ctx.font='900 '+(72*s)+'px "Segoe UI",Arial Black';
-  ctx.fillStyle='rgba(255,255,255,0.95)';
-  ctx.shadowColor=PAL.acc;
-  ctx.shadowBlur=0;
-  // Dessiner "1" "X" "BET" séparément
-  var metrics1=ctx.measureText('1');
-  var metricsX=ctx.measureText('X');
-  var metricsB=ctx.measureText('BET');
-  var totalW=metrics1.width+metricsX.width+metricsB.width;
-  var startX=W/2-totalW/2;
+  // Logo 1XBET aux couleurs de la marque : « 1X » blanc, « BET » bleu, italique
+  // gras. L'italique est obtenu par cisaillement : toutes les machines n'ont pas
+  // de police italique en graisse 900, et le rendu doit être le même partout.
+  var logoY=82*s, taille=76*s, pente=-0.18;
+  ctx.font='900 '+taille+'px "Segoe UI","Arial Black",Arial';
+  var w1=ctx.measureText('1X').width, w2=ctx.measureText('BET').width;
+  var x0=W/2-(w1+w2)/2-pente*logoY;
+  ctx.setTransform(1,0,pente,1,0,0);
   ctx.textAlign='left';
+  // Halo bleu derrière le mot, comme sur le visuel de la marque
+  ctx.shadowColor='rgba(46,168,255,0.55)';
+  ctx.shadowBlur=28*s;
   ctx.fillStyle='#fff';
-  ctx.fillText('1',startX,logoY);
-  ctx.fillStyle=PAL.acc2;
-  ctx.shadowColor=PAL.acc2;
-  ctx.shadowBlur=15*s;
-  ctx.fillText('X',startX+metrics1.width,logoY);
-  ctx.shadowBlur=0;
-  ctx.fillStyle='#fff';
-  ctx.fillText('BET',startX+metrics1.width+metricsX.width,logoY);
+  ctx.fillText('1X',x0,logoY);
+  ctx.fillStyle=BLEU_MARQUE;
+  ctx.fillText('BET',x0+w1,logoY);
+  ctx.setTransform(1,0,0,1,0,0);
   ctx.restore();
 
   // Ligne séparatrice header
@@ -1219,11 +1219,12 @@ function tplFootballPaysage(ctx,W,H,s){
   ctx.textAlign='center';
   ctx.font='700 '+(15*s)+'px "Segoe UI",Arial';
   ctx.fillStyle='rgba(255,255,255,0.55)';
-  texteEspace(ctx,'CODE PROMO EXCLUSIF',cxD,py+27*s,2.6*s);
-  ctx.font='900 '+(40*s)+'px "Segoe UI",Arial Black,Arial';
+  var bp=textesBlocPromo();
+  texteEspace(ctx,bp.titre,cxD,py+27*s,2.6*s);
+  policeAjustee(ctx,bp.valeur,40,larD-40*s,s);
   ctx.fillStyle=PAL.acc2;
   ctx.shadowColor=PAL.acc2; ctx.shadowBlur=16*s;
-  texteEspace(ctx,AG.promo||'',cxD,py+70*s,5*s);
+  texteEspace(ctx,bp.valeur,cxD,py+70*s,(bp.promo?5:2)*s);
   ctx.restore();
 }
 
@@ -1552,6 +1553,18 @@ function tplRetrait(ctx,W,H,s){
   drawPromoBlock(ctx,W,H,s,800*s);
 }
 
+/* Le code promo est facultatif. Sans lui, le bloc garde sa place et sa forme —
+   les modèles sont mis en page autour — mais porte un appel à l'action. */
+function promoAffiche(){
+  var opt=document.getElementById('opt-promo');
+  return !!(opt && opt.checked && AG && AG.promo);
+}
+function textesBlocPromo(){
+  return promoAffiche()
+    ? { promo:true,  titre:'CODE PROMO EXCLUSIF', valeur:AG.promo }
+    : { promo:false, titre:'DÉPÔT & RETRAIT', valeur:'INSTANTANÉS' };
+}
+
 function drawPromoBlock(ctx,W,H,s,y){
   // Fond glassmorphism
   ctx.save();
@@ -1574,14 +1587,15 @@ function drawPromoBlock(ctx,W,H,s,y){
   ctx.fillStyle='rgba(255,255,255,0.35)';
   ctx.textAlign='center';
   ctx.letterSpacing='.12em';
-  ctx.fillText('CODE PROMO EXCLUSIF',W/2,y+40*s);
+  var bp=textesBlocPromo();
+  ctx.fillText(bp.titre,W/2,y+40*s);
 
   ctx.shadowColor=PAL.acc2;
   ctx.shadowBlur=18*s;
-  ctx.font='900 '+(64*s)+'px "Segoe UI",Arial';
+  ctx.letterSpacing=bp.promo?'.18em':'.06em';
+  policeAjustee(ctx,bp.valeur,64,W-200*s,s);
   ctx.fillStyle=PAL.acc2;
-  ctx.letterSpacing='.18em';
-  ctx.fillText(AG.promo,W/2,y+108*s);
+  ctx.fillText(bp.valeur,W/2,y+108*s);
   ctx.restore();
 }
 
@@ -1697,7 +1711,9 @@ function dlFlyer(){
   a.href=cv.toDataURL('image/png');a.click();
 }
 function shareWA(){
-  var msg='🎁 *1xBet — Offre exclusive !*\n\nCode promo : *'+AG.promo+'*\n📱 Contactez : '+AG.phone+'\n✅ Disponible 7j/7';
+  var msg='🎁 *1xBet — Dépôt & retrait instantanés !*\n\n'
+    +(promoAffiche()?'Code promo : *'+AG.promo+'*\n':'')
+    +'📱 Contactez : '+AG.phone+'\n✅ Disponible 7j/7';
   window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
 }
 init();

@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Affiches du jour — 1xBet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@1,900&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#030817;color:#e8eefc;min-height:100vh;}
+.topbar{background:#06102b;border-bottom:1px solid #12224d;padding:0 16px;height:54px;display:flex;align-items:center;position:sticky;top:0;z-index:50;}
+.logo{font-family:'Barlow',sans-serif;font-size:1.35rem;font-weight:900;font-style:italic;color:#fff;letter-spacing:-.01em;}
+.logo em{color:#2ea8ff;font-style:italic;}
+.badge{font-family:'Segoe UI',system-ui,sans-serif;background:#1e90ff;color:#fff;font-size:.56rem;font-weight:800;font-style:normal;padding:.15rem .45rem;border-radius:4px;margin-left:.45rem;letter-spacing:.06em;vertical-align:middle;}
+.layout{display:grid;grid-template-columns:360px 1fr;min-height:calc(100vh - 54px);}
+.panel{background:#06102b;border-right:1px solid #12224d;padding:18px 16px;}
+.apercu{display:flex;flex-direction:column;align-items:center;padding:24px 16px;gap:12px;}
+.apercu canvas{display:block;width:100%;max-width:520px;height:auto;border-radius:12px;box-shadow:0 25px 70px rgba(0,0,0,.7);}
+.sec{margin-bottom:16px;}
+.sec-title{font-size:.62rem;font-weight:800;color:#5c76b8;text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;}
+input[type=date],input[type=text],textarea{width:100%;padding:.6rem .75rem;background:#030817;border:1px solid #1a2e63;border-radius:8px;font-size:.92rem;color:#e8eefc;font-family:inherit;}
+textarea{min-height:230px;resize:vertical;line-height:1.55;}
+input:focus,textarea:focus{outline:none;border-color:#2ea8ff;}
+.aide{font-size:.72rem;color:#5c76b8;margin-top:6px;line-height:1.5;}
+.aide b{color:#8fb4e8;}
+.alerte{font-size:.74rem;color:#ffb74d;margin-top:6px;min-height:1em;}
+.fmts{display:flex;gap:6px;}
+.fmt{flex:1;min-width:0;background:#0a1838;border:1px solid #1a2e63;border-radius:8px;padding:.5rem .25rem;text-align:center;cursor:pointer;font-size:.74rem;color:#8fa6d8;line-height:1.35;font-family:inherit;}
+.fmt small{display:block;font-size:.6rem;color:#5c76b8;}
+.fmt.actif{border-color:#2ea8ff;color:#fff;background:rgba(46,168,255,.12);}
+.btn{width:100%;padding:.78rem;border-radius:9px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px;border:none;}
+.btn-dl{background:linear-gradient(135deg,#2ea8ff,#0b5ed7);color:#fff;}
+.btn-share{background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.35);color:#25d366;}
+.btn:hover{opacity:.9;}
+.apercu canvas.large{max-width:900px;}
+.modes{display:flex;gap:6px;margin-bottom:18px;}
+.mode{flex:1;min-width:0;background:#0a1838;border:1px solid #1a2e63;border-radius:9px;padding:.6rem .3rem;cursor:pointer;font-family:inherit;font-size:.8rem;font-weight:800;color:#8fa6d8;}
+.mode small{display:block;font-size:.62rem;font-weight:600;color:#5c76b8;margin-top:2px;}
+.mode.actif{border-color:#2ea8ff;color:#fff;background:rgba(46,168,255,.14);}
+.jour{background:#081633;border:1px solid #1a2e63;border-radius:10px;padding:10px;margin-bottom:10px;}
+.jour-tete{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.jour-tete b{font-size:.74rem;color:#8fb4e8;letter-spacing:.06em;text-transform:uppercase;}
+.jour-suppr{background:none;border:1px solid #3a2340;color:#ff8a80;font-size:.68rem;border-radius:6px;padding:.2rem .5rem;cursor:pointer;font-family:inherit;}
+.jour input,.jour textarea{margin-bottom:6px;}
+.jour textarea{min-height:130px;}
+.btn-ajout{width:100%;padding:.6rem;border-radius:9px;border:1px dashed #2a4a90;background:none;color:#8fb4e8;font-size:.82rem;font-weight:700;cursor:pointer;font-family:inherit;}
+.btn-ajout:disabled{opacity:.4;cursor:default;}
+@media(max-width:820px){
+  .layout{grid-template-columns:minmax(0,1fr);}
+  .panel,.apercu{min-width:0;}
+  .apercu{order:-1;padding:16px;}
+  .panel{border-right:none;border-top:1px solid #12224d;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar"><span class="logo">1X<em>BET</em><span class="badge">AFFICHES</span></span></div>
+
+<div class="layout">
+  <div class="panel">
+    <div class="modes">
+      <button class="mode actif" data-m="programme" onclick="choisirMode(this)">Programme du jour<small>une date, une liste</small></button>
+      <button class="mode" data-m="evenements" onclick="choisirMode(this)">Événements<small>plusieurs journées</small></button>
+    </div>
+
+    <div id="panneau-programme">
+    <div class="sec">
+      <div class="sec-title">Date</div>
+      <input type="date" id="date" oninput="dessiner()">
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">Titre (facultatif)</div>
+      <input type="text" id="titre" maxlength="40" placeholder="Ex. : LIGUE DES CHAMPIONS" oninput="dessiner()">
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">Matchs</div>
+      <textarea id="matchs" spellcheck="false" oninput="dessiner()"></textarea>
+      <div class="aide">Un match par ligne : <b>Arsenal - Lille</b> ou <b>Arsenal vs Lille</b>. Jusqu'à 12 matchs.</div>
+      <div class="alerte" id="alerte"></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">Bas de l'affiche (facultatif)</div>
+      <input type="text" id="pied" maxlength="60" placeholder="Ex. : Dépôt & retrait : +225 07 00 00 00" oninput="dessiner()">
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">Format</div>
+      <div class="fmts">
+        <button class="fmt actif" data-f="portrait" onclick="choisirFormat(this)">Portrait<small>Facebook · Insta</small></button>
+        <button class="fmt" data-f="carre" onclick="choisirFormat(this)">Carré<small>Instagram</small></button>
+        <button class="fmt" data-f="story" onclick="choisirFormat(this)">Story<small>WhatsApp</small></button>
+      </div>
+    </div>
+    </div>
+
+    <div id="panneau-evenements" style="display:none">
+      <div class="sec">
+        <div class="sec-title">Titre</div>
+        <input type="text" id="e-titre" maxlength="45" oninput="dessiner()">
+      </div>
+      <div class="sec">
+        <div class="sec-title">Sous-titre en bleu</div>
+        <input type="text" id="e-sous" maxlength="45" placeholder="Vide = calculé depuis les dates (DU 7 AU 9 OCTOBRE 2026)" oninput="dessiner()">
+      </div>
+      <div class="sec">
+        <div class="sec-title">Accroche (facultatif)</div>
+        <input type="text" id="e-accroche" maxlength="60" oninput="dessiner()">
+      </div>
+      <div class="sec">
+        <div class="sec-title">Journées</div>
+        <div id="jours"></div>
+        <button class="btn-ajout" id="btn-ajout" onclick="ajouterJour()">+ Ajouter une journée</button>
+        <div class="aide">Un match par ligne : <b>Bénin - Mali</b>. Le drapeau s'ajoute tout seul quand le pays est reconnu.</div>
+        <div class="alerte" id="e-alerte"></div>
+      </div>
+      <div class="sec">
+        <div class="sec-title">Bandeau du bas</div>
+        <input type="text" id="e-bandeau" maxlength="40" oninput="dessiner()">
+      </div>
+      <div class="sec">
+        <div class="sec-title">Format</div>
+        <div class="fmts">
+          <button class="fmt fmt-e actif" data-f="paysage" onclick="choisirFormatE(this)">Paysage<small>Facebook</small></button>
+          <button class="fmt fmt-e" data-f="portrait" onclick="choisirFormatE(this)">Portrait<small>Facebook · Insta</small></button>
+          <button class="fmt fmt-e" data-f="story" onclick="choisirFormatE(this)">Story<small>WhatsApp</small></button>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-dl" onclick="telecharger()">⬇ Télécharger l'affiche</button>
+    <button class="btn btn-share" id="btn-share" onclick="partager()" style="display:none">Partager</button>
+  </div>
+
+  <div class="apercu">
+    <canvas id="c"></canvas>
+  </div>
+</div>
+
+<script>
+// Page ouverte à tous : aucun agent, aucune clé, aucun appel serveur. Tout est
+// dessiné ici, dans le navigateur, pour que l'affiche soit la même partout.
+
+var FORMATS={ portrait:{w:1080,h:1350}, carre:{w:1080,h:1080}, story:{w:1080,h:1920} };
+var FMT='portrait';
+var MAX_MATCHS=12;
+var BLEU='#2ea8ff';
+var POLICE_LOGO='"Barlow","Arial Black",Arial,sans-serif';
+var POLICE_TXT='"Barlow Condensed","Arial Narrow","Segoe UI",Arial,sans-serif';
+
+var EXEMPLE=[
+  'RC Lens - Sporting CP',
+  'Arsenal - Lille',
+  'Atlético Madrid - Manchester United',
+  'Inter Milan - Club Brugge',
+  'Galatasaray - FC Barcelone',
+  'RB Leipzig - PSV Eindhoven',
+  'Villarreal - Napoli'
+].join('\n');
+
+/* « Paris Saint-Germain » contient un tiret : seul un séparateur entouré
+   d'espaces sépare deux équipes. */
+var SEPARATEUR=/\s+(?:vs\.?|v|contre|x|[-–—\/])\s+/i;
+
+function lireMatchs(){
+  var lignes=document.getElementById('matchs').value.split('\n');
+  var ok=[], ignorees=0;
+  lignes.forEach(function(l){
+    l=l.trim(); if(!l) return;
+    var p=l.split(SEPARATEUR);
+    if(p.length!==2||!p[0].trim()||!p[1].trim()){ ignorees++; return; }
+    ok.push([p[0].trim().toUpperCase(), p[1].trim().toUpperCase()]);
+  });
+  var msg=[];
+  if(ignorees) msg.push(ignorees+' ligne'+(ignorees>1?'s':'')+' ignorée'+(ignorees>1?'s':'')+' : séparez les deux équipes par « - » ou « vs ».');
+  if(ok.length>MAX_MATCHS) msg.push('Seuls les '+MAX_MATCHS+' premiers matchs tiennent sur l\'affiche.');
+  document.getElementById('alerte').textContent=msg.join(' ');
+  return ok.slice(0,MAX_MATCHS);
+}
+
+function dateAffichee(){
+  var v=document.getElementById('date').value; // aaaa-mm-jj
+  if(!v) return '';
+  var p=v.split('-');
+  return p[2]+'.'+p[1]+'.'+p[0];
+}
+
+/* Générateur pseudo-aléatoire à graine fixe : les lumières du stade restent à la
+   même place d'une frappe à l'autre, au lieu de scintiller à chaque lettre. */
+function hasard(graine){
+  return function(){ graine=(graine*16807)%2147483647; return (graine-1)/2147483646; };
+}
+
+function taillePolice(ctx,txt,poids,taille,police,maxW){
+  var t=taille;
+  while(t>14){
+    ctx.font=poids+' '+t+'px '+police;
+    if(ctx.measureText(txt).width<=maxW) break;
+    t-=1;
+  }
+  return t;
+}
+
+/* ---------------- FOND ---------------- */
+function dessinerFond(ctx,W,H){
+  var g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#020824'); g.addColorStop(.45,'#05185a'); g.addColorStop(1,'#020a2c');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+  // Grand halo central
+  var r=ctx.createRadialGradient(W*.5,H*.38,0,W*.5,H*.38,W*.85);
+  r.addColorStop(0,'rgba(40,110,255,.38)'); r.addColorStop(1,'rgba(40,110,255,0)');
+  ctx.fillStyle=r; ctx.fillRect(0,0,W,H);
+
+  // Traînées de lumière courbes, à gauche et en haut à droite
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  ctx.lineCap='round';
+  [
+    {a:[-80,H*.05],c1:[W*.25,H*.25],c2:[W*.05,H*.55],b:[-60,H*.85],l:10,o:.55},
+    {a:[-120,H*.12],c1:[W*.32,H*.3],c2:[W*.1,H*.6],b:[-40,H*.95],l:4,o:.8},
+    {a:[-40,H*.3],c1:[W*.18,H*.42],c2:[W*.02,H*.6],b:[-30,H*.72],l:22,o:.18},
+    {a:[W*.62,-40],c1:[W*.8,H*.12],c2:[W*.95,H*.2],b:[W+60,H*.3],l:8,o:.5},
+    {a:[W*.7,-60],c1:[W*.86,H*.08],c2:[W*.98,H*.12],b:[W+80,H*.16],l:3,o:.85},
+    {a:[W*.55,-20],c1:[W*.75,H*.2],c2:[W*.92,H*.28],b:[W+40,H*.42],l:26,o:.14}
+  ].forEach(function(t){
+    ctx.beginPath();
+    ctx.moveTo(t.a[0],t.a[1]);
+    ctx.bezierCurveTo(t.c1[0],t.c1[1],t.c2[0],t.c2[1],t.b[0],t.b[1]);
+    ctx.strokeStyle='rgba(70,160,255,'+t.o+')';
+    ctx.lineWidth=t.l;
+    ctx.shadowColor='rgba(60,150,255,.9)';
+    ctx.shadowBlur=30;
+    ctx.stroke();
+  });
+  ctx.restore();
+
+  // Tribunes illuminées en bas
+  var b=ctx.createRadialGradient(W*.5,H*1.05,0,W*.5,H*1.05,W*.75);
+  b.addColorStop(0,'rgba(120,90,255,.45)'); b.addColorStop(.5,'rgba(40,90,255,.18)'); b.addColorStop(1,'rgba(40,90,255,0)');
+  ctx.fillStyle=b; ctx.fillRect(0,H*.55,W,H*.45);
+  var rnd=hasard(7);
+  ctx.save();
+  for(var i=0;i<260;i++){
+    var x=rnd()*W, y=H*(.8+rnd()*.2), t=rnd()*2.2+.4;
+    ctx.fillStyle='rgba(200,220,255,'+(rnd()*.5+.15)+')';
+    ctx.beginPath(); ctx.arc(x,y,t,0,Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+}
+
+/* ---------------- LOGO ----------------
+   « 1X » blanc, « BET » bleu, italique très gras. Barlow 900 italique s'en
+   approche ; si la police n'a pas pu charger, le cisaillement garde l'élan. */
+function dessinerLogo(ctx,W,y,taille){
+  ctx.save();
+  ctx.font='italic 900 '+taille+'px '+POLICE_LOGO;
+  ctx.textBaseline='alphabetic';
+  var w1=ctx.measureText('1X').width, w2=ctx.measureText('BET').width;
+  var pente=document.fonts&&document.fonts.check('italic 900 40px Barlow')?0:-0.18;
+  var x0=W/2-(w1+w2)/2-pente*y;
+  ctx.setTransform(1,0,pente,1,0,0);
+  ctx.shadowColor='rgba(46,168,255,.6)';
+  ctx.shadowBlur=40;
+  ctx.fillStyle='#fff';
+  ctx.fillText('1X',x0,y);
+  var g=ctx.createLinearGradient(0,y-taille,0,y);
+  g.addColorStop(0,'#6cc7ff'); g.addColorStop(1,'#1e90ff');
+  ctx.fillStyle=g;
+  ctx.fillText('BET',x0+w1,y);
+  ctx.restore();
+}
+
+/* ---------------- CARTOUCHE DE DATE ---------------- */
+function dessinerDate(ctx,W,y,h,txt){
+  var w=Math.min(W*.68,760), x=W/2-w/2, p=h*.42;
+  ctx.save();
+  // Chevrons extérieurs
+  ctx.strokeStyle=BLEU; ctx.lineWidth=h*.1; ctx.lineJoin='miter';
+  ctx.shadowColor=BLEU; ctx.shadowBlur=18;
+  ctx.beginPath(); ctx.moveTo(x-p*.3,y+h*.02); ctx.lineTo(x-p*1.05,y+h/2); ctx.lineTo(x-p*.3,y+h*.98); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x+w+p*.3,y+h*.02); ctx.lineTo(x+w+p*1.05,y+h/2); ctx.lineTo(x+w+p*.3,y+h*.98); ctx.stroke();
+  // Cartouche hexagonal
+  ctx.beginPath();
+  ctx.moveTo(x+p*.5,y); ctx.lineTo(x+w-p*.5,y); ctx.lineTo(x+w,y+h/2);
+  ctx.lineTo(x+w-p*.5,y+h); ctx.lineTo(x+p*.5,y+h); ctx.lineTo(x,y+h/2); ctx.closePath();
+  var f=ctx.createLinearGradient(0,y,0,y+h);
+  f.addColorStop(0,'#0d2f8a'); f.addColorStop(1,'#061a52');
+  ctx.fillStyle=f; ctx.fill();
+  ctx.lineWidth=4; ctx.strokeStyle='#4fb6ff'; ctx.stroke();
+  ctx.shadowBlur=0;
+
+  // Texte + calendrier tracé (un emoji ne se rend pas pareil partout)
+  var t=taillePolice(ctx,txt,'800',Math.round(h*.68),POLICE_TXT,w-p*2-h*.8);
+  ctx.font='800 '+t+'px '+POLICE_TXT;
+  var tw=ctx.measureText(txt).width, ic=h*.46, gap=h*.28;
+  var x0=W/2-(tw+ic+gap)/2, cy=y+h/2;
+  dessinerCalendrier(ctx,x0,cy-ic/2,ic);
+  ctx.fillStyle='#fff'; ctx.textAlign='left'; ctx.textBaseline='middle';
+  ctx.fillText(txt,x0+ic+gap,cy+t*.04);
+  ctx.restore();
+}
+
+function dessinerCalendrier(ctx,x,y,s){
+  ctx.save();
+  ctx.strokeStyle='#fff'; ctx.fillStyle='#fff'; ctx.lineWidth=s*.09;
+  ctx.strokeRect(x,y+s*.12,s,s*.88);
+  ctx.fillRect(x,y+s*.12,s,s*.2);
+  ctx.fillRect(x+s*.22,y,s*.1,s*.24); ctx.fillRect(x+s*.68,y,s*.1,s*.24);
+  for(var r=0;r<2;r++) for(var c=0;c<3;c++)
+    ctx.fillRect(x+s*(.17+c*.26),y+s*(.45+r*.24),s*.15,s*.14);
+  ctx.restore();
+}
+
+/* ---------------- LIGNE DE MATCH ---------------- */
+function dessinerMatch(ctx,W,y,h,eq1,eq2){
+  var mx=W*.1, pente=h*.32, xL=mx, xR=W-mx;
+  var encW=h*1.7, encB=h*1.05; // encoche « VS » : large en haut, étroite en bas
+  ctx.save();
+
+  // Barre en parallélogramme
+  ctx.beginPath();
+  ctx.moveTo(xL+pente,y); ctx.lineTo(xR+pente*.2,y);
+  ctx.lineTo(xR-pente,y+h); ctx.lineTo(xL-pente*.2,y+h); ctx.closePath();
+  var f=ctx.createLinearGradient(0,y,0,y+h);
+  f.addColorStop(0,'#0b2370'); f.addColorStop(.5,'#06153f'); f.addColorStop(1,'#091d5c');
+  ctx.fillStyle=f;
+  ctx.shadowColor='rgba(0,0,0,.6)'; ctx.shadowBlur=18; ctx.shadowOffsetY=6;
+  ctx.fill();
+  ctx.shadowColor='transparent';
+
+  // Liseré : fin en haut et en bas, épais et lumineux sur les côtés
+  ctx.lineWidth=2.5; ctx.strokeStyle='rgba(79,182,255,.75)'; ctx.stroke();
+  ctx.lineCap='round'; ctx.lineWidth=h*.1; ctx.strokeStyle=BLEU;
+  ctx.shadowColor=BLEU; ctx.shadowBlur=14;
+  ctx.beginPath(); ctx.moveTo(xL+pente,y+h*.04); ctx.lineTo(xL-pente*.2,y+h*.96); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(xR+pente*.2,y+h*.04); ctx.lineTo(xR-pente,y+h*.96); ctx.stroke();
+  ctx.shadowBlur=0;
+
+  // Encoche VS
+  var cx=W/2, bas=y+h*1.1;
+  ctx.beginPath();
+  ctx.moveTo(cx-encW/2,y); ctx.lineTo(cx+encW/2,y);
+  ctx.lineTo(cx+encB/2,bas); ctx.lineTo(cx-encB/2,bas); ctx.closePath();
+  var v=ctx.createLinearGradient(0,y,0,bas);
+  v.addColorStop(0,'#0a3fae'); v.addColorStop(1,'#2ea8ff');
+  ctx.fillStyle=v; ctx.fill();
+  ctx.lineWidth=2; ctx.strokeStyle='rgba(160,215,255,.9)'; ctx.stroke();
+
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle='#fff';
+  ctx.font='800 '+Math.round(h*.5)+'px '+POLICE_TXT;
+  ctx.shadowColor='rgba(0,0,0,.45)'; ctx.shadowBlur=6;
+  ctx.fillText('VS',cx,y+h*.55);
+
+  // Noms d'équipes, centrés dans leur moitié et réduits s'ils sont trop longs
+  var demi=(cx-encW/2)-(xL+pente*.4), maxW=demi-h*.5;
+  var t1=taillePolice(ctx,eq1,'800',Math.round(h*.46),POLICE_TXT,maxW);
+  ctx.font='800 '+t1+'px '+POLICE_TXT;
+  ctx.fillText(eq1,(xL+pente*.4+cx-encW/2)/2,y+h*.53);
+  var t2=taillePolice(ctx,eq2,'800',Math.round(h*.46),POLICE_TXT,maxW);
+  ctx.font='800 '+t2+'px '+POLICE_TXT;
+  ctx.fillText(eq2,(cx+encW/2+xR-pente*.4)/2,y+h*.53);
+  ctx.restore();
+}
+
+function dessinerPied(ctx,W,H,txt){
+  var t=taillePolice(ctx,txt,'700',40,POLICE_TXT,W*.8);
+  ctx.save();
+  ctx.font='700 '+t+'px '+POLICE_TXT;
+  var w=ctx.measureText(txt).width+70, h=t+30, x=W/2-w/2, y=H-h-38;
+  ctx.beginPath();
+  if(ctx.roundRect) ctx.roundRect(x,y,w,h,h/2); else ctx.rect(x,y,w,h);
+  ctx.fillStyle='rgba(6,21,63,.85)'; ctx.fill();
+  ctx.lineWidth=2.5; ctx.strokeStyle=BLEU; ctx.stroke();
+  ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(txt,W/2,y+h/2+1);
+  ctx.restore();
+}
+
+/* ---------------- COMPOSITION ---------------- */
+function dessinerProgramme(){
+  var sz=FORMATS[FMT], W=sz.w, H=sz.h;
+  var cv=document.getElementById('c'); cv.width=W; cv.height=H;
+  var ctx=cv.getContext('2d');
+  var matchs=lireMatchs();
+  var titre=document.getElementById('titre').value.trim().toUpperCase();
+  var pied=document.getElementById('pied').value.trim();
+  var date=dateAffichee();
+
+  dessinerFond(ctx,W,H);
+
+  // En story, l'espace en trop va au logo et aux marges, pas aux barres.
+  var k=FMT==='story'?1.25:1;
+  var y=FMT==='story'?230:(FMT==='carre'?150:175);
+  dessinerLogo(ctx,W,y,Math.round((FMT==='carre'?118:140)*k));
+  y+=FMT==='carre'?30:45;
+
+  if(date){
+    var hd=FMT==='carre'?84:100;
+    dessinerDate(ctx,W,y,hd,date);
+    y+=hd+(FMT==='carre'?22:32);
+  }
+  if(titre){
+    ctx.save();
+    var tt=taillePolice(ctx,titre,'800',FMT==='carre'?40:48,POLICE_TXT,W*.8);
+    ctx.font='800 '+tt+'px '+POLICE_TXT;
+    ctx.fillStyle='#bfe3ff'; ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.shadowColor=BLEU; ctx.shadowBlur=16;
+    ctx.fillText(titre,W/2,y);
+    ctx.restore();
+    y+=tt+(FMT==='carre'?18:26);
+  }
+
+  var basZone=H-(pied?130:60);
+  if(!matchs.length){
+    ctx.save();
+    ctx.font='700 40px '+POLICE_TXT; ctx.fillStyle='rgba(191,227,255,.6)';
+    ctx.textAlign='center'; ctx.fillText('Ajoutez vos matchs à gauche',W/2,(y+basZone)/2);
+    ctx.restore();
+  } else {
+    // Hauteur de ligne : on remplit la place disponible, sans dépasser la taille
+    // de l'exemple — trois matchs ne doivent pas donner trois barres géantes.
+    var pas=Math.min(FMT==='story'?150:118,(basZone-y)/matchs.length);
+    var h=pas*.8;
+    // Peu de matchs : le bloc est centré verticalement dans la zone restante.
+    y+=Math.max(0,((basZone-y)-pas*matchs.length)/2);
+    matchs.forEach(function(m,i){ dessinerMatch(ctx,W,y+i*pas,h,m[0],m[1]); });
+  }
+  if(pied) dessinerPied(ctx,W,H,pied);
+}
+
+function choisirFormat(el){
+  FMT=el.getAttribute('data-f');
+  document.querySelectorAll('.fmt:not(.fmt-e)').forEach(function(b){ b.classList.toggle('actif',b===el); });
+  dessiner();
+}
+
+/* =====================================================================
+   MODE ÉVÉNEMENTS — plusieurs journées, une compétition par journée
+   ===================================================================== */
+var MODE='programme';
+var FMT_E='paysage';
+var FORMATS_E={ paysage:{w:1920,h:1280}, portrait:{w:1080,h:1350}, story:{w:1080,h:1920} };
+var MAX_JOURS=4;
+var JOURS=[];
+
+var MOIS=['JANVIER','FÉVRIER','MARS','AVRIL','MAI','JUIN','JUILLET','AOÛT','SEPTEMBRE','OCTOBRE','NOVEMBRE','DÉCEMBRE'];
+
+/* Drapeaux : flagcdn sert ses PNG avec Access-Control-Allow-Origin: *, ce qui
+   garde le canvas exportable. Un pays non reconnu (un club, une faute de frappe)
+   reçoit un rond avec ses initiales : l'affiche ne reste jamais trouée. */
+var PAYS={
+  'afrique du sud':'za','algerie':'dz','angola':'ao','benin':'bj','botswana':'bw','burkina faso':'bf',
+  'burkina':'bf','burundi':'bi','cameroun':'cm','cap vert':'cv','centrafrique':'cf',
+  'republique centrafricaine':'cf','comores':'km','congo':'cg','congo brazzaville':'cg','rd congo':'cd',
+  'rdc':'cd','republique democratique du congo':'cd','congo kinshasa':'cd','cote d ivoire':'ci',
+  'djibouti':'dj','egypte':'eg','erythree':'er','eswatini':'sz','ethiopie':'et','gabon':'ga',
+  'gambie':'gm','ghana':'gh','guinee':'gn','guinee bissau':'gw','guinee equatoriale':'gq',
+  'kenya':'ke','lesotho':'ls','liberia':'lr','libye':'ly','madagascar':'mg','malawi':'mw','mali':'ml',
+  'maroc':'ma','maurice':'mu','ile maurice':'mu','mauritanie':'mr','mozambique':'mz','namibie':'na',
+  'niger':'ne','nigeria':'ng','ouganda':'ug','rwanda':'rw','sao tome et principe':'st','senegal':'sn',
+  'seychelles':'sc','sierra leone':'sl','somalie':'so','soudan':'sd','soudan du sud':'ss',
+  'tanzanie':'tz','tchad':'td','togo':'tg','tunisie':'tn','zambie':'zm','zimbabwe':'zw',
+  'france':'fr','espagne':'es','italie':'it','allemagne':'de','portugal':'pt','angleterre':'gb-eng',
+  'ecosse':'gb-sct','pays de galles':'gb-wls','irlande':'ie','pays bas':'nl','hollande':'nl',
+  'belgique':'be','suisse':'ch','croatie':'hr','serbie':'rs','pologne':'pl','danemark':'dk',
+  'suede':'se','norvege':'no','autriche':'at','turquie':'tr','grece':'gr','ukraine':'ua',
+  'tchequie':'cz','republique tcheque':'cz','hongrie':'hu','roumanie':'ro','bresil':'br',
+  'argentine':'ar','uruguay':'uy','colombie':'co','chili':'cl','perou':'pe','equateur':'ec',
+  'paraguay':'py','mexique':'mx','etats unis':'us','usa':'us','canada':'ca','japon':'jp',
+  'coree du sud':'kr','australie':'au','arabie saoudite':'sa','qatar':'qa','iran':'ir',
+  'jordanie':'jo','emirats arabes unis':'ae','chine':'cn','haiti':'ht','jamaique':'jm'
+};
+function codePays(nom){
+  var k=nom.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[''`\-.]/g,' ').replace(/\s+/g,' ').trim();
+  return PAYS[k]||'';
+}
+
+var DRAPEAUX={}; // code -> {img, pret, echec, promesse}
+function drapeau(code){
+  if(!code) return null;
+  if(!DRAPEAUX[code]){
+    var d=DRAPEAUX[code]={img:new Image(),pret:false,echec:false};
+    d.promesse=new Promise(function(res){
+      d.img.crossOrigin='anonymous';
+      d.img.onload=function(){ d.pret=true; res(); if(MODE==='evenements') dessiner(); };
+      d.img.onerror=function(){ d.echec=true; res(); };
+      d.img.src='https://flagcdn.com/w160/'+code+'.png';
+    });
+  }
+  return DRAPEAUX[code];
+}
+function attendreDrapeaux(){
+  return Promise.all(Object.keys(DRAPEAUX).map(function(c){ return DRAPEAUX[c].promesse; }));
+}
+
+function dessinerRond(ctx,nom,cx,cy,r){
+  var d=drapeau(codePays(nom));
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,.5)'; ctx.shadowBlur=r*.4;
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.fillStyle='#0d2f8a'; ctx.fill();
+  ctx.shadowBlur=0;
+  ctx.save(); ctx.clip();
+  if(d&&d.pret){
+    // Drapeau rectangulaire « couvrant » le rond, centré
+    var ih=2*r, iw=ih*d.img.naturalWidth/d.img.naturalHeight;
+    ctx.drawImage(d.img,cx-iw/2,cy-r,iw,ih);
+  } else {
+    var g=ctx.createLinearGradient(cx,cy-r,cx,cy+r);
+    g.addColorStop(0,'#2ea8ff'); g.addColorStop(1,'#0b3fae');
+    ctx.fillStyle=g; ctx.fillRect(cx-r,cy-r,2*r,2*r);
+    var ini=nom.split(/\s+/).filter(Boolean).slice(0,2).map(function(m){return m[0];}).join('').toUpperCase();
+    ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font='800 '+Math.round(r*.85)+'px '+POLICE_TXT;
+    ctx.fillText(ini,cx,cy+r*.04);
+  }
+  ctx.restore();
+  ctx.lineWidth=Math.max(2,r*.08); ctx.strokeStyle='rgba(255,255,255,.85)';
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
+  ctx.restore();
+}
+
+/* ---------- Journées : état et formulaire ---------- */
+function isoDecale(j){
+  var d=new Date(); d.setDate(d.getDate()+j);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function dateLongue(iso){
+  if(!iso) return '';
+  var p=iso.split('-');
+  return parseInt(p[2],10)+' '+MOIS[parseInt(p[1],10)-1]+' '+p[0];
+}
+function sousTitreAuto(){
+  var ds=JOURS.map(function(j){return j.date;}).filter(Boolean).sort();
+  if(!ds.length) return '';
+  var a=ds[0].split('-'), b=ds[ds.length-1].split('-');
+  if(ds[0]===ds[ds.length-1]) return 'LE '+dateLongue(ds[0]);
+  var ja=parseInt(a[2],10), jb=parseInt(b[2],10);
+  if(a[0]===b[0]&&a[1]===b[1]) return 'DU '+ja+' AU '+jb+' '+MOIS[parseInt(b[1],10)-1]+' '+b[0];
+  if(a[0]===b[0]) return 'DU '+ja+' '+MOIS[parseInt(a[1],10)-1]+' AU '+jb+' '+MOIS[parseInt(b[1],10)-1]+' '+b[0];
+  return 'DU '+dateLongue(ds[0])+' AU '+dateLongue(ds[ds.length-1]);
+}
+
+function afficherJours(){
+  var box=document.getElementById('jours');
+  box.innerHTML='';
+  JOURS.forEach(function(j,i){
+    var el=document.createElement('div');
+    el.className='jour';
+    el.innerHTML='<div class="jour-tete"><b>Journée '+(i+1)+'</b>'
+      +(JOURS.length>1?'<button class="jour-suppr">Supprimer</button>':'')+'</div>'
+      +'<input type="date">'
+      +'<input type="text" maxlength="50" placeholder="Compétition (ex. : Éliminatoires JO 2028)">'
+      +'<input type="text" maxlength="50" placeholder="Précision (ex. : Matchs aller – 2e tour)">'
+      +'<textarea spellcheck="false" placeholder="Un match par ligne : Bénin - Mali"></textarea>';
+    var ch=el.querySelectorAll('input,textarea');
+    // Valeurs posées par .value, jamais par innerHTML : ce que l'on tape reste du texte.
+    ch[0].value=j.date; ch[1].value=j.comp; ch[2].value=j.precision; ch[3].value=j.matchs;
+    ch[0].oninput=function(){ j.date=this.value; dessiner(); };
+    ch[1].oninput=function(){ j.comp=this.value; dessiner(); };
+    ch[2].oninput=function(){ j.precision=this.value; dessiner(); };
+    ch[3].oninput=function(){ j.matchs=this.value; dessiner(); };
+    var sup=el.querySelector('.jour-suppr');
+    if(sup) sup.onclick=function(){ JOURS.splice(i,1); afficherJours(); dessiner(); };
+    box.appendChild(el);
+  });
+  document.getElementById('btn-ajout').disabled=JOURS.length>=MAX_JOURS;
+}
+function ajouterJour(){
+  if(JOURS.length>=MAX_JOURS) return;
+  var der=JOURS[JOURS.length-1];
+  var d=der&&der.date?new Date(der.date+'T12:00:00'):new Date();
+  d.setDate(d.getDate()+1);
+  var iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  JOURS.push({date:iso,comp:der?der.comp:'',precision:der?der.precision:'',matchs:''});
+  afficherJours(); dessiner();
+}
+
+function matchsDuJour(j){
+  var ok=[], ign=0;
+  j.matchs.split('\n').forEach(function(l){
+    l=l.trim(); if(!l) return;
+    var p=l.split(SEPARATEUR);
+    if(p.length!==2||!p[0].trim()||!p[1].trim()){ ign++; return; }
+    ok.push([p[0].trim(),p[1].trim()]);
+  });
+  return {liste:ok,ignorees:ign};
+}
+
+/* ---------- Dessin ---------- */
+function rectArrondi(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  if(ctx.roundRect) ctx.roundRect(x,y,w,h,r); else ctx.rect(x,y,w,h);
+}
+
+function dessinerAccentsAfricains(ctx,W,H){
+  // Rubans vert et jaune en diagonale dans les coins, comme sur les visuels CAF.
+  ctx.save();
+  ctx.globalAlpha=.28;
+  [[ '#1fa34a',0],['#f4c430',1],['#1fa34a',2]].forEach(function(c){
+    var o=c[1]*W*.035;
+    ctx.fillStyle=c[0];
+    ctx.beginPath();
+    ctx.moveTo(-W*.02+o,H*.36); ctx.lineTo(W*.02+o,H*.36);
+    ctx.lineTo(W*.13+o,H*.02); ctx.lineTo(W*.09+o,H*.02); ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(W*.86+o,H*.38); ctx.lineTo(W*.89+o,H*.38);
+    ctx.lineTo(W*.99+o,H*.04); ctx.lineTo(W*.96+o,H*.04); ctx.closePath(); ctx.fill();
+  });
+  ctx.restore();
+}
+
+function dessinerCarteJour(ctx,x,y,w,h,j,k,grand){
+  var m=matchsDuJour(j).liste;
+  ctx.save();
+  // Carte
+  rectArrondi(ctx,x,y,w,h,18*k);
+  var f=ctx.createLinearGradient(0,y,0,y+h);
+  f.addColorStop(0,'rgba(8,30,90,.92)'); f.addColorStop(1,'rgba(3,12,40,.94)');
+  ctx.fillStyle=f; ctx.fill();
+  ctx.lineWidth=3*k; ctx.strokeStyle='rgba(46,168,255,.8)';
+  ctx.shadowColor=BLEU; ctx.shadowBlur=16*k; ctx.stroke(); ctx.shadowBlur=0;
+
+  // Onglet de date
+  var ht=78*k;
+  ctx.save();
+  rectArrondi(ctx,x,y,w,ht,[18*k,18*k,0,0]); ctx.clip();
+  var t=ctx.createLinearGradient(0,y,0,y+ht);
+  t.addColorStop(0,'#1b6fe0'); t.addColorStop(1,'#0b3a9e');
+  ctx.fillStyle=t; ctx.fillRect(x,y,w,ht);
+  ctx.restore();
+  ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  var td=taillePolice(ctx,dateLongue(j.date),'italic 900',Math.round(50*k),POLICE_LOGO,w-40*k);
+  ctx.font='italic 900 '+td+'px '+POLICE_LOGO;
+  ctx.fillText(dateLongue(j.date),x+w/2,y+ht/2+2*k);
+
+  // Compétition
+  var yy=y+ht+22*k;
+  ctx.textAlign='left'; ctx.textBaseline='top';
+  if(j.comp){
+    var tc=taillePolice(ctx,j.comp.toUpperCase(),'800',Math.round(36*k),POLICE_TXT,w-50*k);
+    ctx.font='800 '+tc+'px '+POLICE_TXT; ctx.fillStyle=BLEU;
+    ctx.fillText(j.comp.toUpperCase(),x+25*k,yy); yy+=tc+4*k;
+  }
+  if(j.precision){
+    var tp=taillePolice(ctx,j.precision.toUpperCase(),'700',Math.round(29*k),POLICE_TXT,w-50*k);
+    ctx.font='700 '+tp+'px '+POLICE_TXT; ctx.fillStyle='#7cc4ff';
+    ctx.fillText(j.precision.toUpperCase(),x+25*k,yy); yy+=tp+4*k;
+  }
+  yy+=12*k;
+
+  var bas=y+h-18*k;
+  if(!m.length){
+    ctx.font='700 '+Math.round(28*k)+'px '+POLICE_TXT; ctx.fillStyle='rgba(191,227,255,.5)';
+    ctx.textAlign='center'; ctx.fillText('Ajoutez des matchs',x+w/2,(yy+bas)/2);
+  } else if(grand&&m.length===1){
+    // Un seul match : grands drapeaux, noms dessous, comme l'affiche Rwanda – Éthiopie
+    var zone=Math.min(bas-yy,300*k);
+    yy+=Math.max(0,(bas-yy-zone)/2); // centré dans la colonne
+    var cy=yy+zone*.4, r=Math.min(zone*.28,62*k);
+    rectArrondi(ctx,x+18*k,yy,w-36*k,zone,16*k);
+    ctx.fillStyle='rgba(10,40,110,.55)'; ctx.fill();
+    ctx.lineWidth=2*k; ctx.strokeStyle='rgba(46,168,255,.45)'; ctx.stroke();
+    var x1=x+w*.25, x2=x+w*.75;
+    dessinerRond(ctx,m[0][0],x1,cy,r);
+    dessinerRond(ctx,m[0][1],x2,cy,r);
+    ctx.fillStyle=BLEU; ctx.fillRect(x+w/2-24*k,cy-3*k,48*k,6*k);
+    ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='top';
+    [[m[0][0],x1],[m[0][1],x2]].forEach(function(e){
+      var tn=taillePolice(ctx,e[0].toUpperCase(),'800',Math.round(40*k),POLICE_TXT,w*.42);
+      ctx.font='800 '+tn+'px '+POLICE_TXT;
+      ctx.fillText(e[0].toUpperCase(),e[1],cy+r+16*k);
+    });
+  } else {
+    var pas=Math.min(74*k,(bas-yy)/m.length), hl=pas*.86, r2=hl*.42;
+    m.forEach(function(e,i){
+      var ly=yy+i*pas;
+      rectArrondi(ctx,x+18*k,ly,w-36*k,hl,hl/2);
+      ctx.fillStyle='rgba(10,36,100,.7)'; ctx.fill();
+      ctx.lineWidth=1.5*k; ctx.strokeStyle='rgba(46,168,255,.35)'; ctx.stroke();
+      var cy2=ly+hl/2;
+      dessinerRond(ctx,e[0],x+18*k+hl/2+4*k,cy2,r2);
+      dessinerRond(ctx,e[1],x+w-18*k-hl/2-4*k,cy2,r2);
+      ctx.fillStyle=BLEU; ctx.fillRect(x+w/2-12*k,cy2-2*k,24*k,4*k);
+      var demi=(w-36*k-2*hl-50*k)/2;
+      ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      var c1=x+18*k+hl+8*k+demi/2, c2=x+w-18*k-hl-8*k-demi/2;
+      [[e[0],c1],[e[1],c2]].forEach(function(n){
+        var tn=taillePolice(ctx,n[0],'700',Math.round(Math.min(32*k,hl*.5)),POLICE_TXT,demi-10*k);
+        ctx.font='700 '+tn+'px '+POLICE_TXT;
+        ctx.fillText(n[0],n[1],cy2+1*k);
+      });
+    });
+  }
+  ctx.restore();
+}
+
+function hauteurCarte(j,k){
+  var n=Math.max(1,matchsDuJour(j).liste.length);
+  return 78*k+22*k+(j.comp?40*k:0)+(j.precision?33*k:0)+12*k+n*74*k+18*k;
+}
+
+/* Icônes tracées : un emoji ne se rend pas pareil d'un téléphone à l'autre. */
+function icone(ctx,type,cx,cy,t){
+  ctx.save();
+  ctx.strokeStyle=BLEU; ctx.fillStyle=BLEU; ctx.lineWidth=t*.09; ctx.lineJoin='round';
+  if(type==='bouclier'){
+    ctx.beginPath(); ctx.moveTo(cx,cy-t*.5); ctx.lineTo(cx+t*.4,cy-t*.33); ctx.lineTo(cx+t*.36,cy+t*.1);
+    ctx.quadraticCurveTo(cx+t*.25,cy+t*.38,cx,cy+t*.5); ctx.quadraticCurveTo(cx-t*.25,cy+t*.38,cx-t*.36,cy+t*.1);
+    ctx.lineTo(cx-t*.4,cy-t*.33); ctx.closePath(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx-t*.16,cy); ctx.lineTo(cx-t*.03,cy+t*.14); ctx.lineTo(cx+t*.18,cy-t*.12); ctx.stroke();
+  } else if(type==='eclair'){
+    ctx.beginPath(); ctx.moveTo(cx+t*.12,cy-t*.5); ctx.lineTo(cx-t*.25,cy+t*.06); ctx.lineTo(cx-t*.01,cy+t*.06);
+    ctx.lineTo(cx-t*.12,cy+t*.5); ctx.lineTo(cx+t*.25,cy-t*.08); ctx.lineTo(cx+t*.01,cy-t*.08); ctx.closePath(); ctx.fill();
+  } else if(type==='mobile'){
+    rectArrondi(ctx,cx-t*.24,cy-t*.45,t*.48,t*.9,t*.08); ctx.stroke();
+    ctx.fillRect(cx-t*.07,cy+t*.3,t*.14,t*.05);
+  } else if(type==='ballon'){
+    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(cx,cy,t*.5,0,Math.PI*2); ctx.fill();
+    ctx.lineWidth=t*.05; ctx.strokeStyle=BLEU; ctx.stroke();
+    ctx.fillStyle='#0b3fae';
+    var pent=function(px,py,r){ ctx.beginPath(); for(var i=0;i<5;i++){ var a=-Math.PI/2+i*2*Math.PI/5; ctx.lineTo(px+r*Math.cos(a),py+r*Math.sin(a)); } ctx.closePath(); ctx.fill(); };
+    pent(cx,cy,t*.17);
+    for(var i=0;i<5;i++){ var a=-Math.PI/2+i*2*Math.PI/5; pent(cx+t*.42*Math.cos(a),cy+t*.42*Math.sin(a),t*.11); }
+  }
+  ctx.restore();
+}
+
+function dessinerBandeau(ctx,W,H,hb,k,large){
+  var y=H-hb;
+  ctx.save();
+  var g=ctx.createLinearGradient(0,y,0,H);
+  g.addColorStop(0,'rgba(4,16,52,.96)'); g.addColorStop(1,'rgba(2,8,28,.98)');
+  ctx.fillStyle=g; ctx.fillRect(0,y,W,hb);
+  ctx.fillStyle=BLEU; ctx.fillRect(0,y,W,3*k);
+  var cy=y+hb/2;
+  var texte=(document.getElementById('e-bandeau').value.trim()||'TOUS LES MATCHS').toUpperCase();
+
+  // Bouton à droite
+  ctx.font='800 '+Math.round(34*k)+'px '+POLICE_TXT;
+  var bt='PARIEZ MAINTENANT', bw=ctx.measureText(bt).width+56*k, bh=64*k, bx=W-bw-36*k;
+  rectArrondi(ctx,bx,cy-bh/2,bw,bh,bh/2);
+  var bg=ctx.createLinearGradient(0,cy-bh/2,0,cy+bh/2);
+  bg.addColorStop(0,'#45b4ff'); bg.addColorStop(1,'#1580ea');
+  ctx.fillStyle=bg; ctx.fill();
+  ctx.fillStyle='#04163f'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(bt,bx+bw/2,cy+2*k);
+
+  // Texte à gauche
+  icone(ctx,'ballon',46*k+20*k,cy,58*k);
+  ctx.textAlign='left';
+  var xt=120*k, maxT=large?W*.24:bx-xt-30*k;
+  var t1=taillePolice(ctx,texte,'800',Math.round(36*k),POLICE_TXT,maxT);
+  ctx.font='800 '+t1+'px '+POLICE_TXT; ctx.fillStyle='#fff';
+  ctx.fillText(texte,xt,cy-20*k);
+  ctx.fillStyle=BLEU; ctx.fillText('SUR 1XBET',xt,cy+20*k);
+
+  if(large){
+    // Atouts + logo, seulement quand la largeur le permet
+    var atouts=[['bouclier','PARIS','SÉCURISÉS'],['eclair','RETRAITS','RAPIDES'],['mobile','SUR TOUS','VOS APPAREILS']];
+    var x0=W*.3, pas=W*.13;
+    atouts.forEach(function(a,i){
+      var ax=x0+i*pas;
+      ctx.fillStyle='rgba(46,168,255,.35)'; ctx.fillRect(ax-24*k,cy-34*k,2*k,68*k);
+      icone(ctx,a[0],ax+26*k,cy,50*k);
+      ctx.fillStyle='#dbe9ff'; ctx.textAlign='left';
+      ctx.font='700 '+Math.round(24*k)+'px '+POLICE_TXT;
+      ctx.fillText(a[1],ax+62*k,cy-13*k); ctx.fillText(a[2],ax+62*k,cy+15*k);
+    });
+    // dessinerLogo centre sur W/2 : on lui passe le double du centre voulu.
+    dessinerLogo(ctx,2*(bx-170*k),cy+24*k,Math.round(64*k));
+  }
+  ctx.restore();
+}
+
+function dessinerEvenements(){
+  var sz=FORMATS_E[FMT_E], W=sz.w, H=sz.h;
+  var cv=document.getElementById('c'); cv.width=W; cv.height=H;
+  var ctx=cv.getContext('2d');
+  var paysage=FMT_E==='paysage';
+  var k=paysage?1:(FMT_E==='story'?.95:.82);
+
+  dessinerFond(ctx,W,H);
+  dessinerAccentsAfricains(ctx,W,H);
+
+  var titre=document.getElementById('e-titre').value.trim().toUpperCase();
+  var sous=(document.getElementById('e-sous').value.trim()||sousTitreAuto()).toUpperCase();
+  var accroche=document.getElementById('e-accroche').value.trim().toUpperCase();
+
+  var y=paysage?150:(FMT_E==='story'?190:130);
+  dessinerLogo(ctx,W,y,Math.round((paysage?150:118)*(FMT_E==='story'?1.15:1)));
+  y+=paysage?24:20;
+  ctx.save();
+  ctx.textAlign='center'; ctx.textBaseline='top';
+  ctx.font='italic 700 '+Math.round(30*k)+'px '+POLICE_TXT; ctx.fillStyle='#dbe9ff';
+  ctx.fillText('PARIEZ SUR VOS PASSIONS',W/2,y);
+  y+=48*k;
+  if(titre){
+    var tt=taillePolice(ctx,titre,'800',paysage?88:72,POLICE_TXT,W*.82);
+    ctx.font='800 '+tt+'px '+POLICE_TXT; ctx.fillStyle='#fff';
+    ctx.shadowColor='rgba(0,0,0,.5)'; ctx.shadowBlur=12;
+    ctx.fillText(titre,W/2,y); y+=tt*1.02;
+  }
+  if(sous){
+    var ts=taillePolice(ctx,sous,'800',Math.round((paysage?88:66)),POLICE_TXT,W*.82);
+    ctx.font='800 '+ts+'px '+POLICE_TXT; ctx.fillStyle=BLEU;
+    ctx.shadowColor=BLEU; ctx.shadowBlur=18;
+    ctx.fillText(sous,W/2,y); y+=ts*1.05;
+  }
+  ctx.shadowBlur=0;
+  if(accroche){
+    var ta=taillePolice(ctx,accroche,'700',Math.round((paysage?36:30)),POLICE_TXT,W*.85);
+    ctx.font='700 '+ta+'px '+POLICE_TXT; ctx.fillStyle='#fff';
+    ctx.fillText(accroche,W/2,y+4); y+=ta+10;
+  }
+  ctx.restore();
+  y+=paysage?24:22;
+
+  var hb=paysage?120:110;
+  var bas=H-hb-(paysage?22:24), marge=paysage?30:36;
+  var alertes=[];
+  JOURS.forEach(function(j,i){ var r=matchsDuJour(j); if(r.ignorees) alertes.push('Journée '+(i+1)+' : '+r.ignorees+' ligne(s) ignorée(s), séparez les équipes par « - ».'); });
+
+  if(paysage){
+    // Colonnes côte à côte, toutes de la même hauteur
+    var n=JOURS.length, gap=24, cw=(W-2*marge-(n-1)*gap)/n;
+    JOURS.forEach(function(j,i){
+      dessinerCarteJour(ctx,marge+i*(cw+gap),y,cw,bas-y,j,1,true);
+    });
+  } else {
+    // Journées empilées ; tout est mis à l'échelle si la pile dépasse.
+    var gapV=18, tot=JOURS.reduce(function(a,j){ return a+hauteurCarte(j,1); },0)+(JOURS.length-1)*gapV;
+    var e=Math.min(1,(bas-y)/tot);
+    if(e<.62) alertes.push('Beaucoup de matchs pour ce format : le format Paysage sera plus lisible.');
+    var yy=y;
+    JOURS.forEach(function(j){
+      var h=hauteurCarte(j,e);
+      dessinerCarteJour(ctx,marge,yy,W-2*marge,h,j,e,false);
+      yy+=h+gapV*e;
+    });
+  }
+  document.getElementById('e-alerte').textContent=alertes.join(' ');
+  dessinerBandeau(ctx,W,H,hb,paysage?1:.8,paysage);
+}
+
+function choisirFormatE(el){
+  FMT_E=el.getAttribute('data-f');
+  document.querySelectorAll('.fmt-e').forEach(function(b){ b.classList.toggle('actif',b===el); });
+  dessiner();
+}
+
+function choisirMode(el){
+  MODE=el.getAttribute('data-m');
+  document.querySelectorAll('.mode').forEach(function(b){ b.classList.toggle('actif',b===el); });
+  document.getElementById('panneau-programme').style.display=MODE==='programme'?'':'none';
+  document.getElementById('panneau-evenements').style.display=MODE==='evenements'?'':'none';
+  dessiner();
+}
+
+function dessiner(){
+  var cv=document.getElementById('c');
+  var large=MODE==='evenements'&&FMT_E==='paysage';
+  cv.classList.toggle('large',large);
+  if(MODE==='evenements') dessinerEvenements(); else dessinerProgramme();
+}
+
+function initEvenements(){
+  document.getElementById('e-titre').value='Événements football africain';
+  document.getElementById('e-accroche').value='Les meilleures affiches du continent africain';
+  document.getElementById('e-bandeau').value='Tous les matchs africains';
+  JOURS=[
+    {date:isoDecale(0),comp:'Football féminin – Éliminatoires JO 2028',precision:'Match aller – 2e tour',matchs:'Rwanda - Éthiopie'},
+    {date:isoDecale(1),comp:'Éliminatoires africaines des JO 2028',precision:'Matchs aller – 2e tour',
+     matchs:['Seychelles - Kenya','Maurice - Ghana','Bénin - Mali','Ouganda - Zambie','Tunisie - Sénégal','Burkina Faso - Guinée équatoriale'].join('\n')},
+    {date:isoDecale(2),comp:'Éliminatoires africaines des JO 2028',precision:'Matchs aller – 2e tour',
+     matchs:['RD Congo - Côte d\'Ivoire','Comores - Nigeria','Malawi - Zimbabwe','Angola - Namibie','Madagascar - Afrique du Sud','Centrafrique - Algérie','Botswana - Tanzanie'].join('\n')}
+  ];
+  afficherJours();
+}
+
+function nomFichier(){
+  var d=MODE==='evenements'?((JOURS[0]&&JOURS[0].date)||'evenements'):(document.getElementById('date').value||'programme');
+  return 'affiche_1xbet_'+d+'.png';
+}
+
+function telecharger(){
+  // Un drapeau encore en route manquerait sur l'image : on l'attend, puis on redessine.
+  attendreDrapeaux().then(function(){ dessiner(); exporter(); });
+}
+function exporter(){
+  var a=document.createElement('a');
+  a.download=nomFichier();
+  a.href=document.getElementById('c').toDataURL('image/png');
+  a.click();
+}
+
+// Sur téléphone, le partage envoie l'image elle-même vers WhatsApp, Facebook…
+function partager(){
+  document.getElementById('c').toBlob(function(blob){
+    var f=new File([blob],nomFichier(),{type:'image/png'});
+    navigator.share({ files:[f] }).catch(function(){ /* partage annulé */ });
+  },'image/png');
+}
+
+function init(){
+  var d=new Date();
+  var iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  document.getElementById('date').value=iso;
+  document.getElementById('matchs').value=EXEMPLE;
+  initEvenements();
+  try{
+    var test=new File([new Blob(['x'])],'t.png',{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[test]}))
+      document.getElementById('btn-share').style.display='block';
+  }catch(e){}
+  dessiner();
+  // Les polices Google arrivent après le premier rendu : on redessine une fois
+  // qu'elles sont prêtes, sinon le logo et les noms restent en police de secours.
+  if(document.fonts&&document.fonts.load){
+    Promise.all([
+      document.fonts.load('italic 900 100px Barlow'),
+      document.fonts.load('800 50px "Barlow Condensed"')
+    ]).then(dessiner,function(){});
+  }
+}
+init();
+</script>
+</body>
+</html>
