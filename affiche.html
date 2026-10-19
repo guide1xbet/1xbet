@@ -184,8 +184,8 @@ input:focus,textarea:focus{outline:none;border-color:#2ea8ff;}
 </div>
 
 <script>
-// Page ouverte à tous : aucun agent, aucune clé, aucun appel serveur. Tout est
-// dessiné ici, dans le navigateur, pour que l'affiche soit la même partout.
+// Page ouverte à tous : aucun agent, aucune clé. Tout est dessiné ici, dans le
+// navigateur. Le seul appel au serveur est le compteur anonyme ci-dessous.
 
 var FORMATS={ portrait:{w:1080,h:1350}, carre:{w:1080,h:1080}, story:{w:1080,h:1920} };
 var FMT='portrait';
@@ -1366,7 +1366,19 @@ function telecharger(){
   // Un drapeau encore en route manquerait sur l'image : on l'attend, puis on redessine.
   attendreDrapeaux().then(function(){ dessiner(); exporter(); });
 }
+/* Compteur anonyme : +1 par affiche téléchargée ou partagée, avec le seul nom du
+   mode. Aucune donnée saisie n'est envoyée. Un échec (serveur endormi) est ignoré. */
+function compter(){
+  try{
+    fetch('https://mobcash-server.onrender.com/compteur/affiche',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({mode:MODE}), keepalive:true
+    }).catch(function(){});
+  }catch(e){}
+}
+
 function exporter(){
+  compter();
   var a=document.createElement('a');
   a.download=nomFichier();
   a.href=document.getElementById('c').toDataURL('image/png');
@@ -1375,6 +1387,7 @@ function exporter(){
 
 // Sur téléphone, le partage envoie l'image elle-même vers WhatsApp, Facebook…
 function partager(){
+  compter();
   document.getElementById('c').toBlob(function(blob){
     var f=new File([blob],nomFichier(),{type:'image/png'});
     navigator.share({ files:[f] }).catch(function(){ /* partage annulé */ });

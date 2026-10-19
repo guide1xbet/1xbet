@@ -231,6 +231,11 @@ tr:last-child td{border-bottom:none;}
           <div class="stat-card-val" id="stat-en-attente">—</div>
           <div class="stat-card-sub">À traiter</div>
         </div>
+        <div class="stat-card blue">
+          <div class="stat-card-top"><div class="stat-card-label">Affiches créées</div><div class="stat-card-icon">🖼️</div></div>
+          <div class="stat-card-val" id="stat-affiches">—</div>
+          <div class="stat-card-sub" id="stat-affiches-sub">Depuis la page publique</div>
+        </div>
         <div class="stat-card red">
           <div class="stat-card-top"><div class="stat-card-label">Rejetées</div><div class="stat-card-icon">❌</div></div>
           <div class="stat-card-val" id="stat-rejete">—</div>
@@ -438,11 +443,13 @@ tr:last-child td{border-bottom:none;}
 // ============================================
 // SÉCURITÉ — Clé d'accès
 // ============================================
-const SECRET_KEY = 'manager1xbet2025';
+// Aucune clé dans ce fichier : il est public. Le manager ouvre la page avec sa clé
+// dans le lien (?key=…) et c'est le serveur qui la vérifie — une page qui comparait
+// elle-même la clé la donnait à quiconque lisait son code source.
 const params = new URLSearchParams(window.location.search);
-if(params.get('key') !== SECRET_KEY){
-  document.getElementById('blocked').style.display = 'flex';
-}
+const MANAGER_KEY = params.get('key') || '';
+function bloquer(){ document.getElementById('blocked').style.display = 'flex'; }
+if(!MANAGER_KEY) bloquer();
 
 // ============================================
 // FIREBASE
@@ -522,16 +529,33 @@ function getAgentBadge(agent){
 async function loadAll(){
   document.getElementById('last-update').textContent = 'Chargement...';
   try {
-    const res = await fetch('https://mobcash-server.onrender.com/transactions?key=manager1xbet2025&limit=100');
+    const res = await fetch('https://mobcash-server.onrender.com/transactions?key='+encodeURIComponent(MANAGER_KEY)+'&limit=100');
+    if(res.status === 401){ bloquer(); return; }
     const data = await res.json();
     if(!data.success) throw new Error(data.error);
     allTransactions = data.transactions || [];
     document.getElementById('last-update').textContent = 'Mis à jour ' + new Date().toLocaleTimeString('fr-FR');
     renderAll();
+    chargerAffiches();
   } catch(e){
     console.error('Erreur:', e);
     document.getElementById('last-update').textContent = 'Erreur de connexion';
   }
+}
+
+// Compteur anonyme de la page publique affiche.html
+async function chargerAffiches(){
+  try {
+    const res = await fetch('https://mobcash-server.onrender.com/stats/affiches?key='+encodeURIComponent(MANAGER_KEY));
+    const d = await res.json();
+    if(!d.success) return;
+    const auj = new Date().toISOString().slice(0,10);
+    const j = (d.jours||[]).find(x => x.jour === auj) || {};
+    const sept = (d.jours||[]).filter(x => (Date.now() - new Date(x.jour+'T00:00:00Z')) < 7*86400000)
+      .reduce((a,x) => a + (x.total||0), 0);
+    document.getElementById('stat-affiches').textContent = (d.total && d.total.total) || 0;
+    document.getElementById('stat-affiches-sub').textContent = "Aujourd'hui : "+(j.total||0)+' · 7 jours : '+sept;
+  } catch(e){ /* compteur facultatif */ }
 }
 
 function renderAll(){
